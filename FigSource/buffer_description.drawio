@@ -1,0 +1,22 @@
+<mxfile host="65bd71144e">
+    <diagram id="cqYlmQbF1vhzhG1jBjoa" name="Page-1">
+        <mxGraphModel dx="-40" dy="910" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Output" style="whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=3;fontSize=40;fontStyle=1;fillColor=#CCFFCC;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="3187.9899999999993" y="1230" width="140" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;font style=&quot;font-size: 40px&quot;&gt;Weight&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;fillColor=#e1d5e7;strokeWidth=3;fontSize=50;fontStyle=1;strokeColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="2997.9899999999993" y="1230" width="140" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Buffers:" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=40;" vertex="1" parent="1">
+                    <mxGeometry x="2690" y="1290" width="40" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="&lt;font style=&quot;font-size: 40px&quot;&gt;Input&lt;/font&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=3;fontSize=50;fontStyle=1;strokeColor=none;fillColor=#FFFFCC;" vertex="1" parent="1">
+                    <mxGeometry x="2813.159999999999" y="1230" width="140" height="140" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

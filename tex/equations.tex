@@ -1,0 +1,252 @@
+% Latency Supported Kernel
+
+IFmap \in R^{C \times n\times n}
+
+\\
+
+OFmap \in  R^{F \times m\times m}
+
+\\
+
+Weight \in R^{ C \times F \times K\times K} 
+
+
+\\
+
+K_{unroll} = \begin{cases} K & K \in \{SupportedKernels\}\\1 & K \notin \{SupportedKernels\}\end{cases}
+
+
+\\
+C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Verticle\end{cases}
+
+\\
+
+
+F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Verticle\\ F_{unroll} & K_{axis} = Horizontal\end{cases}
+
+
+\\
+
+\hat{C} = \begin{cases} C &  K \in \{SupportedKernels\}\\ CK & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+
+\hat{F} = \begin{cases} F &  K \in \{SupportedKernels\}\\ FK & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+\hat{Z} = \begin{cases} m^2 &  K \in \{SupportedKernels\}\\ nm & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+Latency_{Lowering} = Latency_{Lifting} = \begin{cases} 0 &  K \in \{SupportedKernels\}\\ m^{2}K & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+Latency = \lceil \frac{\hat{F}}{F_{eff}}\rceil\lceil \frac{\hat{C}}{C_{eff}}\rceil  \hat{Z} + Latency_{Lowering} + Latency_{Lifting}
+
+\\
+
+% Conv is GEMM
+
+
+
+IFmap \in R^{C \times n\times n}
+
+\\
+
+OFmap \in  R^{F \times m\times m}
+
+\\
+
+Weight \in R^{F \times C\times K\times K} 
+
+\\
+
+OFmap[f][y][x] = \displaystyle\sum\limits_{c=0}^{C-1}\displaystyle\sum\limits_{k_x=0}^{K-1} \displaystyle\sum\limits_{k_y=0}^{K-1}Weight[f][c][k_y][k_x]*IFmap[c][y+ky][x+kx]
+
+\\ 
+
+at \space K=1 
+
+\\
+
+% OFmap[f][y][x] = \displaystyle\sum\limits_{c=0}^{C-1}Weight[f][c][0][0]*IFmap[c][y][x]
+
+\\
+
+let \space Weight \in R^{F \times C \times 1\times 1} \xrightarrow[]{Reshape} Weight \in R^{F\times C}
+
+\\
+
+let \space IFmap \in R^{C \times n\times n} \xrightarrow[]{Reshape} IFmap \in R^{ C\times n^{2}}
+
+
+\\
+
+OFmap[f][z] = \displaystyle\sum\limits_{c=0}^{C-1}Weight[f][c]*IFmap[c][z]
+
+
+\\
+
+
+OFmap \in R^{F \times n^{2}}= Weight \in R^{F\times C} . IFmap \in R^{C\times n^2} 
+
+
+
+% What is balanced lowering/ lifting
+
+% Illustrating balanced lowering and lifting
+
+
+IFmap \in R^{C \times n\times n}
+
+\\
+
+OFmap \in  R^{F \times m\times m}
+
+\\
+
+Weight \in R^{F \times C\times K\times K} 
+\\
+
+
+
+
+IFmap \in R^{C\times n\times n} \xrightarrow[]{Balanced Lowering} \hat{IFmap} \in R^{nm\times KC} 
+
+\\
+
+\hat{IFmap}[cn+r, :] = vec(IFmap[:, r, c:c+K]) \space\forall r,c \in ([0, n-1], [0, m-1])
+
+
+
+\\
+Weight \in R^{F\times C\times K \times K} \xrightarrow[]{Balanced Lowering} \hat{Weight} \in R^{KC\times FK}
+
+
+\\
+
+\hat{Weight}[f*K:f*K+K, i] = vec(Weight[:, i, :]) \space\forall f,i \in ([0, F-1], [0, K-1])
+
+
+
+\\
+
+
+
+\hat{OFmap} = \hat{IFmap} . \hat{Weight} 
+
+\\
+
+\hat{OFmap} \in R^{nm\times FK} \xrightarrow[]{Balanced Lifting} OFmap \in  R^{m\times m\times F}
+
+
+\\
+
+OFmap[f, r, c] = (\displaystyle\sum\limits_{j=0}^{K-1} \hat{OFmap}[cn+r+j, j+fK]) \space\forall f,r,c \in ([0, F-1], [0, m-1], [0, m-1])
+
+
+
+% USING CONV AS GEMM TRICK
+
+IFmap \in R^{C \times n\times n}
+
+
+\\
+
+Weight \in R^{F \times C\times K'\times K'} 
+
+\\
+
+OFmap \in  R^{F \times m\times m} = IFmap * Weight
+
+\\
+
+Where \space K' \notin \{Supported Kernels\}
+
+\\
+
+IFmap \in R^{C\times n\times n} \xrightarrow[]{Balanced Lowering} \hat{IFmap} \in R^{nm\times CK'} \xrightarrow[]{Transpose} \hat{IFmap} \in R^{CK' \times nm}
+
+\\ 
+
+Weight \in R^{F\times C\times K' \times K'} \xrightarrow[]{Balanced Lowering} \hat{Weight} \in R^{CK'\times FK'} \xrightarrow[]{Transpose} \hat{Weight} \in R^{FK'\times CK'}
+\\
+
+\hat{OFmap} \in R^{FK' \times nm}= \hat{Weight} \in R^{FK'\times CK'} * IFmap \in R^{CK'\times nm} 
+
+\\
+
+\hat{IFmap} \in R^{CK' \times nm} \xrightarrow[]{Reshape} \hat{IFmap} \in R^{CK' \times nm \times 1}
+
+\\ 
+
+\hat{Weight} \in R^{FK'\times CK'} \xrightarrow[]{Reshape} \hat{Weight} \in R^{FK'\times CK' \times 1 \times1}
+
+\\
+
+\hat{OFmap} \in R^{FK\times nm \times 1} = \hat{IFmap}*\hat{Weight}
+
+\\
+
+\hat{OFmap} \in R^{FK\times nm \times 1} \xrightarrow[]{Balanced Lifting} OFmap \in R^{F \times m \times m}
+
+
+% Access counts
+% Access counts
+
+IFmap \in R^{C \times n\times n}
+
+\\
+
+OFmap \in  R^{F \times m\times m}
+
+\\
+
+Weight \in R^{ C \times F \times K\times K} 
+
+\\
+
+K_{unroll} = \begin{cases} K & K \in \{SupportedKernels\}\\1 & K \notin \{SupportedKernels\}\end{cases}
+
+
+\\
+C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Verticle\end{cases}
+
+\\
+
+
+F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Verticle\\ F_{unroll} & K_{axis} = Horizontal\end{cases}
+
+
+\\
+
+\hat{C} = \begin{cases} C &  K \in \{SupportedKernels\}\\ CK & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+
+\hat{F} = \begin{cases} F &  K \in \{SupportedKernels\}\\ FK & K \notin \{SupportedKernels\}\end{cases}
+
+
+
+\\
+
+
+\\
+
+\hat{Z} = \begin{cases} m^2 &  K \in \{SupportedKernels\}\\ nm & K \notin \{SupportedKernels\}\end{cases}
+
+\\
+
+OFmap^{AccessCount} = F_{eff}\hat{Z} \lceil\frac{\hat{C}}{C_{eff}}\rceil(\lfloor\frac{\hat{F}}{F_{Feff}}\rfloor+\hat{F}\bmod F_{eff})
+
+\\
+
+IFmap^{AccessCount} = K_{unroll}^{2}C_{unroll}\hat{Z} (\lfloor\frac{\hat{C}}{C_{eff}} \rfloor + \hat{C}\bmod C_{eff})\lceil\frac{\hat{F}}{F_{Feff}}\rceil
+
+\\
+
+Weight^{AccessCount} = F_{unroll}C_{unroll}K^{2}_{unroll} \hat{Z}(\lfloor\frac{\hat{C}}{C_{eff}} \rfloor + \hat{C}\bmod C_{eff} \rfloor) (\lfloor\frac{\hat{F}}{F_{Feff}}\rfloor+\hat{F}\bmod F_{eff})

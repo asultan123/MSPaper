@@ -1,0 +1,1508 @@
+% ----------------------------------------------------------------------------
+% Citation database
+% ----------------------------------------------------------------------------
+
+@STRING{ASPDAC = "Proceedings of the Asia and South Pacific Design Automation Conference (ASPDAC)"}
+@STRING{DAC = "Proceedings of the Design Automation Conference (DAC)"}
+@STRING{DATE = "Proceedings of the Design, Automation and Test in Europe (DATE) Conference"}
+@STRING{CODES = "Proceedings of the International Symposium on Hardware-Software Codesign (CODES)"}
+@STRING{EDAC = "Proceedings of the European Design Automation Conference (Euro-DAC)"}
+@STRING{EDTC = "Proceedings of the European Design and Test Conference"}
+@STRING{ICCD = "Proceedings of the International Conference on Computer Design (ICCD)"}
+@STRING{ICCAD = "Proceedings of the International Conference on Computer Aided Design (ICCAD)"}
+@STRING{ISSS = "Proceedings of the International Symposium on System Synthesis"}
+@STRING{SASIMI = "Proceedings of the Workshop of Synthesis and System Integration of Mixed Information Technologies"}
+@STRING{ESC = "Proceedings of the Embedded System Conference (ESC)"}
+@STRING{TCAD = "IEEE Transactions on Computer-Aided Design of Intergrated Circuits and Systems (TCAD)"}
+@STRING{TCOMP = "IEEE Transactions on Computers"}
+@STRING{TSP = "IEEE Transactions on Signal Processing"}
+@STRING{TVLSI = "IEEE Transactions on VLSI Systems"}
+@STRING{TPDS = "IEEE Transactions on Parallel and Distributed Systems"}
+@STRING{D&T = "IEEE Design and Test of Computers"}
+@STRING{JACM = "Journal of the ACM"}
+@STRING{TODAES = "ACM Transactions on Design Automation of Electronic Systems"}
+@STRING{Kluwer = "Kluwer Academic Publishers"}
+@STRING{Prentice = "Prentice Hall"}
+
+@STRING{ICS = "Information and Computer Science"}
+@STRING{UCI = "University of California, Irvine"}
+@STRING{CECS = "Center for Embedded Computer Systems"}
+
+
+
+
+% --- Books ---
+
+% Applications
+
+% Design languages and methodologies
+
+@book{book:SpecC:yellow,
+  author    = {Andreas Gerstlauer and Rainer D{\"o}mer and Junyu Peng and
+               Daniel D. Gajski},
+  title     = {System Design: A Practical Guide with {SpecC}},
+  publisher = Kluwer,
+  year      = {2001}
+}
+
+@book{book:SpecC:green,
+  author    = {Daniel D. Gajski and Jianwen Zhu and Rainer D{\"o}mer and
+               Andreas Gerstlauer and Shuqing Zhao},
+  title     = {{SpecC}: Specification Language and Design Methodology},
+  publisher = Kluwer,
+  year      = {2000}
+}
+
+@book{book:SystemC,
+  author    = {Thorsten Gr{\"o}tker and Stan Liao and Grant Martin and Stuart Swan},
+  title     = {System Design with {SystemC}},
+  publisher = Kluwer,
+  year      = {2002}
+}
+
+
+% Design environments
+
+@book{book:SpecSyn,
+  author    = {Daniel D. Gajski and Frank Vahid and Sanjiv Narayan and Ji Gong},
+  title     = {Specification and Design of Embedded Systems},
+  publisher = Prentice,
+  year      = {1994}
+}
+
+@book{book:polis,
+  author    = {Felice Balarin and Massimiliano Chiodo and Paolo Giusto and
+               Harry Hsieh and Attila Jurecska and Luciano Lavagno and
+               Claudio Passerone and Alberto Sangiovanni-Vincentelli and
+               Ellen Sentovich and Kei Suzuki and Bassam Tabbara},
+  title     = {Hardware-Software Co-Design of Embedded Systems: 
+               The {POLIS} Approach},
+  publisher = Kluwer,
+  year      = {1997}
+}
+
+
+
+% --- Journal papers ---
+
+% Design languages
+
+% papers
+
+@inproceedings{paper:lang:SpecC:formal,
+  author    = {Wolfgang Mueller and Rainer D{\"o}mer and Andreas Gerstlauer},
+  title     = {The Formal Execution Semantics of {SpecC}},
+  booktitle = ISSS,
+  address   = {Kyoto, Japan},
+  month     = {October},
+  year      = {2002}
+}
+
+@inproceedings{paper:lang:SpecC,
+  author    = {Jianwen Zhu and Rainer D{\"o}mer and Daniel D. Gajski},
+  title     = {Syntax and Semantics of the {SpecC} Language},
+  booktitle = ISSS,
+  address   = {Osaka, Japan},
+  month     = {December},
+  year      = {1997}
+}
+
+@misc{latex:index,
+  author       = {Wikibooks},
+  title        = {LaTeX/Indexing},
+  howpublished = {\url{http://en.wikibooks.org/wiki/LaTeX/Indexing}}
+}
+
+
+%%% most important :-) 
+@book{book:42,
+  author    = {Douglas Adams},
+  title     = {The Hitchhiker's Guide to the Galaxy},
+  publisher = {Pan Books},
+  year      = 1979,
+  month     = oct
+}
+
+
+@article{kolesnikov_big_2020,
+  title        = {Big Transfer ({BiT}): General Visual Representation Learning},
+  url          = {http://arxiv.org/abs/1912.11370},
+  shorttitle   = {Big Transfer ({BiT})},
+  abstract     = {Transfer of pre-trained representations improves sample efficiency and simplifies hyperparameter tuning when training deep neural networks for vision. We revisit the paradigm of pre-training on large supervised datasets and fine-tuning the model on a target task. We scale up pre-training, and propose a simple recipe that we call Big Transfer ({BiT}). By combining a few carefully selected components, and transferring using a simple heuristic, we achieve strong performance on over 20 datasets. {BiT} performs well across a surprisingly wide range of data regimes -- from 1 example per class to 1M total examples. {BiT} achieves 87.5\% top-1 accuracy on {ILSVRC}-2012, 99.4\% on {CIFAR}-10, and 76.3\% on the 19 task Visual Task Adaptation Benchmark ({VTAB}). On small datasets, {BiT} attains 76.8\% on {ILSVRC}-2012 with 10 examples per class, and 97.0\% on {CIFAR}-10 with 10 examples per class. We conduct detailed analysis of the main components that lead to high transfer performance.},
+  journaltitle = {{arXiv}:1912.11370 [cs]},
+  author       = {Kolesnikov, Alexander and Beyer, Lucas and Zhai, Xiaohua and Puigcerver, Joan and Yung, Jessica and Gelly, Sylvain and Houlsby, Neil},
+  urldate      = {2021-12-09},
+  date         = {2020-05-05},
+  eprinttype   = {arxiv},
+  eprint       = {1912.11370},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/LCDQLUDY/Kolesnikov et al. - 2020 - Big Transfer (BiT) General Visual Representation .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/2QVNX98K/1912.html:text/html}
+}
+
+@article{dascoli_convit_2021,
+  title        = {{ConViT}: Improving Vision Transformers with Soft Convolutional Inductive Biases},
+  url          = {http://arxiv.org/abs/2103.10697},
+  shorttitle   = {{ConViT}},
+  abstract     = {Convolutional architectures have proven extremely successful for vision tasks. Their hard inductive biases enable sample-efficient learning, but come at the cost of a potentially lower performance ceiling. Vision Transformers ({ViTs}) rely on more flexible self-attention layers, and have recently outperformed {CNNs} for image classification. However, they require costly pre-training on large external datasets or distillation from pre-trained convolutional networks. In this paper, we ask the following question: is it possible to combine the strengths of these two architectures while avoiding their respective limitations? To this end, we introduce gated positional self-attention ({GPSA}), a form of positional self-attention which can be equipped with a ``soft" convolutional inductive bias. We initialise the {GPSA} layers to mimic the locality of convolutional layers, then give each attention head the freedom to escape locality by adjusting a gating parameter regulating the attention paid to position versus content information. The resulting convolutional-like {ViT} architecture, {ConViT}, outperforms the {DeiT} on {ImageNet}, while offering a much improved sample efficiency. We further investigate the role of locality in learning by first quantifying how it is encouraged in vanilla self-attention layers, then analysing how it is escaped in {GPSA} layers. We conclude by presenting various ablations to better understand the success of the {ConViT}. Our code and models are released publicly at https://github.com/facebookresearch/convit.},
+  journaltitle = {{arXiv}:2103.10697 [cs, stat]},
+  author       = {d'Ascoli, Stéphane and Touvron, Hugo and Leavitt, Matthew and Morcos, Ari and Biroli, Giulio and Sagun, Levent},
+  urldate      = {2021-12-09},
+  date         = {2021-06-10},
+  eprinttype   = {arxiv},
+  eprint       = {2103.10697},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/TXE6JMVN/d'Ascoli et al. - 2021 - ConViT Improving Vision Transformers with Soft Co.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/ANH92S4A/2103.html:text/html}
+}
+
+@article{wang_cspnet_2019,
+  title        = {{CSPNet}: A New Backbone that can Enhance Learning Capability of {CNN}},
+  url          = {http://arxiv.org/abs/1911.11929},
+  shorttitle   = {{CSPNet}},
+  abstract     = {Neural networks have enabled state-of-the-art approaches to achieve incredible results on computer vision tasks such as object detection. However, such success greatly relies on costly computation resources, which hinders people with cheap devices from appreciating the advanced technology. In this paper, we propose Cross Stage Partial Network ({CSPNet}) to mitigate the problem that previous works require heavy inference computations from the network architecture perspective. We attribute the problem to the duplicate gradient information within network optimization. The proposed networks respect the variability of the gradients by integrating feature maps from the beginning and the end of a network stage, which, in our experiments, reduces computations by 20\% with equivalent or even superior accuracy on the {ImageNet} dataset, and significantly outperforms state-of-the-art approaches in terms of {AP}50 on the {MS} {COCO} object detection dataset. The {CSPNet} is easy to implement and general enough to cope with architectures based on {ResNet}, {ResNeXt}, and {DenseNet}. Source code is at https://github.com/{WongKinYiu}/{CrossStagePartialNetworks}.},
+  journaltitle = {{arXiv}:1911.11929 [cs]},
+  author       = {Wang, Chien-Yao and Liao, Hong-Yuan Mark and Yeh, I.-Hau and Wu, Yueh-Hua and Chen, Ping-Yang and Hsieh, Jun-Wei},
+  urldate      = {2021-12-09},
+  date         = {2019-11-26},
+  eprinttype   = {arxiv},
+  eprint       = {1911.11929},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/PCJAD9AB/Wang et al. - 2019 - CSPNet A New Backbone that can Enhance Learning C.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/IIIN98CL/1911.html:text/html}
+}
+
+@article{xu_co-scale_2021,
+  title        = {Co-Scale Conv-Attentional Image Transformers},
+  url          = {http://arxiv.org/abs/2104.06399},
+  abstract     = {In this paper, we present Co-scale conv-attentional image Transformers ({CoaT}), a Transformer-based image classifier equipped with co-scale and conv-attentional mechanisms. First, the co-scale mechanism maintains the integrity of Transformers' encoder branches at individual scales, while allowing representations learned at different scales to effectively communicate with each other; we design a series of serial and parallel blocks to realize the co-scale mechanism. Second, we devise a conv-attentional mechanism by realizing a relative position embedding formulation in the factorized attention module with an efficient convolution-like implementation. {CoaT} empowers image Transformers with enriched multi-scale and contextual modeling capabilities. On {ImageNet}, relatively small {CoaT} models attain superior classification results compared with similar-sized convolutional neural networks and image/vision Transformers. The effectiveness of {CoaT}'s backbone is also illustrated on object detection and instance segmentation, demonstrating its applicability to downstream computer vision tasks.},
+  journaltitle = {{arXiv}:2104.06399 [cs]},
+  author       = {Xu, Weijian and Xu, Yifan and Chang, Tyler and Tu, Zhuowen},
+  urldate      = {2021-12-09},
+  date         = {2021-08-26},
+  eprinttype   = {arxiv},
+  eprint       = {2104.06399},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Computer Science - Neural and Evolutionary Computing},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/8PD92P5G/Xu et al. - 2021 - Co-Scale Conv-Attentional Image Transformers.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/ZXU3F8BM/2104.html:text/html}
+}
+
+@article{touvron_going_2021,
+  title        = {Going deeper with Image Transformers},
+  url          = {http://arxiv.org/abs/2103.17239},
+  abstract     = {Transformers have been recently adapted for large scale image classification, achieving high scores shaking up the long supremacy of convolutional neural networks. However the optimization of image transformers has been little studied so far. In this work, we build and optimize deeper transformer networks for image classification. In particular, we investigate the interplay of architecture and optimization of such dedicated transformers. We make two transformers architecture changes that significantly improve the accuracy of deep transformers. This leads us to produce models whose performance does not saturate early with more depth, for instance we obtain 86.5\% top-1 accuracy on Imagenet when training with no external data, we thus attain the current {SOTA} with less {FLOPs} and parameters. Moreover, our best model establishes the new state of the art on Imagenet with Reassessed labels and Imagenet-V2 / match frequency, in the setting with no additional training data. We share our code and models.},
+  journaltitle = {{arXiv}:2103.17239 [cs]},
+  author       = {Touvron, Hugo and Cord, Matthieu and Sablayrolles, Alexandre and Synnaeve, Gabriel and Jégou, Hervé},
+  urldate      = {2021-12-09},
+  date         = {2021-04-07},
+  eprinttype   = {arxiv},
+  eprint       = {2103.17239},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/84XSULQ2/Touvron et al. - 2021 - Going deeper with Image Transformers.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/S9HPCVAW/2103.html:text/html}
+}
+
+@article{srinivas_bottleneck_2021,
+  title        = {Bottleneck Transformers for Visual Recognition},
+  url          = {http://arxiv.org/abs/2101.11605},
+  abstract     = {We present {BoTNet}, a conceptually simple yet powerful backbone architecture that incorporates self-attention for multiple computer vision tasks including image classification, object detection and instance segmentation. By just replacing the spatial convolutions with global self-attention in the final three bottleneck blocks of a {ResNet} and no other changes, our approach improves upon the baselines significantly on instance segmentation and object detection while also reducing the parameters, with minimal overhead in latency. Through the design of {BoTNet}, we also point out how {ResNet} bottleneck blocks with self-attention can be viewed as Transformer blocks. Without any bells and whistles, {BoTNet} achieves 44.4\% Mask {AP} and 49.7\% Box {AP} on the {COCO} Instance Segmentation benchmark using the Mask R-{CNN} framework; surpassing the previous best published single model and single scale results of {ResNeSt} evaluated on the {COCO} validation set. Finally, we present a simple adaptation of the {BoTNet} design for image classification, resulting in models that achieve a strong performance of 84.7\% top-1 accuracy on the {ImageNet} benchmark while being up to 1.64x faster in compute time than the popular {EfficientNet} models on {TPU}-v3 hardware. We hope our simple and effective approach will serve as a strong baseline for future research in self-attention models for vision},
+  journaltitle = {{arXiv}:2101.11605 [cs]},
+  author       = {Srinivas, Aravind and Lin, Tsung-Yi and Parmar, Niki and Shlens, Jonathon and Abbeel, Pieter and Vaswani, Ashish},
+  urldate      = {2021-12-09},
+  date         = {2021-08-02},
+  eprinttype   = {arxiv},
+  eprint       = {2101.11605},
+  keywords     = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/9LQL9DUL/Srinivas et al. - 2021 - Bottleneck Transformers for Visual Recognition.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/5INYU7D9/2101.html:text/html}
+}
+
+@article{xie_self-training_2020,
+  title        = {Self-training with Noisy Student improves {ImageNet} classification},
+  url          = {http://arxiv.org/abs/1911.04252},
+  abstract     = {We present Noisy Student Training, a semi-supervised learning approach that works well even when labeled data is abundant. Noisy Student Training achieves 88.4\% top-1 accuracy on {ImageNet}, which is 2.0\% better than the state-of-the-art model that requires 3.5B weakly labeled Instagram images. On robustness test sets, it improves {ImageNet}-A top-1 accuracy from 61.0\% to 83.7\%, reduces {ImageNet}-C mean corruption error from 45.7 to 28.3, and reduces {ImageNet}-P mean flip rate from 27.8 to 12.2. Noisy Student Training extends the idea of self-training and distillation with the use of equal-or-larger student models and noise added to the student during learning. On {ImageNet}, we first train an {EfficientNet} model on labeled images and use it as a teacher to generate pseudo labels for 300M unlabeled images. We then train a larger {EfficientNet} as a student model on the combination of labeled and pseudo labeled images. We iterate this process by putting back the student as the teacher. During the learning of the student, we inject noise such as dropout, stochastic depth, and data augmentation via {RandAugment} to the student so that the student generalizes better than the teacher. Models are available at https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet. Code is available at https://github.com/google-research/noisystudent.},
+  journaltitle = {{arXiv}:1911.04252 [cs, stat]},
+  author       = {Xie, Qizhe and Luong, Minh-Thang and Hovy, Eduard and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2020-06-19},
+  eprinttype   = {arxiv},
+  eprint       = {1911.04252},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/XRFJENM4/Xie et al. - 2020 - Self-training with Noisy Student improves ImageNet.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/9DPY3IVF/1911.html:text/html}
+}
+
+@article{xie_adversarial_2020,
+  title        = {Adversarial Examples Improve Image Recognition},
+  url          = {http://arxiv.org/abs/1911.09665},
+  abstract     = {Adversarial examples are commonly viewed as a threat to {ConvNets}. Here we present an opposite perspective: adversarial examples can be used to improve image recognition models if harnessed in the right manner. We propose {AdvProp}, an enhanced adversarial training scheme which treats adversarial examples as additional examples, to prevent overfitting. Key to our method is the usage of a separate auxiliary batch norm for adversarial examples, as they have different underlying distributions to normal examples. We show that {AdvProp} improves a wide range of models on various image recognition tasks and performs better when the models are bigger. For instance, by applying {AdvProp} to the latest {EfficientNet}-B7 [28] on {ImageNet}, we achieve significant improvements on {ImageNet} (+0.7\%), {ImageNet}-C (+6.5\%), {ImageNet}-A (+7.0\%), Stylized-{ImageNet} (+4.8\%). With an enhanced {EfficientNet}-B8, our method achieves the state-of-the-art 85.5\% {ImageNet} top-1 accuracy without extra data. This result even surpasses the best model in [20] which is trained with 3.5B Instagram images ({\textasciitilde}3000X more than {ImageNet}) and {\textasciitilde}9.4X more parameters. Models are available at https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet.},
+  journaltitle = {{arXiv}:1911.09665 [cs]},
+  author       = {Xie, Cihang and Tan, Mingxing and Gong, Boqing and Wang, Jiang and Yuille, Alan and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2020-04-14},
+  eprinttype   = {arxiv},
+  eprint       = {1911.09665},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/6PGFEFYQ/Xie et al. - 2020 - Adversarial Examples Improve Image Recognition.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/W8W2XSKJ/1911.html:text/html}
+}
+
+@article{chen_dual_2017,
+  title        = {Dual Path Networks},
+  url          = {http://arxiv.org/abs/1707.01629},
+  abstract     = {In this work, we present a simple, highly efficient and modularized Dual Path Network ({DPN}) for image classification which presents a new topology of connection paths internally. By revealing the equivalence of the state-of-the-art Residual Network ({ResNet}) and Densely Convolutional Network ({DenseNet}) within the {HORNN} framework, we find that {ResNet} enables feature re-usage while {DenseNet} enables new features exploration which are both important for learning good representations. To enjoy the benefits from both path topologies, our proposed Dual Path Network shares common features while maintaining the flexibility to explore new features through dual path architectures. Extensive experiments on three benchmark datasets, {ImagNet}-1k, Places365 and {PASCAL} {VOC}, clearly demonstrate superior performance of the proposed {DPN} over state-of-the-arts. In particular, on the {ImagNet}-1k dataset, a shallow {DPN} surpasses the best {ResNeXt}-101(64x4d) with 26\% smaller model size, 25\% less computational cost and 8\% lower memory consumption, and a deeper {DPN} ({DPN}-131) further pushes the state-of-the-art single model performance with about 2 times faster training speed. Experiments on the Places365 large-scale scene dataset, {PASCAL} {VOC} detection dataset, and {PASCAL} {VOC} segmentation dataset also demonstrate its consistently better performance than {DenseNet}, {ResNet} and the latest {ResNeXt} model over various applications.},
+  journaltitle = {{arXiv}:1707.01629 [cs]},
+  author       = {Chen, Yunpeng and Li, Jianan and Xiao, Huaxin and Jin, Xiaojie and Yan, Shuicheng and Feng, Jiashi},
+  urldate      = {2021-12-09},
+  date         = {2017-07-31},
+  eprinttype   = {arxiv},
+  eprint       = {1707.01629},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/XZNMDKK4/Chen et al. - 2017 - Dual Path Networks.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/72LVPSLT/1707.html:text/html}
+}
+
+@article{touvron_training_2021,
+  title        = {Training data-efficient image transformers \& distillation through attention},
+  url          = {http://arxiv.org/abs/2012.12877},
+  abstract     = {Recently, neural networks purely based on attention were shown to address image understanding tasks such as image classification. However, these visual transformers are pre-trained with hundreds of millions of images using an expensive infrastructure, thereby limiting their adoption. In this work, we produce a competitive convolution-free transformer by training on Imagenet only. We train them on a single computer in less than 3 days. Our reference vision transformer (86M parameters) achieves top-1 accuracy of 83.1\% (single-crop evaluation) on {ImageNet} with no external data. More importantly, we introduce a teacher-student strategy specific to transformers. It relies on a distillation token ensuring that the student learns from the teacher through attention. We show the interest of this token-based distillation, especially when using a convnet as a teacher. This leads us to report results competitive with convnets for both Imagenet (where we obtain up to 85.2\% accuracy) and when transferring to other tasks. We share our code and models.},
+  journaltitle = {{arXiv}:2012.12877 [cs]},
+  author       = {Touvron, Hugo and Cord, Matthieu and Douze, Matthijs and Massa, Francisco and Sablayrolles, Alexandre and Jégou, Hervé},
+  urldate      = {2021-12-09},
+  date         = {2021-01-15},
+  eprinttype   = {arxiv},
+  eprint       = {2012.12877},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/9RY8JQCC/Touvron et al. - 2021 - Training data-efficient image transformers & disti.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/XIC58HLE/2012.html:text/html}
+}
+
+@article{tan_efficientnet_2020,
+  title        = {{EfficientNet}: Rethinking Model Scaling for Convolutional Neural Networks},
+  url          = {http://arxiv.org/abs/1905.11946},
+  shorttitle   = {{EfficientNet}},
+  abstract     = {Convolutional Neural Networks ({ConvNets}) are commonly developed at a fixed resource budget, and then scaled up for better accuracy if more resources are available. In this paper, we systematically study model scaling and identify that carefully balancing network depth, width, and resolution can lead to better performance. Based on this observation, we propose a new scaling method that uniformly scales all dimensions of depth/width/resolution using a simple yet highly effective compound coefficient. We demonstrate the effectiveness of this method on scaling up {MobileNets} and {ResNet}. To go even further, we use neural architecture search to design a new baseline network and scale it up to obtain a family of models, called {EfficientNets}, which achieve much better accuracy and efficiency than previous {ConvNets}. In particular, our {EfficientNet}-B7 achieves state-of-the-art 84.3\% top-1 accuracy on {ImageNet}, while being 8.4x smaller and 6.1x faster on inference than the best existing {ConvNet}. Our {EfficientNets} also transfer well and achieve state-of-the-art accuracy on {CIFAR}-100 (91.7\%), Flowers (98.8\%), and 3 other transfer learning datasets, with an order of magnitude fewer parameters. Source code is at https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet.},
+  journaltitle = {{arXiv}:1905.11946 [cs, stat]},
+  author       = {Tan, Mingxing and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2020-09-11},
+  eprinttype   = {arxiv},
+  eprint       = {1905.11946},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/3NVTUX4V/Tan and Le - 2020 - EfficientNet Rethinking Model Scaling for Convolu.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/73ZQTSV5/1905.html:text/html}
+}
+
+@article{tan_efficientnetv2_2021,
+  title        = {{EfficientNetV}2: Smaller Models and Faster Training},
+  url          = {http://arxiv.org/abs/2104.00298},
+  shorttitle   = {{EfficientNetV}2},
+  abstract     = {This paper introduces {EfficientNetV}2, a new family of convolutional networks that have faster training speed and better parameter efficiency than previous models. To develop this family of models, we use a combination of training-aware neural architecture search and scaling, to jointly optimize training speed and parameter efficiency. The models were searched from the search space enriched with new ops such as Fused-{MBConv}. Our experiments show that {EfficientNetV}2 models train much faster than state-of-the-art models while being up to 6.8x smaller. Our training can be further sped up by progressively increasing the image size during training, but it often causes a drop in accuracy. To compensate for this accuracy drop, we propose to adaptively adjust regularization (e.g., dropout and data augmentation) as well, such that we can achieve both fast training and good accuracy. With progressive learning, our {EfficientNetV}2 significantly outperforms previous models on {ImageNet} and {CIFAR}/Cars/Flowers datasets. By pretraining on the same {ImageNet}21k, our {EfficientNetV}2 achieves 87.3\% top-1 accuracy on {ImageNet} {ILSVRC}2012, outperforming the recent {ViT} by 2.0\% accuracy while training 5x-11x faster using the same computing resources. Code will be available at https://github.com/google/automl/tree/master/efficientnetv2.},
+  journaltitle = {{arXiv}:2104.00298 [cs]},
+  author       = {Tan, Mingxing and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2021-06-23},
+  eprinttype   = {arxiv},
+  eprint       = {2104.00298},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/HMDQZFT8/Tan and Le - 2021 - EfficientNetV2 Smaller Models and Faster Training.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/CKKWQW77/2104.html:text/html}
+}
+
+@article{wu_fbnet_2019,
+  title        = {{FBNet}: Hardware-Aware Efficient {ConvNet} Design via Differentiable Neural Architecture Search},
+  url          = {http://arxiv.org/abs/1812.03443},
+  shorttitle   = {{FBNet}},
+  abstract     = {Designing accurate and efficient {ConvNets} for mobile devices is challenging because the design space is combinatorially large. Due to this, previous neural architecture search ({NAS}) methods are computationally expensive. {ConvNet} architecture optimality depends on factors such as input resolution and target devices. However, existing approaches are too expensive for case-by-case redesigns. Also, previous work focuses primarily on reducing {FLOPs}, but {FLOP} count does not always reflect actual latency. To address these, we propose a differentiable neural architecture search ({DNAS}) framework that uses gradient-based methods to optimize {ConvNet} architectures, avoiding enumerating and training individual architectures separately as in previous methods. {FBNets}, a family of models discovered by {DNAS} surpass state-of-the-art models both designed manually and generated automatically. {FBNet}-B achieves 74.1\% top-1 accuracy on {ImageNet} with 295M {FLOPs} and 23.1 ms latency on a Samsung S8 phone, 2.4x smaller and 1.5x faster than {MobileNetV}2-1.3 with similar accuracy. Despite higher accuracy and lower latency than {MnasNet}, we estimate {FBNet}-B's search cost is 420x smaller than {MnasNet}'s, at only 216 {GPU}-hours. Searched for different resolutions and channel sizes, {FBNets} achieve 1.5\% to 6.4\% higher accuracy than {MobileNetV}2. The smallest {FBNet} achieves 50.2\% accuracy and 2.9 ms latency (345 frames per second) on a Samsung S8. Over a Samsung-optimized {FBNet}, the {iPhone}-X-optimized model achieves a 1.4x speedup on an {iPhone} X.},
+  journaltitle = {{arXiv}:1812.03443 [cs]},
+  author       = {Wu, Bichen and Dai, Xiaoliang and Zhang, Peizhao and Wang, Yanghan and Sun, Fei and Wu, Yiming and Tian, Yuandong and Vajda, Peter and Jia, Yangqing and Keutzer, Kurt},
+  urldate      = {2021-12-09},
+  date         = {2019-05-24},
+  eprinttype   = {arxiv},
+  eprint       = {1812.03443},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/G3HQTQYW/Wu et al. - 2019 - FBNet Hardware-Aware Efficient ConvNet Design via.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/FSF38YCC/1812.html:text/html}
+}
+
+@article{yu_deep_2019,
+  title        = {Deep Layer Aggregation},
+  url          = {http://arxiv.org/abs/1707.06484},
+  abstract     = {Visual recognition requires rich representations that span levels from low to high, scales from small to large, and resolutions from fine to coarse. Even with the depth of features in a convolutional network, a layer in isolation is not enough: compounding and aggregating these representations improves inference of what and where. Architectural efforts are exploring many dimensions for network backbones, designing deeper or wider architectures, but how to best aggregate layers and blocks across a network deserves further attention. Although skip connections have been incorporated to combine layers, these connections have been "shallow" themselves, and only fuse by simple, one-step operations. We augment standard architectures with deeper aggregation to better fuse information across layers. Our deep layer aggregation structures iteratively and hierarchically merge the feature hierarchy to make networks with better accuracy and fewer parameters. Experiments across architectures and tasks show that deep layer aggregation improves recognition and resolution compared to existing branching and merging schemes. The code is at https://github.com/ucbdrive/dla.},
+  journaltitle = {{arXiv}:1707.06484 [cs]},
+  author       = {Yu, Fisher and Wang, Dequan and Shelhamer, Evan and Darrell, Trevor},
+  urldate      = {2021-12-09},
+  date         = {2019-01-04},
+  eprinttype   = {arxiv},
+  eprint       = {1707.06484},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/4IKM2RJX/Yu et al. - 2019 - Deep Layer Aggregation.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/UTW5SUFR/1707.html:text/html}
+}
+
+@article{huang_densely_2018,
+  title        = {Densely Connected Convolutional Networks},
+  url          = {http://arxiv.org/abs/1608.06993},
+  abstract     = {Recent work has shown that convolutional networks can be substantially deeper, more accurate, and efficient to train if they contain shorter connections between layers close to the input and those close to the output. In this paper, we embrace this observation and introduce the Dense Convolutional Network ({DenseNet}), which connects each layer to every other layer in a feed-forward fashion. Whereas traditional convolutional networks with L layers have L connections - one between each layer and its subsequent layer - our network has L(L+1)/2 direct connections. For each layer, the feature-maps of all preceding layers are used as inputs, and its own feature-maps are used as inputs into all subsequent layers. {DenseNets} have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters. We evaluate our proposed architecture on four highly competitive object recognition benchmark tasks ({CIFAR}-10, {CIFAR}-100, {SVHN}, and {ImageNet}). {DenseNets} obtain significant improvements over the state-of-the-art on most of them, whilst requiring less computation to achieve high performance. Code and pre-trained models are available at https://github.com/liuzhuang13/{DenseNet} .},
+  journaltitle = {{arXiv}:1608.06993 [cs]},
+  author       = {Huang, Gao and Liu, Zhuang and van der Maaten, Laurens and Weinberger, Kilian Q.},
+  urldate      = {2021-12-09},
+  date         = {2018-01-28},
+  eprinttype   = {arxiv},
+  eprint       = {1608.06993},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/VCLV57TD/Huang et al. - 2018 - Densely Connected Convolutional Networks.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/9VIL589S/1608.html:text/html}
+}
+
+@article{tan_mnasnet_2019,
+  title        = {{MnasNet}: Platform-Aware Neural Architecture Search for Mobile},
+  url          = {http://arxiv.org/abs/1807.11626},
+  shorttitle   = {{MnasNet}},
+  abstract     = {Designing convolutional neural networks ({CNN}) for mobile devices is challenging because mobile models need to be small and fast, yet still accurate. Although significant efforts have been dedicated to design and improve mobile {CNNs} on all dimensions, it is very difficult to manually balance these trade-offs when there are so many architectural possibilities to consider. In this paper, we propose an automated mobile neural architecture search ({MNAS}) approach, which explicitly incorporate model latency into the main objective so that the search can identify a model that achieves a good trade-off between accuracy and latency. Unlike previous work, where latency is considered via another, often inaccurate proxy (e.g., {FLOPS}), our approach directly measures real-world inference latency by executing the model on mobile phones. To further strike the right balance between flexibility and search space size, we propose a novel factorized hierarchical search space that encourages layer diversity throughout the network. Experimental results show that our approach consistently outperforms state-of-the-art mobile {CNN} models across multiple vision tasks. On the {ImageNet} classification task, our {MnasNet} achieves 75.2\% top-1 accuracy with 78ms latency on a Pixel phone, which is 1.8x faster than {MobileNetV}2 [29] with 0.5\% higher accuracy and 2.3x faster than {NASNet} [36] with 1.2\% higher accuracy. Our {MnasNet} also achieves better {mAP} quality than {MobileNets} for {COCO} object detection. Code is at https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet},
+  journaltitle = {{arXiv}:1807.11626 [cs]},
+  author       = {Tan, Mingxing and Chen, Bo and Pang, Ruoming and Vasudevan, Vijay and Sandler, Mark and Howard, Andrew and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2019-05-28},
+  eprinttype   = {arxiv},
+  eprint       = {1807.11626},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/9DGMT9DE/Tan et al. - 2019 - MnasNet Platform-Aware Neural Architecture Search.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/EML2DSB9/1807.html:text/html}
+}
+
+@article{stamoulis_single-path_2019,
+  title        = {Single-Path {NAS}: Designing Hardware-Efficient {ConvNets} in less than 4 Hours},
+  url          = {http://arxiv.org/abs/1904.02877},
+  shorttitle   = {Single-Path {NAS}},
+  abstract     = {Can we automatically design a Convolutional Network ({ConvNet}) with the highest image classification accuracy under the runtime constraint of a mobile device? Neural architecture search ({NAS}) has revolutionized the design of hardware-efficient {ConvNets} by automating this process. However, the {NAS} problem remains challenging due to the combinatorially large design space, causing a significant searching time (at least 200 {GPU}-hours). To alleviate this complexity, we propose Single-Path {NAS}, a novel differentiable {NAS} method for designing hardware-efficient {ConvNets} in less than 4 hours. Our contributions are as follows: 1. Single-path search space: Compared to previous differentiable {NAS} methods, Single-Path {NAS} uses one single-path over-parameterized {ConvNet} to encode all architectural decisions with shared convolutional kernel parameters, hence drastically decreasing the number of trainable parameters and the search cost down to few epochs. 2. Hardware-efficient {ImageNet} classification: Single-Path {NAS} achieves 74.96\% top-1 accuracy on {ImageNet} with 79ms latency on a Pixel 1 phone, which is state-of-the-art accuracy compared to {NAS} methods with similar constraints ({\textless}80ms). 3. {NAS} efficiency: Single-Path {NAS} search cost is only 8 epochs (30 {TPU}-hours), which is up to 5,000x faster compared to prior work. 4. Reproducibility: Unlike all recent mobile-efficient {NAS} methods which only release pretrained models, we open-source our entire codebase at: https://github.com/dstamoulis/single-path-nas.},
+  journaltitle = {{arXiv}:1904.02877 [cs, stat]},
+  author       = {Stamoulis, Dimitrios and Ding, Ruizhou and Wang, Di and Lymberopoulos, Dimitrios and Priyantha, Bodhi and Liu, Jie and Marculescu, Diana},
+  urldate      = {2021-12-09},
+  date         = {2019-04-05},
+  eprinttype   = {arxiv},
+  eprint       = {1904.02877},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/83LIV5Z3/Stamoulis et al. - 2019 - Single-Path NAS Designing Hardware-Efficient Conv.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/3SVJB3J3/1904.html:text/html}
+}
+
+@article{han_ghostnet_2020,
+  title        = {{GhostNet}: More Features from Cheap Operations},
+  url          = {http://arxiv.org/abs/1911.11907},
+  shorttitle   = {{GhostNet}},
+  abstract     = {Deploying convolutional neural networks ({CNNs}) on embedded devices is difficult due to the limited memory and computation resources. The redundancy in feature maps is an important characteristic of those successful {CNNs}, but has rarely been investigated in neural architecture design. This paper proposes a novel Ghost module to generate more feature maps from cheap operations. Based on a set of intrinsic feature maps, we apply a series of linear transformations with cheap cost to generate many ghost feature maps that could fully reveal information underlying intrinsic features. The proposed Ghost module can be taken as a plug-and-play component to upgrade existing convolutional neural networks. Ghost bottlenecks are designed to stack Ghost modules, and then the lightweight {GhostNet} can be easily established. Experiments conducted on benchmarks demonstrate that the proposed Ghost module is an impressive alternative of convolution layers in baseline models, and our {GhostNet} can achieve higher recognition performance (e.g. \$75.7{\textbackslash}\%\$ top-1 accuracy) than {MobileNetV}3 with similar computational cost on the {ImageNet} {ILSVRC}-2012 classification dataset. Code is available at https://github.com/huawei-noah/ghostnet},
+  journaltitle = {{arXiv}:1911.11907 [cs]},
+  author       = {Han, Kai and Wang, Yunhe and Tian, Qi and Guo, Jianyuan and Xu, Chunjing and Xu, Chang},
+  urldate      = {2021-12-09},
+  date         = {2020-03-13},
+  eprinttype   = {arxiv},
+  eprint       = {1911.11907},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/KQNST7NY/Han et al. - 2020 - GhostNet More Features from Cheap Operations.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/EXD4UERU/1911.html:text/html}
+}
+
+@article{tan_mixconv_2019,
+  title        = {{MixConv}: Mixed Depthwise Convolutional Kernels},
+  url          = {http://arxiv.org/abs/1907.09595},
+  shorttitle   = {{MixConv}},
+  abstract     = {Depthwise convolution is becoming increasingly popular in modern efficient {ConvNets}, but its kernel size is often overlooked. In this paper, we systematically study the impact of different kernel sizes, and observe that combining the benefits of multiple kernel sizes can lead to better accuracy and efficiency. Based on this observation, we propose a new mixed depthwise convolution ({MixConv}), which naturally mixes up multiple kernel sizes in a single convolution. As a simple drop-in replacement of vanilla depthwise convolution, our {MixConv} improves the accuracy and efficiency for existing {MobileNets} on both {ImageNet} classification and {COCO} object detection. To demonstrate the effectiveness of {MixConv}, we integrate it into {AutoML} search space and develop a new family of models, named as {MixNets}, which outperform previous mobile models including {MobileNetV}2 [20] ({ImageNet} top-1 accuracy +4.2\%), {ShuffleNetV}2 [16] (+3.5\%), {MnasNet} [26] (+1.3\%), {ProxylessNAS} [2] (+2.2\%), and {FBNet} [27] (+2.0\%). In particular, our {MixNet}-L achieves a new state-of-the-art 78.9\% {ImageNet} top-1 accuracy under typical mobile settings ({\textless}600M {FLOPS}). Code is at https://github.com/ tensorflow/tpu/tree/master/models/official/mnasnet/mixnet},
+  journaltitle = {{arXiv}:1907.09595 [cs]},
+  author       = {Tan, Mingxing and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2019-12-01},
+  eprinttype   = {arxiv},
+  eprint       = {1907.09595},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/AE6BYK62/Tan and Le - 2019 - MixConv Mixed Depthwise Convolutional Kernels.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/6SAHMGBA/1907.html:text/html}
+}
+
+@article{howard_searching_2019,
+  title        = {Searching for {MobileNetV}3},
+  url          = {http://arxiv.org/abs/1905.02244},
+  abstract     = {We present the next generation of {MobileNets} based on a combination of complementary search techniques as well as a novel architecture design. {MobileNetV}3 is tuned to mobile phone {CPUs} through a combination of hardware-aware network architecture search ({NAS}) complemented by the {NetAdapt} algorithm and then subsequently improved through novel architecture advances. This paper starts the exploration of how automated search algorithms and network design can work together to harness complementary approaches improving the overall state of the art. Through this process we create two new {MobileNet} models for release: {MobileNetV}3-Large and {MobileNetV}3-Small which are targeted for high and low resource use cases. These models are then adapted and applied to the tasks of object detection and semantic segmentation. For the task of semantic segmentation (or any dense pixel prediction), we propose a new efficient segmentation decoder Lite Reduced Atrous Spatial Pyramid Pooling ({LR}-{ASPP}). We achieve new state of the art results for mobile classification, detection and segmentation. {MobileNetV}3-Large is 3.2{\textbackslash}\% more accurate on {ImageNet} classification while reducing latency by 15{\textbackslash}\% compared to {MobileNetV}2. {MobileNetV}3-Small is 4.6{\textbackslash}\% more accurate while reducing latency by 5{\textbackslash}\% compared to {MobileNetV}2. {MobileNetV}3-Large detection is 25{\textbackslash}\% faster at roughly the same accuracy as {MobileNetV}2 on {COCO} detection. {MobileNetV}3-Large {LR}-{ASPP} is 30{\textbackslash}\% faster than {MobileNetV}2 R-{ASPP} at similar accuracy for Cityscapes segmentation.},
+  journaltitle = {{arXiv}:1905.02244 [cs]},
+  author       = {Howard, Andrew and Sandler, Mark and Chu, Grace and Chen, Liang-Chieh and Chen, Bo and Tan, Mingxing and Wang, Weijun and Zhu, Yukun and Pang, Ruoming and Vasudevan, Vijay and Le, Quoc V. and Adam, Hartwig},
+  urldate      = {2021-12-09},
+  date         = {2019-11-20},
+  eprinttype   = {arxiv},
+  eprint       = {1905.02244},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/VHTUVVUM/Howard et al. - 2019 - Searching for MobileNetV3.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/DANLQQ3C/1905.html:text/html}
+}
+
+@article{brock_characterizing_2021,
+  title        = {Characterizing signal propagation to close the performance gap in unnormalized {ResNets}},
+  url          = {http://arxiv.org/abs/2101.08692},
+  abstract     = {Batch Normalization is a key component in almost all state-of-the-art image classifiers, but it also introduces practical challenges: it breaks the independence between training examples within a batch, can incur compute and memory overhead, and often results in unexpected bugs. Building on recent theoretical analyses of deep {ResNets} at initialization, we propose a simple set of analysis tools to characterize signal propagation on the forward pass, and leverage these tools to design highly performant {ResNets} without activation normalization layers. Crucial to our success is an adapted version of the recently proposed Weight Standardization. Our analysis tools show how this technique preserves the signal in networks with {ReLU} or Swish activation functions by ensuring that the per-channel activation means do not grow with depth. Across a range of {FLOP} budgets, our networks attain performance competitive with the state-of-the-art {EfficientNets} on {ImageNet}.},
+  journaltitle = {{arXiv}:2101.08692 [cs, stat]},
+  author       = {Brock, Andrew and De, Soham and Smith, Samuel L.},
+  urldate      = {2021-12-09},
+  date         = {2021-01-27},
+  eprinttype   = {arxiv},
+  eprint       = {2101.08692},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/ELYT4JXY/Brock et al. - 2021 - Characterizing signal propagation to close the per.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/X56EUJ28/2101.html:text/html}
+}
+
+@article{li_selective_2019,
+  title        = {Selective Kernel Networks},
+  url          = {http://arxiv.org/abs/1903.06586},
+  abstract     = {In standard Convolutional Neural Networks ({CNNs}), the receptive fields of artificial neurons in each layer are designed to share the same size. It is well-known in the neuroscience community that the receptive field size of visual cortical neurons are modulated by the stimulus, which has been rarely considered in constructing {CNNs}. We propose a dynamic selection mechanism in {CNNs} that allows each neuron to adaptively adjust its receptive field size based on multiple scales of input information. A building block called Selective Kernel ({SK}) unit is designed, in which multiple branches with different kernel sizes are fused using softmax attention that is guided by the information in these branches. Different attentions on these branches yield different sizes of the effective receptive fields of neurons in the fusion layer. Multiple {SK} units are stacked to a deep network termed Selective Kernel Networks ({SKNets}). On the {ImageNet} and {CIFAR} benchmarks, we empirically show that {SKNet} outperforms the existing state-of-the-art architectures with lower model complexity. Detailed analyses show that the neurons in {SKNet} can capture target objects with different scales, which verifies the capability of neurons for adaptively adjusting their receptive field sizes according to the input. The code and models are available at https://github.com/implus/{SKNet}.},
+  journaltitle = {{arXiv}:1903.06586 [cs]},
+  author       = {Li, Xiang and Wang, Wenhai and Hu, Xiaolin and Yang, Jian},
+  urldate      = {2021-12-09},
+  date         = {2019-03-17},
+  eprinttype   = {arxiv},
+  eprint       = {1903.06586},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/DJMSE3WM/Li et al. - 2019 - Selective Kernel Networks.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/Q6DEB4PR/1903.html:text/html}
+}
+
+@article{han_transformer_2021,
+  title        = {Transformer in Transformer},
+  url          = {http://arxiv.org/abs/2103.00112},
+  abstract     = {Transformer is a new kind of neural architecture which encodes the input data as powerful features via the attention mechanism. Basically, the visual transformers first divide the input images into several local patches and then calculate both representations and their relationship. Since natural images are of high complexity with abundant detail and color information, the granularity of the patch dividing is not fine enough for excavating features of objects in different scales and locations. In this paper, we point out that the attention inside these local patches are also essential for building visual transformers with high performance and we explore a new architecture, namely, Transformer {iN} Transformer ({TNT}). Specifically, we regard the local patches (e.g., 16\${\textbackslash}times\$16) as "visual sentences" and present to further divide them into smaller patches (e.g., 4\${\textbackslash}times\$4) as "visual words". The attention of each word will be calculated with other words in the given visual sentence with negligible computational costs. Features of both words and sentences will be aggregated to enhance the representation ability. Experiments on several benchmarks demonstrate the effectiveness of the proposed {TNT} architecture, e.g., we achieve an 81.5\% top-1 accuracy on the {ImageNet}, which is about 1.7\% higher than that of the state-of-the-art visual transformer with similar computational cost. The {PyTorch} code is available at https://github.com/huawei-noah/{CV}-Backbones, and the {MindSpore} code is available at https://gitee.com/mindspore/models/tree/master/research/cv/{TNT}.},
+  journaltitle = {{arXiv}:2103.00112 [cs]},
+  author       = {Han, Kai and Xiao, An and Wu, Enhua and Guo, Jianyuan and Xu, Chunjing and Wang, Yunhe},
+  urldate      = {2021-12-09},
+  date         = {2021-10-25},
+  eprinttype   = {arxiv},
+  eprint       = {2103.00112},
+  keywords     = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/CABCTE92/Han et al. - 2021 - Transformer in Transformer.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/5Q4IJEDE/2103.html:text/html}
+}
+
+@article{DBLP:journals/corr/abs-2104-13840,
+  author     = {Xiangxiang Chu and
+                Zhi Tian and
+                Yuqing Wang and
+                Bo Zhang and
+                Haibing Ren and
+                Xiaolin Wei and
+                Huaxia Xia and
+                Chunhua Shen},
+  title      = {Twins: Revisiting Spatial Attention Design in Vision Transformers},
+  journal    = {CoRR},
+  volume     = {abs/2104.13840},
+  year       = {2021},
+  url        = {https://arxiv.org/abs/2104.13840},
+  eprinttype = {arXiv},
+  eprint     = {2104.13840},
+  timestamp  = {Thu, 12 Aug 2021 15:37:12 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-2104-13840.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{ridnik_tresnet_2020,
+  title        = {{TResNet}: High Performance {GPU}-Dedicated Architecture},
+  url          = {http://arxiv.org/abs/2003.13630},
+  shorttitle   = {{TResNet}},
+  abstract     = {Many deep learning models, developed in recent years, reach higher {ImageNet} accuracy than {ResNet}50, with fewer or comparable {FLOPS} count. While {FLOPs} are often seen as a proxy for network efficiency, when measuring actual {GPU} training and inference throughput, vanilla {ResNet}50 is usually significantly faster than its recent competitors, offering better throughput-accuracy trade-off. In this work, we introduce a series of architecture modifications that aim to boost neural networks' accuracy, while retaining their {GPU} training and inference efficiency. We first demonstrate and discuss the bottlenecks induced by {FLOPs}-optimizations. We then suggest alternative designs that better utilize {GPU} structure and assets. Finally, we introduce a new family of {GPU}-dedicated models, called {TResNet}, which achieve better accuracy and efficiency than previous {ConvNets}. Using a {TResNet} model, with similar {GPU} throughput to {ResNet}50, we reach 80.8 top-1 accuracy on {ImageNet}. Our {TResNet} models also transfer well and achieve state-of-the-art accuracy on competitive single-label classification datasets such as Stanford cars (96.0\%), {CIFAR}-10 (99.0\%), {CIFAR}-100 (91.5\%) and Oxford-Flowers (99.1\%). They also perform well on multi-label classification and object detection tasks. Implementation is available at: https://github.com/{mrT}23/{TResNet}.},
+  journaltitle = {{arXiv}:2003.13630 [cs, eess]},
+  author       = {Ridnik, Tal and Lawen, Hussam and Noy, Asaf and Baruch, Emanuel Ben and Sharir, Gilad and Friedman, Itamar},
+  urldate      = {2021-12-09},
+  date         = {2020-08-27},
+  eprinttype   = {arxiv},
+  eprint       = {2003.13630},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Electrical Engineering and Systems Science - Image and Video Processing},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/25PN5TCT/Ridnik et al. - 2020 - TResNet High Performance GPU-Dedicated Architectu.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/WMHD375M/2003.html:text/html}
+}
+
+@article{lee_centermask_2020,
+  title        = {{CenterMask} : Real-Time Anchor-Free Instance Segmentation},
+  url          = {http://arxiv.org/abs/1911.06667},
+  shorttitle   = {{CenterMask}},
+  abstract     = {We propose a simple yet efficient anchor-free instance segmentation, called {CenterMask}, that adds a novel spatial attention-guided mask ({SAG}-Mask) branch to anchor-free one stage object detector ({FCOS}) in the same vein with Mask R-{CNN}. Plugged into the {FCOS} object detector, the {SAG}-Mask branch predicts a segmentation mask on each box with the spatial attention map that helps to focus on informative pixels and suppress noise. We also present an improved backbone networks, {VoVNetV}2, with two effective strategies: (1) residual connection for alleviating the optimization problem of larger {VoVNet} {\textbackslash}cite\{lee2019energy\} and (2) effective Squeeze-Excitation ({eSE}) dealing with the channel information loss problem of original {SE}. With {SAG}-Mask and {VoVNetV}2, we deign {CenterMask} and {CenterMask}-Lite that are targeted to large and small models, respectively. Using the same {ResNet}-101-{FPN} backbone, {CenterMask} achieves 38.3\%, surpassing all previous state-of-the-art methods while at a much faster speed. {CenterMask}-Lite also outperforms the state-of-the-art by large margins at over 35fps on Titan Xp. We hope that {CenterMask} and {VoVNetV}2 can serve as a solid baseline of real-time instance segmentation and backbone network for various vision tasks, respectively. The Code is available at https://github.com/{youngwanLEE}/{CenterMask}.},
+  journaltitle = {{arXiv}:1911.06667 [cs]},
+  author       = {Lee, Youngwan and Park, Jongyoul},
+  urldate      = {2021-12-09},
+  date         = {2020-04-02},
+  eprinttype   = {arxiv},
+  eprint       = {1911.06667},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/PBNN554E/Lee and Park - 2020 - CenterMask  Real-Time Anchor-Free Instance Segmen.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/VPA35V89/1911.html:text/html}
+}
+
+@article{dosovitskiy_image_2021,
+  title        = {An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale},
+  url          = {http://arxiv.org/abs/2010.11929},
+  shorttitle   = {An Image is Worth 16x16 Words},
+  abstract     = {While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited. In vision, attention is either applied in conjunction with convolutional networks, or used to replace certain components of convolutional networks while keeping their overall structure in place. We show that this reliance on {CNNs} is not necessary and a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks. When pre-trained on large amounts of data and transferred to multiple mid-sized or small image recognition benchmarks ({ImageNet}, {CIFAR}-100, {VTAB}, etc.), Vision Transformer ({ViT}) attains excellent results compared to state-of-the-art convolutional networks while requiring substantially fewer computational resources to train.},
+  journaltitle = {{arXiv}:2010.11929 [cs]},
+  author       = {Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and Uszkoreit, Jakob and Houlsby, Neil},
+  urldate      = {2021-12-09},
+  date         = {2021-06-03},
+  eprinttype   = {arxiv},
+  eprint       = {2010.11929},
+  keywords     = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/H7TZD8KU/Dosovitskiy et al. - 2021 - An Image is Worth 16x16 Words Transformers for Im.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/WWUYQX5Z/2010.html:text/html}
+}
+
+@article{gao_res2net_2021,
+  title        = {Res2Net: A New Multi-scale Backbone Architecture},
+  volume       = {43},
+  issn         = {0162-8828, 2160-9292, 1939-3539},
+  url          = {http://arxiv.org/abs/1904.01169},
+  doi          = {10.1109/TPAMI.2019.2938758},
+  shorttitle   = {Res2Net},
+  abstract     = {Representing features at multiple scales is of great importance for numerous vision tasks. Recent advances in backbone convolutional neural networks ({CNNs}) continually demonstrate stronger multi-scale representation ability, leading to consistent performance gains on a wide range of applications. However, most existing methods represent the multi-scale features in a layer-wise manner. In this paper, we propose a novel building block for {CNNs}, namely Res2Net, by constructing hierarchical residual-like connections within one single residual block. The Res2Net represents multi-scale features at a granular level and increases the range of receptive fields for each network layer. The proposed Res2Net block can be plugged into the state-of-the-art backbone {CNN} models, e.g., {ResNet}, {ResNeXt}, and {DLA}. We evaluate the Res2Net block on all these models and demonstrate consistent performance gains over baseline models on widely-used datasets, e.g., {CIFAR}-100 and {ImageNet}. Further ablation studies and experimental results on representative computer vision tasks, i.e., object detection, class activation mapping, and salient object detection, further verify the superiority of the Res2Net over the state-of-the-art baseline methods. The source code and trained models are available on https://mmcheng.net/res2net/.},
+  pages        = {652--662},
+  number       = {2},
+  journaltitle = {{IEEE} Transactions on Pattern Analysis and Machine Intelligence},
+  shortjournal = {{IEEE} Trans. Pattern Anal. Mach. Intell.},
+  author       = {Gao, Shang-Hua and Cheng, Ming-Ming and Zhao, Kai and Zhang, Xin-Yu and Yang, Ming-Hsuan and Torr, Philip},
+  urldate      = {2021-12-09},
+  date         = {2021-02-01},
+  eprinttype   = {arxiv},
+  eprint       = {1904.01169},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {Res2Net\: A New Multi-scale Backbone Architecture:/home/sultan/Zotero/storage/KH8UNUZB/TPAMI.2019.2938758.pdf.pdf:application/pdf;arXiv Fulltext PDF:/home/sultan/Zotero/storage/ULXZKFA8/Gao et al. - 2021 - Res2Net A New Multi-scale Backbone Architecture.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/5TIHUXKZ/1904.html:text/html}
+}
+
+@article{chollet_xception_2017,
+  title        = {Xception: Deep Learning with Depthwise Separable Convolutions},
+  url          = {http://arxiv.org/abs/1610.02357},
+  shorttitle   = {Xception},
+  abstract     = {We present an interpretation of Inception modules in convolutional neural networks as being an intermediate step in-between regular convolution and the depthwise separable convolution operation (a depthwise convolution followed by a pointwise convolution). In this light, a depthwise separable convolution can be understood as an Inception module with a maximally large number of towers. This observation leads us to propose a novel deep convolutional neural network architecture inspired by Inception, where Inception modules have been replaced with depthwise separable convolutions. We show that this architecture, dubbed Xception, slightly outperforms Inception V3 on the {ImageNet} dataset (which Inception V3 was designed for), and significantly outperforms Inception V3 on a larger image classification dataset comprising 350 million images and 17,000 classes. Since the Xception architecture has the same number of parameters as Inception V3, the performance gains are not due to increased capacity but rather to a more efficient use of model parameters.},
+  journaltitle = {{arXiv}:1610.02357 [cs]},
+  author       = {Chollet, François},
+  urldate      = {2021-12-09},
+  date         = {2017-04-04},
+  eprinttype   = {arxiv},
+  eprint       = {1610.02357},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/C45SG5PE/Chollet - 2017 - Xception Deep Learning with Depthwise Separable C.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/5TQJUA6B/1610.html:text/html}
+}
+
+@article{chen_encoder-decoder_2018,
+  title        = {Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation},
+  url          = {http://arxiv.org/abs/1802.02611},
+  abstract     = {Spatial pyramid pooling module or encode-decoder structure are used in deep neural networks for semantic segmentation task. The former networks are able to encode multi-scale contextual information by probing the incoming features with filters or pooling operations at multiple rates and multiple effective fields-of-view, while the latter networks can capture sharper object boundaries by gradually recovering the spatial information. In this work, we propose to combine the advantages from both methods. Specifically, our proposed model, {DeepLabv}3+, extends {DeepLabv}3 by adding a simple yet effective decoder module to refine the segmentation results especially along object boundaries. We further explore the Xception model and apply the depthwise separable convolution to both Atrous Spatial Pyramid Pooling and decoder modules, resulting in a faster and stronger encoder-decoder network. We demonstrate the effectiveness of the proposed model on {PASCAL} {VOC} 2012 and Cityscapes datasets, achieving the test set performance of 89.0{\textbackslash}\% and 82.1{\textbackslash}\% without any post-processing. Our paper is accompanied with a publicly available reference implementation of the proposed models in Tensorflow at {\textbackslash}url\{https://github.com/tensorflow/models/tree/master/research/deeplab\}.},
+  journaltitle = {{arXiv}:1802.02611 [cs]},
+  author       = {Chen, Liang-Chieh and Zhu, Yukun and Papandreou, George and Schroff, Florian and Adam, Hartwig},
+  urldate      = {2021-12-09},
+  date         = {2018-08-22},
+  eprinttype   = {arxiv},
+  eprint       = {1802.02611},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/TYA8PDB6/Chen et al. - 2018 - Encoder-Decoder with Atrous Separable Convolution .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/D4XZFAL2/1802.html:text/html}
+}
+
+@article{mehta_xnect_2020,
+  title        = {{XNect}: Real-time Multi-Person 3D Motion Capture with a Single {RGB} Camera},
+  volume       = {39},
+  issn         = {0730-0301, 1557-7368},
+  url          = {http://arxiv.org/abs/1907.00837},
+  doi          = {10.1145/3386569.3392410},
+  shorttitle   = {{XNect}},
+  abstract     = {We present a real-time approach for multi-person 3D motion capture at over 30 fps using a single {RGB} camera. It operates successfully in generic scenes which may contain occlusions by objects and by other people. Our method operates in subsequent stages. The first stage is a convolutional neural network ({CNN}) that estimates 2D and 3D pose features along with identity assignments for all visible joints of all individuals.We contribute a new architecture for this {CNN}, called {SelecSLS} Net, that uses novel selective long and short range skip connections to improve the information flow allowing for a drastically faster network without compromising accuracy. In the second stage, a fully connected neural network turns the possibly partial (on account of occlusion) 2Dpose and 3Dpose features for each subject into a complete 3Dpose estimate per individual. The third stage applies space-time skeletal model fitting to the predicted 2D and 3D pose per subject to further reconcile the 2D and 3D pose, and enforce temporal coherence. Our method returns the full skeletal pose in joint angles for each subject. This is a further key distinction from previous work that do not produce joint angle results of a coherent skeleton in real time for multi-person scenes. The proposed system runs on consumer hardware at a previously unseen speed of more than 30 fps given 512x320 images as input while achieving state-of-the-art accuracy, which we will demonstrate on a range of challenging real-world scenes.},
+  number       = {4},
+  journaltitle = {{ACM} Transactions on Graphics},
+  shortjournal = {{ACM} Trans. Graph.},
+  author       = {Mehta, Dushyant and Sotnychenko, Oleksandr and Mueller, Franziska and Xu, Weipeng and Elgharib, Mohamed and Fua, Pascal and Seidel, Hans-Peter and Rhodin, Helge and Pons-Moll, Gerard and Theobalt, Christian},
+  urldate      = {2021-12-09},
+  date         = {2020-07-08},
+  eprinttype   = {arxiv},
+  eprint       = {1907.00837},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Graphics},
+  file         = {XNect\: Real-time Multi-Person 3D Motion Capture with a Single RGB Camera:/home/sultan/Zotero/storage/MTL3V7VU/mehta2020.pdf.pdf:application/pdf;arXiv Fulltext PDF:/home/sultan/Zotero/storage/KNJF3BUN/Mehta et al. - 2020 - XNect Real-time Multi-Person 3D Motion Capture wi.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/AH5AENIA/1907.html:text/html}
+}
+
+@article{liu_swin_2021,
+  title        = {Swin Transformer: Hierarchical Vision Transformer using Shifted Windows},
+  url          = {http://arxiv.org/abs/2103.14030},
+  shorttitle   = {Swin Transformer},
+  abstract     = {This paper presents a new vision Transformer, called Swin Transformer, that capably serves as a general-purpose backbone for computer vision. Challenges in adapting Transformer from language to vision arise from differences between the two domains, such as large variations in the scale of visual entities and the high resolution of pixels in images compared to words in text. To address these differences, we propose a hierarchical Transformer whose representation is computed with {\textbackslash}textbf\{S\}hifted {\textbackslash}textbf\{win\}dows. The shifted windowing scheme brings greater efficiency by limiting self-attention computation to non-overlapping local windows while also allowing for cross-window connection. This hierarchical architecture has the flexibility to model at various scales and has linear computational complexity with respect to image size. These qualities of Swin Transformer make it compatible with a broad range of vision tasks, including image classification (87.3 top-1 accuracy on {ImageNet}-1K) and dense prediction tasks such as object detection (58.7 box {AP} and 51.1 mask {AP} on {COCO} test-dev) and semantic segmentation (53.5 {mIoU} on {ADE}20K val). Its performance surpasses the previous state-of-the-art by a large margin of +2.7 box {AP} and +2.6 mask {AP} on {COCO}, and +3.2 {mIoU} on {ADE}20K, demonstrating the potential of Transformer-based models as vision backbones. The hierarchical design and the shifted window approach also prove beneficial for all-{MLP} architectures. The code and models are publicly available at{\textasciitilde}{\textbackslash}url\{https://github.com/microsoft/Swin-Transformer\}.},
+  journaltitle = {{arXiv}:2103.14030 [cs]},
+  author       = {Liu, Ze and Lin, Yutong and Cao, Yue and Hu, Han and Wei, Yixuan and Zhang, Zheng and Lin, Stephen and Guo, Baining},
+  urldate      = {2021-12-09},
+  date         = {2021-08-17},
+  eprinttype   = {arxiv},
+  eprint       = {2103.14030},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/E69ZPMPG/Liu et al. - 2021 - Swin Transformer Hierarchical Vision Transformer .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/LCHFDXNJ/2103.html:text/html}
+}
+
+@article{liu_progressive_2018,
+  title        = {Progressive Neural Architecture Search},
+  url          = {http://arxiv.org/abs/1712.00559},
+  abstract     = {We propose a new method for learning the structure of convolutional neural networks ({CNNs}) that is more efficient than recent state-of-the-art methods based on reinforcement learning and evolutionary algorithms. Our approach uses a sequential model-based optimization ({SMBO}) strategy, in which we search for structures in order of increasing complexity, while simultaneously learning a surrogate model to guide the search through structure space. Direct comparison under the same search space shows that our method is up to 5 times more efficient than the {RL} method of Zoph et al. (2018) in terms of number of models evaluated, and 8 times faster in terms of total compute. The structures we discover in this way achieve state of the art classification accuracies on {CIFAR}-10 and {ImageNet}.},
+  journaltitle = {{arXiv}:1712.00559 [cs, stat]},
+  author       = {Liu, Chenxi and Zoph, Barret and Neumann, Maxim and Shlens, Jonathon and Hua, Wei and Li, Li-Jia and Fei-Fei, Li and Yuille, Alan and Huang, Jonathan and Murphy, Kevin},
+  urldate      = {2021-12-09},
+  date         = {2018-07-26},
+  eprinttype   = {arxiv},
+  eprint       = {1712.00559},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/DNT44BHC/Liu et al. - 2018 - Progressive Neural Architecture Search.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/UMXHTFVC/1712.html:text/html}
+}
+
+@article{heo_rethinking_2021,
+  title        = {Rethinking Spatial Dimensions of Vision Transformers},
+  url          = {http://arxiv.org/abs/2103.16302},
+  abstract     = {Vision Transformer ({ViT}) extends the application range of transformers from language processing to computer vision tasks as being an alternative architecture against the existing convolutional neural networks ({CNN}). Since the transformer-based architecture has been innovative for computer vision modeling, the design convention towards an effective architecture has been less studied yet. From the successful design principles of {CNN}, we investigate the role of spatial dimension conversion and its effectiveness on transformer-based architecture. We particularly attend to the dimension reduction principle of {CNNs}; as the depth increases, a conventional {CNN} increases channel dimension and decreases spatial dimensions. We empirically show that such a spatial dimension reduction is beneficial to a transformer architecture as well, and propose a novel Pooling-based Vision Transformer ({PiT}) upon the original {ViT} model. We show that {PiT} achieves the improved model capability and generalization performance against {ViT}. Throughout the extensive experiments, we further show {PiT} outperforms the baseline on several tasks such as image classification, object detection, and robustness evaluation. Source codes and {ImageNet} models are available at https://github.com/naver-ai/pit},
+  journaltitle = {{arXiv}:2103.16302 [cs]},
+  author       = {Heo, Byeongho and Yun, Sangdoo and Han, Dongyoon and Chun, Sanghyuk and Choe, Junsuk and Oh, Seong Joon},
+  urldate      = {2021-12-09},
+  date         = {2021-08-17},
+  eprinttype   = {arxiv},
+  eprint       = {2103.16302},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/TK6GPLJP/Heo et al. - 2021 - Rethinking Spatial Dimensions of Vision Transforme.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/JZ6IVGWN/2103.html:text/html}
+}
+
+@article{radosavovic_designing_2020,
+  title        = {Designing Network Design Spaces},
+  url          = {http://arxiv.org/abs/2003.13678},
+  abstract     = {In this work, we present a new network design paradigm. Our goal is to help advance the understanding of network design and discover design principles that generalize across settings. Instead of focusing on designing individual network instances, we design network design spaces that parametrize populations of networks. The overall process is analogous to classic manual design of networks, but elevated to the design space level. Using our methodology we explore the structure aspect of network design and arrive at a low-dimensional design space consisting of simple, regular networks that we call {RegNet}. The core insight of the {RegNet} parametrization is surprisingly simple: widths and depths of good networks can be explained by a quantized linear function. We analyze the {RegNet} design space and arrive at interesting findings that do not match the current practice of network design. The {RegNet} design space provides simple and fast networks that work well across a wide range of flop regimes. Under comparable training settings and flops, the {RegNet} models outperform the popular {EfficientNet} models while being up to 5x faster on {GPUs}.},
+  journaltitle = {{arXiv}:2003.13678 [cs]},
+  author       = {Radosavovic, Ilija and Kosaraju, Raj Prateek and Girshick, Ross and He, Kaiming and Dollár, Piotr},
+  urldate      = {2021-12-09},
+  date         = {2020-03-30},
+  eprinttype   = {arxiv},
+  eprint       = {2003.13678},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/JUSHXJL4/Radosavovic et al. - 2020 - Designing Network Design Spaces.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/Z5TLKWSF/2003.html:text/html}
+}
+
+@article{ding_repvgg_2021,
+  title        = {{RepVGG}: Making {VGG}-style {ConvNets} Great Again},
+  url          = {http://arxiv.org/abs/2101.03697},
+  shorttitle   = {{RepVGG}},
+  abstract     = {We present a simple but powerful architecture of convolutional neural network, which has a {VGG}-like inference-time body composed of nothing but a stack of 3x3 convolution and {ReLU}, while the training-time model has a multi-branch topology. Such decoupling of the training-time and inference-time architecture is realized by a structural re-parameterization technique so that the model is named {RepVGG}. On {ImageNet}, {RepVGG} reaches over 80\% top-1 accuracy, which is the first time for a plain model, to the best of our knowledge. On {NVIDIA} 1080Ti {GPU}, {RepVGG} models run 83\% faster than {ResNet}-50 or 101\% faster than {ResNet}-101 with higher accuracy and show favorable accuracy-speed trade-off compared to the state-of-the-art models like {EfficientNet} and {RegNet}. The code and trained models are available at https://github.com/megvii-model/{RepVGG}.},
+  journaltitle = {{arXiv}:2101.03697 [cs]},
+  author       = {Ding, Xiaohan and Zhang, Xiangyu and Ma, Ningning and Han, Jungong and Ding, Guiguang and Sun, Jian},
+  urldate      = {2021-12-09},
+  date         = {2021-03-29},
+  eprinttype   = {arxiv},
+  eprint       = {2101.03697},
+  keywords     = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/MGV543V5/Ding et al. - 2021 - RepVGG Making VGG-style ConvNets Great Again.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/82HI6QSN/2101.html:text/html}
+}
+
+@article{touvron_resmlp_2021,
+  title        = {{ResMLP}: Feedforward networks for image classification with data-efficient training},
+  url          = {http://arxiv.org/abs/2105.03404},
+  shorttitle   = {{ResMLP}},
+  abstract     = {We present {ResMLP}, an architecture built entirely upon multi-layer perceptrons for image classification. It is a simple residual network that alternates (i) a linear layer in which image patches interact, independently and identically across channels, and (ii) a two-layer feed-forward network in which channels interact independently per patch. When trained with a modern training strategy using heavy data-augmentation and optionally distillation, it attains surprisingly good accuracy/complexity trade-offs on {ImageNet}. We also train {ResMLP} models in a self-supervised setup, to further remove priors from employing a labelled dataset. Finally, by adapting our model to machine translation we achieve surprisingly good results. We share pre-trained models and our code based on the Timm library.},
+  journaltitle = {{arXiv}:2105.03404 [cs]},
+  author       = {Touvron, Hugo and Bojanowski, Piotr and Caron, Mathilde and Cord, Matthieu and El-Nouby, Alaaeldin and Grave, Edouard and Izacard, Gautier and Joulin, Armand and Synnaeve, Gabriel and Verbeek, Jakob and Jégou, Hervé},
+  urldate      = {2021-12-09},
+  date         = {2021-06-10},
+  eprinttype   = {arxiv},
+  eprint       = {2105.03404},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/NUHBFJF3/Touvron et al. - 2021 - ResMLP Feedforward networks for image classificat.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/3LQXLAMI/2105.html:text/html}
+}
+
+@article{he_deep_2015,
+  title        = {Deep Residual Learning for Image Recognition},
+  url          = {http://arxiv.org/abs/1512.03385},
+  abstract     = {Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the {ImageNet} dataset we evaluate residual nets with a depth of up to 152 layers---8x deeper than {VGG} nets but still having lower complexity. An ensemble of these residual nets achieves 3.57\% error on the {ImageNet} test set. This result won the 1st place on the {ILSVRC} 2015 classification task. We also present analysis on {CIFAR}-10 with 100 and 1000 layers. The depth of representations is of central importance for many visual recognition tasks. Solely due to our extremely deep representations, we obtain a 28\% relative improvement on the {COCO} object detection dataset. Deep residual nets are foundations of our submissions to {ILSVRC} \& {COCO} 2015 competitions, where we also won the 1st places on the tasks of {ImageNet} detection, {ImageNet} localization, {COCO} detection, and {COCO} segmentation.},
+  journaltitle = {{arXiv}:1512.03385 [cs]},
+  author       = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  urldate      = {2021-12-09},
+  date         = {2015-12-10},
+  eprinttype   = {arxiv},
+  eprint       = {1512.03385},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/FHFFV948/He et al. - 2015 - Deep Residual Learning for Image Recognition.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/KA5DPVPS/1512.html:text/html}
+}
+
+@article{xie_aggregated_2017,
+  title        = {Aggregated Residual Transformations for Deep Neural Networks},
+  url          = {http://arxiv.org/abs/1611.05431},
+  abstract     = {We present a simple, highly modularized network architecture for image classification. Our network is constructed by repeating a building block that aggregates a set of transformations with the same topology. Our simple design results in a homogeneous, multi-branch architecture that has only a few hyper-parameters to set. This strategy exposes a new dimension, which we call "cardinality" (the size of the set of transformations), as an essential factor in addition to the dimensions of depth and width. On the {ImageNet}-1K dataset, we empirically show that even under the restricted condition of maintaining complexity, increasing cardinality is able to improve classification accuracy. Moreover, increasing cardinality is more effective than going deeper or wider when we increase the capacity. Our models, named {ResNeXt}, are the foundations of our entry to the {ILSVRC} 2016 classification task in which we secured 2nd place. We further investigate {ResNeXt} on an {ImageNet}-5K set and the {COCO} detection set, also showing better results than its {ResNet} counterpart. The code and models are publicly available online.},
+  journaltitle = {{arXiv}:1611.05431 [cs]},
+  author       = {Xie, Saining and Girshick, Ross and Dollár, Piotr and Tu, Zhuowen and He, Kaiming},
+  urldate      = {2021-12-09},
+  date         = {2017-04-10},
+  eprinttype   = {arxiv},
+  eprint       = {1611.05431},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/N4VBQ8GT/Xie et al. - 2017 - Aggregated Residual Transformations for Deep Neura.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/NT4355PD/1611.html:text/html}
+}
+
+@article{he_bag_2018,
+  title        = {Bag of Tricks for Image Classification with Convolutional Neural Networks},
+  url          = {http://arxiv.org/abs/1812.01187},
+  abstract     = {Much of the recent progress made in image classification research can be credited to training procedure refinements, such as changes in data augmentations and optimization methods. In the literature, however, most refinements are either briefly mentioned as implementation details or only visible in source code. In this paper, we will examine a collection of such refinements and empirically evaluate their impact on the final model accuracy through ablation study. We will show that, by combining these refinements together, we are able to improve various {CNN} models significantly. For example, we raise {ResNet}-50's top-1 validation accuracy from 75.3\% to 79.29\% on {ImageNet}. We will also demonstrate that improvement on image classification accuracy leads to better transfer learning performance in other application domains such as object detection and semantic segmentation.},
+  journaltitle = {{arXiv}:1812.01187 [cs]},
+  author       = {He, Tong and Zhang, Zhi and Zhang, Hang and Zhang, Zhongyue and Xie, Junyuan and Li, Mu},
+  urldate      = {2021-12-09},
+  date         = {2018-12-05},
+  eprinttype   = {arxiv},
+  eprint       = {1812.01187},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/IXVDRRUZ/He et al. - 2018 - Bag of Tricks for Image Classification with Convol.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/M9Q3WXK4/1812.html:text/html}
+}
+
+@article{DBLP:journals/corr/abs-1910-03151,
+  author     = {Qilong Wang and
+                Banggu Wu and
+                Pengfei Zhu and
+                Peihua Li and
+                Wangmeng Zuo and
+                Qinghua Hu},
+  title      = {ECA-Net: Efficient Channel Attention for Deep Convolutional Neural
+                Networks},
+  journal    = {CoRR},
+  volume     = {abs/1910.03151},
+  year       = {2019},
+  url        = {http://arxiv.org/abs/1910.03151},
+  eprinttype = {arXiv},
+  eprint     = {1910.03151},
+  timestamp  = {Wed, 09 Oct 2019 14:07:58 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-1910-03151.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{mahajan_exploring_2018,
+  title        = {Exploring the Limits of Weakly Supervised Pretraining},
+  url          = {http://arxiv.org/abs/1805.00932},
+  abstract     = {State-of-the-art visual perception models for a wide range of tasks rely on supervised pretraining. {ImageNet} classification is the de facto pretraining task for these models. Yet, {ImageNet} is now nearly ten years old and is by modern standards "small". Even so, relatively little is known about the behavior of pretraining with datasets that are multiple orders of magnitude larger. The reasons are obvious: such datasets are difficult to collect and annotate. In this paper, we present a unique study of transfer learning with large convolutional networks trained to predict hashtags on billions of social media images. Our experiments demonstrate that training for large-scale hashtag prediction leads to excellent results. We show improvements on several image classification and object detection tasks, and report the highest {ImageNet}-1k single-crop, top-1 accuracy to date: 85.4\% (97.6\% top-5). We also perform extensive experiments that provide novel empirical data on the relationship between large-scale pretraining and transfer learning performance.},
+  journaltitle = {{arXiv}:1805.00932 [cs]},
+  author       = {Mahajan, Dhruv and Girshick, Ross and Ramanathan, Vignesh and He, Kaiming and Paluri, Manohar and Li, Yixuan and Bharambe, Ashwin and van der Maaten, Laurens},
+  urldate      = {2021-12-09},
+  date         = {2018-05-02},
+  eprinttype   = {arxiv},
+  eprint       = {1805.00932},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/IVH8Y6W8/Mahajan et al. - 2018 - Exploring the Limits of Weakly Supervised Pretrain.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/RDWML3KB/1805.html:text/html}
+}
+
+@article{yalniz_billion-scale_2019,
+  title        = {Billion-scale semi-supervised learning for image classification},
+  url          = {http://arxiv.org/abs/1905.00546},
+  abstract     = {This paper presents a study of semi-supervised learning with large convolutional networks. We propose a pipeline, based on a teacher/student paradigm, that leverages a large collection of unlabelled images (up to 1 billion). Our main goal is to improve the performance for a given target architecture, like {ResNet}-50 or {ResNext}. We provide an extensive analysis of the success factors of our approach, which leads us to formulate some recommendations to produce high-accuracy models for image classification with semi-supervised learning. As a result, our approach brings important gains to standard architectures for image, video and fine-grained classification. For instance, by leveraging one billion unlabelled images, our learned vanilla {ResNet}-50 achieves 81.2\% top-1 accuracy on the {ImageNet} benchmark.},
+  journaltitle = {{arXiv}:1905.00546 [cs]},
+  author       = {Yalniz, I. Zeki and Jégou, Hervé and Chen, Kan and Paluri, Manohar and Mahajan, Dhruv},
+  urldate      = {2021-12-09},
+  date         = {2019-05-01},
+  eprinttype   = {arxiv},
+  eprint       = {1905.00546},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/QIAFWTGQ/Yalniz et al. - 2019 - Billion-scale semi-supervised learning for image c.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/N8RR8ZKV/1905.html:text/html}
+}
+
+@article{wang_eca-net_2020,
+  title        = {{ECA}-Net: Efficient Channel Attention for Deep Convolutional Neural Networks},
+  url          = {http://arxiv.org/abs/1910.03151},
+  shorttitle   = {{ECA}-Net},
+  abstract     = {Recently, channel attention mechanism has demonstrated to offer great potential in improving the performance of deep convolutional neural networks ({CNNs}). However, most existing methods dedicate to developing more sophisticated attention modules for achieving better performance, which inevitably increase model complexity. To overcome the paradox of performance and complexity trade-off, this paper proposes an Efficient Channel Attention ({ECA}) module, which only involves a handful of parameters while bringing clear performance gain. By dissecting the channel attention module in {SENet}, we empirically show avoiding dimensionality reduction is important for learning channel attention, and appropriate cross-channel interaction can preserve performance while significantly decreasing model complexity. Therefore, we propose a local cross-channel interaction strategy without dimensionality reduction, which can be efficiently implemented via \$1D\$ convolution. Furthermore, we develop a method to adaptively select kernel size of \$1D\$ convolution, determining coverage of local cross-channel interaction. The proposed {ECA} module is efficient yet effective, e.g., the parameters and computations of our modules against backbone of {ResNet}50 are 80 vs. 24.37M and 4.7e-4 {GFLOPs} vs. 3.86 {GFLOPs}, respectively, and the performance boost is more than 2\% in terms of Top-1 accuracy. We extensively evaluate our {ECA} module on image classification, object detection and instance segmentation with backbones of {ResNets} and {MobileNetV}2. The experimental results show our module is more efficient while performing favorably against its counterparts.},
+  journaltitle = {{arXiv}:1910.03151 [cs]},
+  author       = {Wang, Qilong and Wu, Banggu and Zhu, Pengfei and Li, Peihua and Zuo, Wangmeng and Hu, Qinghua},
+  urldate      = {2021-12-09},
+  date         = {2020-04-07},
+  eprinttype   = {arxiv},
+  eprint       = {1910.03151},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/TIGQA5K9/Wang et al. - 2020 - ECA-Net Efficient Channel Attention for Deep Conv.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/4LHBFJYP/1910.html:text/html}
+}
+
+@article{brock_high-performance_2021,
+  title        = {High-Performance Large-Scale Image Recognition Without Normalization},
+  url          = {http://arxiv.org/abs/2102.06171},
+  abstract     = {Batch normalization is a key component of most image classification models, but it has many undesirable properties stemming from its dependence on the batch size and interactions between examples. Although recent work has succeeded in training deep {ResNets} without normalization layers, these models do not match the test accuracies of the best batch-normalized networks, and are often unstable for large learning rates or strong data augmentations. In this work, we develop an adaptive gradient clipping technique which overcomes these instabilities, and design a significantly improved class of Normalizer-Free {ResNets}. Our smaller models match the test accuracy of an {EfficientNet}-B7 on {ImageNet} while being up to 8.7x faster to train, and our largest models attain a new state-of-the-art top-1 accuracy of 86.5\%. In addition, Normalizer-Free models attain significantly better performance than their batch-normalized counterparts when finetuning on {ImageNet} after large-scale pre-training on a dataset of 300 million labeled images, with our best models obtaining an accuracy of 89.2\%. Our code is available at https://github.com/deepmind/ deepmind-research/tree/master/nfnets},
+  journaltitle = {{arXiv}:2102.06171 [cs, stat]},
+  author       = {Brock, Andrew and De, Soham and Smith, Samuel L. and Simonyan, Karen},
+  urldate      = {2021-12-09},
+  date         = {2021-02-11},
+  eprinttype   = {arxiv},
+  eprint       = {2102.06171},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/L3XD76NF/Brock et al. - 2021 - High-Performance Large-Scale Image Recognition Wit.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/G4RGLL6H/2102.html:text/html}
+}
+
+@article{zoph_learning_2018,
+  title        = {Learning Transferable Architectures for Scalable Image Recognition},
+  url          = {http://arxiv.org/abs/1707.07012},
+  abstract     = {Developing neural network image classification models often requires significant architecture engineering. In this paper, we study a method to learn the model architectures directly on the dataset of interest. As this approach is expensive when the dataset is large, we propose to search for an architectural building block on a small dataset and then transfer the block to a larger dataset. The key contribution of this work is the design of a new search space (the "{NASNet} search space") which enables transferability. In our experiments, we search for the best convolutional layer (or "cell") on the {CIFAR}-10 dataset and then apply this cell to the {ImageNet} dataset by stacking together more copies of this cell, each with their own parameters to design a convolutional architecture, named "{NASNet} architecture". We also introduce a new regularization technique called {ScheduledDropPath} that significantly improves generalization in the {NASNet} models. On {CIFAR}-10 itself, {NASNet} achieves 2.4\% error rate, which is state-of-the-art. On {ImageNet}, {NASNet} achieves, among the published works, state-of-the-art accuracy of 82.7\% top-1 and 96.2\% top-5 on {ImageNet}. Our model is 1.2\% better in top-1 accuracy than the best human-invented architectures while having 9 billion fewer {FLOPS} - a reduction of 28\% in computational demand from the previous state-of-the-art model. When evaluated at different levels of computational cost, accuracies of {NASNets} exceed those of the state-of-the-art human-designed models. For instance, a small version of {NASNet} also achieves 74\% top-1 accuracy, which is 3.1\% better than equivalently-sized, state-of-the-art models for mobile platforms. Finally, the learned features by {NASNet} used with the Faster-{RCNN} framework surpass state-of-the-art by 4.0\% achieving 43.1\% {mAP} on the {COCO} dataset.},
+  journaltitle = {{arXiv}:1707.07012 [cs, stat]},
+  author       = {Zoph, Barret and Vasudevan, Vijay and Shlens, Jonathon and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2018-04-11},
+  eprinttype   = {arxiv},
+  eprint       = {1707.07012},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/F7RHIUU6/Zoph et al. - 2018 - Learning Transferable Architectures for Scalable I.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/XCN6HAIK/1707.html:text/html}
+}
+
+@article{sandler_mobilenetv2_2019,
+  title        = {{MobileNetV}2: Inverted Residuals and Linear Bottlenecks},
+  url          = {http://arxiv.org/abs/1801.04381},
+  shorttitle   = {{MobileNetV}2},
+  abstract     = {In this paper we describe a new mobile architecture, {MobileNetV}2, that improves the state of the art performance of mobile models on multiple tasks and benchmarks as well as across a spectrum of different model sizes. We also describe efficient ways of applying these mobile models to object detection in a novel framework we call {SSDLite}. Additionally, we demonstrate how to build mobile semantic segmentation models through a reduced form of {DeepLabv}3 which we call Mobile {DeepLabv}3. The {MobileNetV}2 architecture is based on an inverted residual structure where the input and output of the residual block are thin bottleneck layers opposite to traditional residual models which use expanded representations in the input an {MobileNetV}2 uses lightweight depthwise convolutions to filter features in the intermediate expansion layer. Additionally, we find that it is important to remove non-linearities in the narrow layers in order to maintain representational power. We demonstrate that this improves performance and provide an intuition that led to this design. Finally, our approach allows decoupling of the input/output domains from the expressiveness of the transformation, which provides a convenient framework for further analysis. We measure our performance on Imagenet classification, {COCO} object detection, {VOC} image segmentation. We evaluate the trade-offs between accuracy, and number of operations measured by multiply-adds ({MAdd}), as well as the number of parameters},
+  journaltitle = {{arXiv}:1801.04381 [cs]},
+  author       = {Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh},
+  urldate      = {2021-12-09},
+  date         = {2019-03-21},
+  eprinttype   = {arxiv},
+  eprint       = {1801.04381},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/2XQ5AHX5/Sandler et al. - 2019 - MobileNetV2 Inverted Residuals and Linear Bottlen.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/CJLSQ6NG/1801.html:text/html}
+}
+
+@article{liu_pay_2021,
+  title        = {Pay Attention to {MLPs}},
+  url          = {http://arxiv.org/abs/2105.08050},
+  abstract     = {Transformers have become one of the most important architectural innovations in deep learning and have enabled many breakthroughs over the past few years. Here we propose a simple network architecture, {gMLP}, based on {MLPs} with gating, and show that it can perform as well as Transformers in key language and vision applications. Our comparisons show that self-attention is not critical for Vision Transformers, as {gMLP} can achieve the same accuracy. For {BERT}, our model achieves parity with Transformers on pretraining perplexity and is better on some downstream {NLP} tasks. On finetuning tasks where {gMLP} performs worse, making the {gMLP} model substantially larger can close the gap with Transformers. In general, our experiments show that {gMLP} can scale as well as Transformers over increased data and compute.},
+  journaltitle = {{arXiv}:2105.08050 [cs]},
+  author       = {Liu, Hanxiao and Dai, Zihang and So, David R. and Le, Quoc V.},
+  urldate      = {2021-12-09},
+  date         = {2021-06-01},
+  eprinttype   = {arxiv},
+  eprint       = {2105.08050},
+  keywords     = {Computer Science - Computation and Language, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/Q5UCHWYL/Liu et al. - 2021 - Pay Attention to MLPs.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/IRX38DSJ/2105.html:text/html}
+}
+
+@article{lin_neural_2020,
+  title        = {Neural Architecture Design for {GPU}-Efficient Networks},
+  url          = {http://arxiv.org/abs/2006.14090},
+  abstract     = {Many mission-critical systems are based on {GPU} for inference. It requires not only high recognition accuracy but also low latency in responding time. Although many studies are devoted to optimizing the structure of deep models for efficient inference, most of them do not leverage the architecture of {\textbackslash}textbf\{modern {GPU}\} for fast inference, leading to suboptimal performance. To address this issue, we propose a general principle for designing {GPU}-efficient networks based on extensive empirical studies. This design principle enables us to search for {GPU}-efficient network structures effectively by a simple and lightweight method as opposed to most Neural Architecture Search ({NAS}) methods that are complicated and computationally expensive. Based on the proposed framework, we design a family of {GPU}-Efficient Networks, or {GENets} in short. We did extensive evaluations on multiple {GPU} platforms and inference engines. While achieving \${\textbackslash}geq 81.3{\textbackslash}\%\$ top-1 accuracy on {ImageNet}, {GENet} is up to \$6.4\$ times faster than {EfficienNet} on {GPU}. It also outperforms most state-of-the-art models that are more efficient than {EfficientNet} in high precision regimes. Our source code and pre-trained models are available from {\textbackslash}url\{https://github.com/idstcv/{GPU}-Efficient-Networks\}.},
+  journaltitle = {{arXiv}:2006.14090 [cs]},
+  author       = {Lin, Ming and Chen, Hesen and Sun, Xiuyu and Qian, Qi and Li, Hao and Jin, Rong},
+  urldate      = {2021-12-09},
+  date         = {2020-08-11},
+  eprinttype   = {arxiv},
+  eprint       = {2006.14090},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/99MWHFF3/Lin et al. - 2020 - Neural Architecture Design for GPU-Efficient Netwo.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/MX8GQ3C7/2006.html:text/html}
+}
+
+@article{vaswani_scaling_2021,
+  title        = {Scaling Local Self-Attention for Parameter Efficient Visual Backbones},
+  url          = {http://arxiv.org/abs/2103.12731},
+  abstract     = {Self-attention has the promise of improving computer vision systems due to parameter-independent scaling of receptive fields and content-dependent interactions, in contrast to parameter-dependent scaling and content-independent interactions of convolutions. Self-attention models have recently been shown to have encouraging improvements on accuracy-parameter trade-offs compared to baseline convolutional models such as {ResNet}-50. In this work, we aim to develop self-attention models that can outperform not just the canonical baseline models, but even the high-performing convolutional models. We propose two extensions to self-attention that, in conjunction with a more efficient implementation of self-attention, improve the speed, memory usage, and accuracy of these models. We leverage these improvements to develop a new self-attention model family, {HaloNets}, which reach state-of-the-art accuracies on the parameter-limited setting of the {ImageNet} classification benchmark. In preliminary transfer learning experiments, we find that {HaloNet} models outperform much larger models and have better inference performance. On harder tasks such as object detection and instance segmentation, our simple local self-attention and convolutional hybrids show improvements over very strong baselines. These results mark another step in demonstrating the efficacy of self-attention models on settings traditionally dominated by convolutional models.},
+  journaltitle = {{arXiv}:2103.12731 [cs]},
+  author       = {Vaswani, Ashish and Ramachandran, Prajit and Srinivas, Aravind and Parmar, Niki and Hechtman, Blake and Shlens, Jonathon},
+  urldate      = {2021-12-09},
+  date         = {2021-06-07},
+  eprinttype   = {arxiv},
+  eprint       = {2103.12731},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/SPNFA3DS/Vaswani et al. - 2021 - Scaling Local Self-Attention for Parameter Efficie.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/FZ4WZ5V2/2103.html:text/html}
+}
+
+@article{nayman_hardcore-nas_2021,
+  title        = {{HardCoRe}-{NAS}: Hard Constrained {diffeRentiable} Neural Architecture Search},
+  url          = {http://arxiv.org/abs/2102.11646},
+  shorttitle   = {{HardCoRe}-{NAS}},
+  abstract     = {Realistic use of neural networks often requires adhering to multiple constraints on latency, energy and memory among others. A popular approach to find fitting networks is through constrained Neural Architecture Search ({NAS}), however, previous methods enforce the constraint only softly. Therefore, the resulting networks do not exactly adhere to the resource constraint and their accuracy is harmed. In this work we resolve this by introducing Hard Constrained {diffeRentiable} {NAS} ({HardCoRe}-{NAS}), that is based on an accurate formulation of the expected resource requirement and a scalable search method that satisfies the hard constraint throughout the search. Our experiments show that {HardCoRe}-{NAS} generates state-of-the-art architectures, surpassing other {NAS} methods, while strictly satisfying the hard resource constraints without any tuning required.},
+  journaltitle = {{arXiv}:2102.11646 [cs, math, stat]},
+  author       = {Nayman, Niv and Aflalo, Yonathan and Noy, Asaf and Zelnik-Manor, Lihi},
+  urldate      = {2021-12-09},
+  date         = {2021-02-23},
+  eprinttype   = {arxiv},
+  eprint       = {2102.11646},
+  keywords     = {68T09, 68T45, Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, G.1.6, G.3, I.2.10, I.2.8, I.5.1, Mathematics - Optimization and Control, Statistics - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/GK78LB59/Nayman et al. - 2021 - HardCoRe-NAS Hard Constrained diffeRentiable Neur.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/5Y7XP4R5/2102.html:text/html}
+}
+
+@article{wang_deep_2020,
+  title        = {Deep High-Resolution Representation Learning for Visual Recognition},
+  url          = {http://arxiv.org/abs/1908.07919},
+  abstract     = {High-resolution representations are essential for position-sensitive vision problems, such as human pose estimation, semantic segmentation, and object detection. Existing state-of-the-art frameworks first encode the input image as a low-resolution representation through a subnetwork that is formed by connecting high-to-low resolution convolutions {\textbackslash}emph\{in series\} (e.g., {ResNet}, {VGGNet}), and then recover the high-resolution representation from the encoded low-resolution representation. Instead, our proposed network, named as High-Resolution Network ({HRNet}), maintains high-resolution representations through the whole process. There are two key characteristics: (i) Connect the high-to-low resolution convolution streams {\textbackslash}emph\{in parallel\}; (ii) Repeatedly exchange the information across resolutions. The benefit is that the resulting representation is semantically richer and spatially more precise. We show the superiority of the proposed {HRNet} in a wide range of applications, including human pose estimation, semantic segmentation, and object detection, suggesting that the {HRNet} is a stronger backbone for computer vision problems. All the codes are available at{\textasciitilde}\{{\textbackslash}url\{https://github.com/{HRNet}\}\}.},
+  journaltitle = {{arXiv}:1908.07919 [cs]},
+  author       = {Wang, Jingdong and Sun, Ke and Cheng, Tianheng and Jiang, Borui and Deng, Chaorui and Zhao, Yang and Liu, Dong and Mu, Yadong and Tan, Mingkui and Wang, Xinggang and Liu, Wenyu and Xiao, Bin},
+  urldate      = {2021-12-09},
+  date         = {2020-03-13},
+  eprinttype   = {arxiv},
+  eprint       = {1908.07919},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/VNAXBWFZ/Wang et al. - 2020 - Deep High-Resolution Representation Learning for V.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/QLWW8XKX/1908.html:text/html}
+}
+
+@article{szegedy_inception-v4_2016,
+  title        = {Inception-v4, Inception-{ResNet} and the Impact of Residual Connections on Learning},
+  url          = {http://arxiv.org/abs/1602.07261},
+  abstract     = {Very deep convolutional networks have been central to the largest advances in image recognition performance in recent years. One example is the Inception architecture that has been shown to achieve very good performance at relatively low computational cost. Recently, the introduction of residual connections in conjunction with a more traditional architecture has yielded state-of-the-art performance in the 2015 {ILSVRC} challenge; its performance was similar to the latest generation Inception-v3 network. This raises the question of whether there are any benefit in combining the Inception architecture with residual connections. Here we give clear empirical evidence that training with residual connections accelerates the training of Inception networks significantly. There is also some evidence of residual Inception networks outperforming similarly expensive Inception networks without residual connections by a thin margin. We also present several new streamlined architectures for both residual and non-residual Inception networks. These variations improve the single-frame recognition performance on the {ILSVRC} 2012 classification task significantly. We further demonstrate how proper activation scaling stabilizes the training of very wide residual Inception networks. With an ensemble of three residual and one Inception-v4, we achieve 3.08 percent top-5 error on the test set of the {ImageNet} classification ({CLS}) challenge},
+  journaltitle = {{arXiv}:1602.07261 [cs]},
+  author       = {Szegedy, Christian and Ioffe, Sergey and Vanhoucke, Vincent and Alemi, Alex},
+  urldate      = {2021-12-09},
+  date         = {2016-08-23},
+  eprinttype   = {arxiv},
+  eprint       = {1602.07261},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/H2ZJ5XF5/Szegedy et al. - 2016 - Inception-v4, Inception-ResNet and the Impact of R.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/3X8W9WPE/1602.html:text/html}
+}
+
+@article{szegedy_rethinking_2015,
+  title        = {Rethinking the Inception Architecture for Computer Vision},
+  url          = {http://arxiv.org/abs/1512.00567},
+  abstract     = {Convolutional networks are at the core of most state-of-the-art computer vision solutions for a wide variety of tasks. Since 2014 very deep convolutional networks started to become mainstream, yielding substantial gains in various benchmarks. Although increased model size and computational cost tend to translate to immediate quality gains for most tasks (as long as enough labeled data is provided for training), computational efficiency and low parameter count are still enabling factors for various use cases such as mobile vision and big-data scenarios. Here we explore ways to scale up networks in ways that aim at utilizing the added computation as efficiently as possible by suitably factorized convolutions and aggressive regularization. We benchmark our methods on the {ILSVRC} 2012 classification challenge validation set demonstrate substantial gains over the state of the art: 21.2\% top-1 and 5.6\% top-5 error for single frame evaluation using a network with a computational cost of 5 billion multiply-adds per inference and with using less than 25 million parameters. With an ensemble of 4 models and multi-crop evaluation, we report 3.5\% top-5 error on the validation set (3.6\% error on the test set) and 17.3\% top-1 error on the validation set.},
+  journaltitle = {{arXiv}:1512.00567 [cs]},
+  author       = {Szegedy, Christian and Vanhoucke, Vincent and Ioffe, Sergey and Shlens, Jonathon and Wojna, Zbigniew},
+  urldate      = {2021-12-09},
+  date         = {2015-12-11},
+  eprinttype   = {arxiv},
+  eprint       = {1512.00567},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/W94NDVGC/Szegedy et al. - 2015 - Rethinking the Inception Architecture for Computer.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/958EV5RN/1512.html:text/html}
+}
+
+@article{tolstikhin_mlp-mixer_2021,
+  title        = {{MLP}-Mixer: An all-{MLP} Architecture for Vision},
+  url          = {http://arxiv.org/abs/2105.01601},
+  shorttitle   = {{MLP}-Mixer},
+  abstract     = {Convolutional Neural Networks ({CNNs}) are the go-to model for computer vision. Recently, attention-based networks, such as the Vision Transformer, have also become popular. In this paper we show that while convolutions and attention are both sufficient for good performance, neither of them are necessary. We present {MLP}-Mixer, an architecture based exclusively on multi-layer perceptrons ({MLPs}). {MLP}-Mixer contains two types of layers: one with {MLPs} applied independently to image patches (i.e. "mixing" the per-location features), and one with {MLPs} applied across patches (i.e. "mixing" spatial information). When trained on large datasets, or with modern regularization schemes, {MLP}-Mixer attains competitive scores on image classification benchmarks, with pre-training and inference cost comparable to state-of-the-art models. We hope that these results spark further research beyond the realms of well established {CNNs} and Transformers.},
+  journaltitle = {{arXiv}:2105.01601 [cs]},
+  author       = {Tolstikhin, Ilya and Houlsby, Neil and Kolesnikov, Alexander and Beyer, Lucas and Zhai, Xiaohua and Unterthiner, Thomas and Yung, Jessica and Steiner, Andreas and Keysers, Daniel and Uszkoreit, Jakob and Lucic, Mario and Dosovitskiy, Alexey},
+  urldate      = {2021-12-09},
+  date         = {2021-06-11},
+  eprinttype   = {arxiv},
+  eprint       = {2105.01601},
+  keywords     = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/39AJ5GUE/Tolstikhin et al. - 2021 - MLP-Mixer An all-MLP Architecture for Vision.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/L3G4JZ2K/2105.html:text/html}
+}
+
+@article{bello_lambdanetworks_2021,
+  title        = {{LambdaNetworks}: Modeling Long-Range Interactions Without Attention},
+  url          = {http://arxiv.org/abs/2102.08602},
+  shorttitle   = {{LambdaNetworks}},
+  abstract     = {We present lambda layers -- an alternative framework to self-attention -- for capturing long-range interactions between an input and structured contextual information (e.g. a pixel surrounded by other pixels). Lambda layers capture such interactions by transforming available contexts into linear functions, termed lambdas, and applying these linear functions to each input separately. Similar to linear attention, lambda layers bypass expensive attention maps, but in contrast, they model both content and position-based interactions which enables their application to large structured inputs such as images. The resulting neural network architectures, {LambdaNetworks}, significantly outperform their convolutional and attentional counterparts on {ImageNet} classification, {COCO} object detection and {COCO} instance segmentation, while being more computationally efficient. Additionally, we design {LambdaResNets}, a family of hybrid architectures across different scales, that considerably improves the speed-accuracy tradeoff of image classification models. {LambdaResNets} reach excellent accuracies on {ImageNet} while being 3.2 - 4.4x faster than the popular {EfficientNets} on modern machine learning accelerators. When training with an additional 130M pseudo-labeled images, {LambdaResNets} achieve up to a 9.5x speed-up over the corresponding {EfficientNet} checkpoints.},
+  journaltitle = {{arXiv}:2102.08602 [cs]},
+  author       = {Bello, Irwan},
+  urldate      = {2021-12-09},
+  date         = {2021-02-17},
+  eprinttype   = {arxiv},
+  eprint       = {2102.08602},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/IIQYAAN6/Bello - 2021 - LambdaNetworks Modeling Long-Range Interactions W.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/79KGLSGY/2102.html:text/html}
+}
+
+@article{graham_levit_2021,
+  title        = {{LeViT}: a Vision Transformer in {ConvNet}'s Clothing for Faster Inference},
+  url          = {http://arxiv.org/abs/2104.01136},
+  shorttitle   = {{LeViT}},
+  abstract     = {We design a family of image classification architectures that optimize the trade-off between accuracy and efficiency in a high-speed regime. Our work exploits recent findings in attention-based architectures, which are competitive on highly parallel processing hardware. We revisit principles from the extensive literature on convolutional neural networks to apply them to transformers, in particular activation maps with decreasing resolutions. We also introduce the attention bias, a new way to integrate positional information in vision transformers. As a result, we propose {LeVIT}: a hybrid neural network for fast inference image classification. We consider different measures of efficiency on different hardware platforms, so as to best reflect a wide range of application scenarios. Our extensive experiments empirically validate our technical choices and show they are suitable to most architectures. Overall, {LeViT} significantly outperforms existing convnets and vision transformers with respect to the speed/accuracy tradeoff. For example, at 80\% {ImageNet} top-1 accuracy, {LeViT} is 5 times faster than {EfficientNet} on {CPU}. We release the code at https://github.com/facebookresearch/{LeViT}},
+  journaltitle = {{arXiv}:2104.01136 [cs]},
+  author       = {Graham, Ben and El-Nouby, Alaaeldin and Touvron, Hugo and Stock, Pierre and Joulin, Armand and Jégou, Hervé and Douze, Matthijs},
+  urldate      = {2021-12-09},
+  date         = {2021-05-06},
+  eprinttype   = {arxiv},
+  eprint       = {2104.01136},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/XQU6IKHG/Graham et al. - 2021 - LeViT a Vision Transformer in ConvNet's Clothing .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/VPVYM4UD/2104.html:text/html}
+}
+
+@article{bello_revisiting_2021,
+  title        = {Revisiting {ResNets}: Improved Training and Scaling Strategies},
+  url          = {http://arxiv.org/abs/2103.07579},
+  shorttitle   = {Revisiting {ResNets}},
+  abstract     = {Novel computer vision architectures monopolize the spotlight, but the impact of the model architecture is often conflated with simultaneous changes to training methodology and scaling strategies. Our work revisits the canonical {ResNet} (He et al., 2015) and studies these three aspects in an effort to disentangle them. Perhaps surprisingly, we find that training and scaling strategies may matter more than architectural changes, and further, that the resulting {ResNets} match recent state-of-the-art models. We show that the best performing scaling strategy depends on the training regime and offer two new scaling strategies: (1) scale model depth in regimes where overfitting can occur (width scaling is preferable otherwise); (2) increase image resolution more slowly than previously recommended (Tan \& Le, 2019). Using improved training and scaling strategies, we design a family of {ResNet} architectures, {ResNet}-{RS}, which are 1.7x - 2.7x faster than {EfficientNets} on {TPUs}, while achieving similar accuracies on {ImageNet}. In a large-scale semi-supervised learning setup, {ResNet}-{RS} achieves 86.2\% top-1 {ImageNet} accuracy, while being 4.7x faster than {EfficientNet} {NoisyStudent}. The training techniques improve transfer performance on a suite of downstream tasks (rivaling state-of-the-art self-supervised algorithms) and extend to video classification on Kinetics-400. We recommend practitioners use these simple revised {ResNets} as baselines for future research.},
+  journaltitle = {{arXiv}:2103.07579 [cs]},
+  author       = {Bello, Irwan and Fedus, William and Du, Xianzhi and Cubuk, Ekin D. and Srinivas, Aravind and Lin, Tsung-Yi and Shlens, Jonathon and Zoph, Barret},
+  urldate      = {2021-12-09},
+  date         = {2021-03-12},
+  eprinttype   = {arxiv},
+  eprint       = {2103.07579},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/TJ8IX3BF/Bello et al. - 2021 - Revisiting ResNets Improved Training and Scaling .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/J8IWPHBG/2103.html:text/html}
+}
+
+@article{hu_squeeze-and-excitation_2019,
+  title        = {Squeeze-and-Excitation Networks},
+  url          = {http://arxiv.org/abs/1709.01507},
+  abstract     = {The central building block of convolutional neural networks ({CNNs}) is the convolution operator, which enables networks to construct informative features by fusing both spatial and channel-wise information within local receptive fields at each layer. A broad range of prior research has investigated the spatial component of this relationship, seeking to strengthen the representational power of a {CNN} by enhancing the quality of spatial encodings throughout its feature hierarchy. In this work, we focus instead on the channel relationship and propose a novel architectural unit, which we term the "Squeeze-and-Excitation" ({SE}) block, that adaptively recalibrates channel-wise feature responses by explicitly modelling interdependencies between channels. We show that these blocks can be stacked together to form {SENet} architectures that generalise extremely effectively across different datasets. We further demonstrate that {SE} blocks bring significant improvements in performance for existing state-of-the-art {CNNs} at slight additional computational cost. Squeeze-and-Excitation Networks formed the foundation of our {ILSVRC} 2017 classification submission which won first place and reduced the top-5 error to 2.251\%, surpassing the winning entry of 2016 by a relative improvement of {\textasciitilde}25\%. Models and code are available at https://github.com/hujie-frank/{SENet}.},
+  journaltitle = {{arXiv}:1709.01507 [cs]},
+  author       = {Hu, Jie and Shen, Li and Albanie, Samuel and Sun, Gang and Wu, Enhua},
+  urldate      = {2021-12-09},
+  date         = {2019-05-16},
+  eprinttype   = {arxiv},
+  eprint       = {1709.01507},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/IKTFPZ3S/Hu et al. - 2019 - Squeeze-and-Excitation Networks.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/75VCIIJS/1709.html:text/html}
+}
+
+@article{zhang_resnest_2020,
+  title        = {{ResNeSt}: Split-Attention Networks},
+  url          = {http://arxiv.org/abs/2004.08955},
+  shorttitle   = {{ResNeSt}},
+  abstract     = {It is well known that featuremap attention and multi-path representation are important for visual recognition. In this paper, we present a modularized architecture, which applies the channel-wise attention on different network branches to leverage their success in capturing cross-feature interactions and learning diverse representations. Our design results in a simple and unified computation block, which can be parameterized using only a few variables. Our model, named {ResNeSt}, outperforms {EfficientNet} in accuracy and latency trade-off on image classification. In addition, {ResNeSt} has achieved superior transfer learning results on several public benchmarks serving as the backbone, and has been adopted by the winning entries of {COCO}-{LVIS} challenge. The source code for complete system and pretrained models are publicly available.},
+  journaltitle = {{arXiv}:2004.08955 [cs]},
+  author       = {Zhang, Hang and Wu, Chongruo and Zhang, Zhongyue and Zhu, Yi and Lin, Haibin and Zhang, Zhi and Sun, Yue and He, Tong and Mueller, Jonas and Manmatha, R. and Li, Mu and Smola, Alexander},
+  urldate      = {2021-12-09},
+  date         = {2020-12-30},
+  eprinttype   = {arxiv},
+  eprint       = {2004.08955},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/LV729ZIT/Zhang et al. - 2020 - ResNeSt Split-Attention Networks.pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/BYMMNZ7I/2004.html:text/html}
+}
+
+@article{han_rethinking_2021,
+  title        = {Rethinking Channel Dimensions for Efficient Model Design},
+  url          = {http://arxiv.org/abs/2007.00992},
+  abstract     = {Designing an efficient model within the limited computational cost is challenging. We argue the accuracy of a lightweight model has been further limited by the design convention: a stage-wise configuration of the channel dimensions, which looks like a piecewise linear function of the network stage. In this paper, we study an effective channel dimension configuration towards better performance than the convention. To this end, we empirically study how to design a single layer properly by analyzing the rank of the output feature. We then investigate the channel configuration of a model by searching network architectures concerning the channel configuration under the computational cost restriction. Based on the investigation, we propose a simple yet effective channel configuration that can be parameterized by the layer index. As a result, our proposed model following the channel parameterization achieves remarkable performance on {ImageNet} classification and transfer learning tasks including {COCO} object detection, {COCO} instance segmentation, and fine-grained classifications. Code and {ImageNet} pretrained models are available at https://github.com/clovaai/rexnet.},
+  journaltitle = {{arXiv}:2007.00992 [cs]},
+  author       = {Han, Dongyoon and Yun, Sangdoo and Heo, Byeongho and Yoo, {YoungJoon}},
+  urldate      = {2021-12-09},
+  date         = {2021-06-08},
+  eprinttype   = {arxiv},
+  eprint       = {2007.00992},
+  keywords     = {Computer Science - Computer Vision and Pattern Recognition},
+  file         = {arXiv Fulltext PDF:/home/sultan/Zotero/storage/7GKRPFRJ/Han et al. - 2021 - Rethinking Channel Dimensions for Efficient Model .pdf:application/pdf;arXiv.org Snapshot:/home/sultan/Zotero/storage/T5J6K8IG/2007.html:text/html}
+}
+
+@misc{google_ai_blog_2019,
+  title   = {EfficientNet-EdgeTPU: Creating Accelerator-Optimized Neural Networks with AutoML},
+  url     = {https://ai.googleblog.com/2019/08/efficientnet-edgetpu-creating.html},
+  journal = {Google AI Blog},
+  year    = {2019},
+  month   = {Aug}
+}
+
+@article{Lecun1998,
+  doi       = {10.1109/5.726791},
+  url       = {https://doi.org/10.1109/5.726791},
+  year      = {1998},
+  publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},
+  volume    = {86},
+  number    = {11},
+  pages     = {2278--2324},
+  author    = {Y. Lecun and L. Bottou and Y. Bengio and P. Haffner},
+  title     = {Gradient-based learning applied to document recognition},
+  journal   = {Proceedings of the {IEEE}}
+}
+
+@inproceedings{NIPS2012_c399862d,
+  author    = {Krizhevsky, Alex and Sutskever, Ilya and Hinton, Geoffrey E},
+  booktitle = {Advances in Neural Information Processing Systems},
+  editor    = {F. Pereira and C. J. C. Burges and L. Bottou and K. Q. Weinberger},
+  pages     = {},
+  publisher = {Curran Associates, Inc.},
+  title     = {ImageNet Classification with Deep Convolutional Neural Networks},
+  url       = {https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf},
+  volume    = {25},
+  year      = {2012}
+}
+
+@article{DBLP:journals/corr/IandolaMAHDK16,
+  author     = {Forrest N. Iandola and
+                Matthew W. Moskewicz and
+                Khalid Ashraf and
+                Song Han and
+                William J. Dally and
+                Kurt Keutzer},
+  title      = {SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and {\textless}1MB
+                model size},
+  journal    = {CoRR},
+  volume     = {abs/1602.07360},
+  year       = {2016},
+  url        = {http://arxiv.org/abs/1602.07360},
+  eprinttype = {arXiv},
+  eprint     = {1602.07360},
+  timestamp  = {Fri, 20 Nov 2020 16:16:06 +0100},
+  biburl     = {https://dblp.org/rec/journals/corr/IandolaMAHDK16.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/ZhangZLS17,
+  author     = {Xiangyu Zhang and
+                Xinyu Zhou and
+                Mengxiao Lin and
+                Jian Sun},
+  title      = {ShuffleNet: An Extremely Efficient Convolutional Neural Network for
+                Mobile Devices},
+  journal    = {CoRR},
+  volume     = {abs/1707.01083},
+  year       = {2017},
+  url        = {http://arxiv.org/abs/1707.01083},
+  eprinttype = {arXiv},
+  eprint     = {1707.01083},
+  timestamp  = {Tue, 31 Aug 2021 13:57:12 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/ZhangZLS17.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/abs-2103-17239,
+  author     = {Hugo Touvron and
+                Matthieu Cord and
+                Alexandre Sablayrolles and
+                Gabriel Synnaeve and
+                Herv{\'{e}} J{\'{e}}gou},
+  title      = {Going deeper with Image Transformers},
+  journal    = {CoRR},
+  volume     = {abs/2103.17239},
+  year       = {2021},
+  url        = {https://arxiv.org/abs/2103.17239},
+  eprinttype = {arXiv},
+  eprint     = {2103.17239},
+  timestamp  = {Wed, 07 Apr 2021 15:31:46 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-2103-17239.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/HuangLW16a,
+  author     = {Gao Huang and
+                Zhuang Liu and
+                Kilian Q. Weinberger},
+  title      = {Densely Connected Convolutional Networks},
+  journal    = {CoRR},
+  volume     = {abs/1608.06993},
+  year       = {2016},
+  url        = {http://arxiv.org/abs/1608.06993},
+  eprinttype = {arXiv},
+  eprint     = {1608.06993},
+  timestamp  = {Mon, 10 Sep 2018 15:49:32 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/HuangLW16a.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/LiuAESR15,
+  author     = {Wei Liu and
+                Dragomir Anguelov and
+                Dumitru Erhan and
+                Christian Szegedy and
+                Scott E. Reed and
+                Cheng{-}Yang Fu and
+                Alexander C. Berg},
+  title      = {{SSD:} Single Shot MultiBox Detector},
+  journal    = {CoRR},
+  volume     = {abs/1512.02325},
+  year       = {2015},
+  url        = {http://arxiv.org/abs/1512.02325},
+  eprinttype = {arXiv},
+  eprint     = {1512.02325},
+  timestamp  = {Wed, 12 Feb 2020 08:32:49 +0100},
+  biburl     = {https://dblp.org/rec/journals/corr/LiuAESR15.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{DBLP:journals/corr/abs-2108-11539,
+  author     = {Xingkui Zhu and
+                Shuchang Lyu and
+                Xu Wang and
+                Qi Zhao},
+  title      = {TPH-YOLOv5: Improved YOLOv5 Based on Transformer Prediction Head for
+                Object Detection on Drone-captured Scenarios},
+  journal    = {CoRR},
+  volume     = {abs/2108.11539},
+  year       = {2021},
+  url        = {https://arxiv.org/abs/2108.11539},
+  eprinttype = {arXiv},
+  eprint     = {2108.11539},
+  timestamp  = {Fri, 27 Aug 2021 15:02:29 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-2108-11539.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{dnn_df_overrated,
+  author     = {Xuan Yang and
+                Mingyu Gao and
+                Jing Pu and
+                Ankita Nayak and
+                Qiaoyi Liu and
+                Steven Bell and
+                Jeff Setter and
+                Kaidi Cao and
+                Heonjae Ha and
+                Christos Kozyrakis and
+                Mark Horowitz},
+  title      = {{DNN} Dataflow Choice Is Overrated},
+  journal    = {CoRR},
+  volume     = {abs/1809.04070},
+  year       = {2018},
+  url        = {http://arxiv.org/abs/1809.04070},
+  eprinttype = {arXiv},
+  eprint     = {1809.04070},
+  timestamp  = {Thu, 20 Aug 2020 17:55:14 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-1809-04070.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{cafe_con_troll,
+  author     = {Firas Abuzaid and
+                Stefan Hadjis and
+                Ce Zhang and
+                Christopher R{\'{e}}},
+  title      = {Caffe con Troll: Shallow Ideas to Speed Up Deep Learning},
+  journal    = {CoRR},
+  volume     = {abs/1504.04343},
+  year       = {2015},
+  url        = {http://arxiv.org/abs/1504.04343},
+  eprinttype = {arXiv},
+  eprint     = {1504.04343},
+  timestamp  = {Tue, 12 Jan 2021 16:18:01 +0100},
+  biburl     = {https://dblp.org/rec/journals/corr/AbuzaidHZR15.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@inproceedings{cong_sys_array,
+  author    = {Xuechao Wei and Cody Hao Yu and Peng Zhang and Youxiang Chen and Yuxin Wang and Han Hu and Yun Liang and Cong, Jason},
+  booktitle = {2017 54th ACM/EDAC/IEEE Design Automation Conference (DAC)},
+  title     = {Automated systolic array architecture synthesis for high throughput CNN inference on FPGAs},
+  year      = {2017},
+  volume    = {},
+  number    = {},
+  pages     = {1-6},
+  doi       = {10.1145/3061639.3062207}
+}
+
+
+  @article{maestro,
+  author     = {Hyoukjun Kwon and
+                Michael Pellauer and
+                Tushar Krishna},
+  title      = {{MAESTRO:} An Open-source Infrastructure for Modeling Dataflows within
+                Deep Learning Accelerators},
+  journal    = {CoRR},
+  volume     = {abs/1805.02566},
+  year       = {2018},
+  url        = {http://arxiv.org/abs/1805.02566},
+  eprinttype = {arXiv},
+  eprint     = {1805.02566},
+  timestamp  = {Mon, 13 Aug 2018 16:46:45 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-1805-02566.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{meeus,
+  author  = {Meeus, Wim and Stroobandt, Dirk},
+  journal = {IEEE Transactions on Very Large Scale Integration (VLSI) Systems},
+  title   = {Data Reuse Buffer Synthesis Using the Polyhedral Model},
+  year    = {2018},
+  volume  = {26},
+  number  = {7},
+  pages   = {1340-1353},
+  doi     = {10.1109/TVLSI.2018.2817159}
+}
+
+
+  @article{dnn_df_overrated_v1,
+  author     = {Xuan Yang and
+                Mingyu Gao and
+                Jing Pu and
+                Ankita Nayak and
+                Qiaoyi Liu and
+                Steven Bell and
+                Jeff Setter and
+                Kaidi Cao and
+                Heonjae Ha and
+                Christos Kozyrakis and
+                Mark Horowitz},
+  title      = {{DNN} Dataflow Choice Is Overrated},
+  journal    = {CoRR},
+  volume     = {abs/1809.04070},
+  year       = {2018},
+  url        = {http://arxiv.org/abs/1809.04070},
+  eprinttype = {arXiv},
+  eprint     = {1809.04070},
+  timestamp  = {Thu, 20 Aug 2020 17:55:14 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-1809-04070.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{dnn_is_sota_image,
+  title         = {Very Deep Convolutional Networks for Large-Scale Image Recognition},
+  author        = {Karen Simonyan and Andrew Zisserman},
+  year          = {2015},
+  eprint        = {1409.1556},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CV}
+}
+
+@article{dnn_is_sota_speech,
+  author     = {Dario Amodei and
+                Rishita Anubhai and
+                Eric Battenberg and
+                Carl Case and
+                Jared Casper and
+                Bryan Catanzaro and
+                Jingdong Chen and
+                Mike Chrzanowski and
+                Adam Coates and
+                Greg Diamos and
+                Erich Elsen and
+                Jesse H. Engel and
+                Linxi Fan and
+                Christopher Fougner and
+                Tony Han and
+                Awni Y. Hannun and
+                Billy Jun and
+                Patrick LeGresley and
+                Libby Lin and
+                Sharan Narang and
+                Andrew Y. Ng and
+                Sherjil Ozair and
+                Ryan Prenger and
+                Jonathan Raiman and
+                Sanjeev Satheesh and
+                David Seetapun and
+                Shubho Sengupta and
+                Yi Wang and
+                Zhiqian Wang and
+                Chong Wang and
+                Bo Xiao and
+                Dani Yogatama and
+                Jun Zhan and
+                Zhenyao Zhu},
+  title      = {Deep Speech 2: End-to-End Speech Recognition in English and Mandarin},
+  journal    = {CoRR},
+  volume     = {abs/1512.02595},
+  year       = {2015},
+  url        = {http://arxiv.org/abs/1512.02595},
+  eprinttype = {arXiv},
+  eprint     = {1512.02595},
+  timestamp  = {Mon, 22 Jul 2019 13:51:23 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/AmodeiABCCCCCCD15.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{dnn_is_sota_seq2seq,
+  author     = {Yonghui Wu and
+                Mike Schuster and
+                Zhifeng Chen and
+                Quoc V. Le and
+                Mohammad Norouzi and
+                Wolfgang Macherey and
+                Maxim Krikun and
+                Yuan Cao and
+                Qin Gao and
+                Klaus Macherey and
+                Jeff Klingner and
+                Apurva Shah and
+                Melvin Johnson and
+                Xiaobing Liu and
+                Lukasz Kaiser and
+                Stephan Gouws and
+                Yoshikiyo Kato and
+                Taku Kudo and
+                Hideto Kazawa and
+                Keith Stevens and
+                George Kurian and
+                Nishant Patil and
+                Wei Wang and
+                Cliff Young and
+                Jason Smith and
+                Jason Riesa and
+                Alex Rudnick and
+                Oriol Vinyals and
+                Greg Corrado and
+                Macduff Hughes and
+                Jeffrey Dean},
+  title      = {Google's Neural Machine Translation System: Bridging the Gap between
+                Human and Machine Translation},
+  journal    = {CoRR},
+  volume     = {abs/1609.08144},
+  year       = {2016},
+  url        = {http://arxiv.org/abs/1609.08144},
+  eprinttype = {arXiv},
+  eprint     = {1609.08144},
+  timestamp  = {Thu, 14 Jan 2021 12:12:19 +0100},
+  biburl     = {https://dblp.org/rec/journals/corr/WuSCLNMKCGMKSJL16.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+
+@inproceedings{isscc_2016_chen_eyeriss,
+  author    = {{Chen, Yu-Hsin and Krishna, Tushar and Emer, Joel and Sze, Vivienne}},
+  title     = {{Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks}},
+  booktitle = {{IEEE International Solid-State Circuits Conference, ISSCC 2016, Digest of Technical Papers}},
+  year      = {{2016}},
+  pages     = {{262-263}}
+}
+
+@article{caffeine,
+  author  = {Zhang, Chen and Sun, Guangyu and Fang, Zhenman and Zhou, Peipei and Pan, Peichen and Cong, Jason},
+  journal = {IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+  title   = {Caffeine: Toward Uniformed Representation and Acceleration for Deep Convolutional Neural Networks},
+  year    = {2019},
+  volume  = {38},
+  number  = {11},
+  pages   = {2072-2085},
+  doi     = {10.1109/TCAD.2017.2785257}
+}
+
+@article{conv_and_transformers,
+  author     = {Nicolas Carion and
+                Francisco Massa and
+                Gabriel Synnaeve and
+                Nicolas Usunier and
+                Alexander Kirillov and
+                Sergey Zagoruyko},
+  title      = {End-to-End Object Detection with Transformers},
+  journal    = {CoRR},
+  volume     = {abs/2005.12872},
+  year       = {2020},
+  url        = {https://arxiv.org/abs/2005.12872},
+  eprinttype = {arXiv},
+  eprint     = {2005.12872},
+  timestamp  = {Thu, 28 May 2020 17:38:09 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/abs-2005-12872.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{area_model,
+  author     = {Dally, William J. and Turakhia, Yatish and Han, Song},
+  title      = {Domain-Specific Hardware Accelerators},
+  year       = {2020},
+  issue_date = {July 2020},
+  publisher  = {Association for Computing Machinery},
+  address    = {New York, NY, USA},
+  volume     = {63},
+  number     = {7},
+  issn       = {0001-0782},
+  url        = {https://doi.org/10.1145/3361682},
+  doi        = {10.1145/3361682},
+  abstract   = {DSAs gain efficiency from specialization and performance from parallelism.},
+  journal    = {Commun. ACM},
+  month      = {jun},
+  pages      = {48–57},
+  numpages   = {10}
+}
+
+@incollection{pytorch,
+  title     = {PyTorch: An Imperative Style, High-Performance Deep Learning Library},
+  author    = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+  booktitle = {Advances in Neural Information Processing Systems 32},
+  editor    = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesingle Alch\'{e}-Buc and E. Fox and R. Garnett},
+  pages     = {8024--8035},
+  year      = {2019},
+  publisher = {Curran Associates, Inc.},
+  url       = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf}
+}
+
+@misc{timm,
+  author       = {Ross Wightman},
+  title        = {PyTorch Image Models},
+  year         = {2019},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  doi          = {10.5281/zenodo.4414861},
+  howpublished = {\url{https://github.com/rwightman/pytorch-image-models}}
+}
+
+@article{resnet,
+  author     = {Kaiming He and
+                Xiangyu Zhang and
+                Shaoqing Ren and
+                Jian Sun},
+  title      = {Deep Residual Learning for Image Recognition},
+  journal    = {CoRR},
+  volume     = {abs/1512.03385},
+  year       = {2015},
+  url        = {http://arxiv.org/abs/1512.03385},
+  eprinttype = {arXiv},
+  eprint     = {1512.03385},
+  timestamp  = {Wed, 17 Apr 2019 17:23:45 +0200},
+  biburl     = {https://dblp.org/rec/journals/corr/HeZRS15.bib},
+  bibsource  = {dblp computer science bibliography, https://dblp.org}
+}
+
+@book{2d_dma_book,
+  place     = {Burlington},
+  title     = {Embedded Media Processing},
+  publisher = {Newnes (Elsevier)},
+  author    = {Katz, David and Gentile, Rick},
+  year      = {2006}
+} 
+
+@article{infamous_stanford,
+  author    = {Qiaoyi Liu and
+               Dillon Huff and
+               Jeff Setter and
+               Maxwell Strange and
+               Kathleen Feng and
+               Kavya Sreedhar and
+               Ziheng Wang and
+               Keyi Zhang and
+               Mark Horowitz and
+               Priyanka Raina and
+               Fredrik Kjolstad},
+  title     = {Compiling Halide Programs to Push-Memory Accelerators},
+  journal   = {CoRR},
+  volume    = {abs/2105.12858},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2105.12858},
+  eprinttype = {arXiv},
+  eprint    = {2105.12858},
+  timestamp = {Tue, 01 Jun 2021 18:07:59 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2105-12858.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}

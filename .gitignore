@@ -1,0 +1,15 @@
+.vscode/
+thesis.aux
+thesis.bbl
+thesis.blg
+thesis.fdb_latexmk
+thesis.fls
+thesis.idx
+thesis.ilg
+thesis.ind
+thesis.lof
+thesis.log
+thesis.lot
+thesis.out
+thesis.synctex.gz
+thesis.toc

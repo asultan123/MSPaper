@@ -1,0 +1,88 @@
+\chapter{Conclusion}
+\label{chap:conclude}
+
+Writing a long manuscript is easy ... only if one starts early enough. 
+
+
+% \begin{gather}
+% IFmap \in R^{C \times n\times n} \\
+% OFmap \in  R^{F \times m\times m} \\
+% Weight \in R^{ C \times F \times K\times K}
+
+% \\
+
+% K_{unroll} = \begin{cases} K & K \in \{SupportedKernels\}\\1 &K \notin \{SupportedKernels\}\end{cases}
+
+
+% \\
+% C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Verticle\end{cases}
+
+% \\
+
+
+% F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Verticle\\ F_{unroll} & K_{axis} = Horizontal\end{cases}
+
+
+% \\
+
+% \hat{C} = \begin{cases} C &  K \in \{SupportedKernels\}\\ CK & K \notin \{SupportedKernels\}\end{cases}
+
+% \\
+
+
+% \hat{F} = \begin{cases} F &  K \in \{SupportedKernels\}\\ FK & K \notin \{SupportedKernels\}\end{cases}
+
+
+
+% \\
+
+
+% \hat{Z} = \begin{cases} m^2 &  K \in \{SupportedKernels\}\\ nm & K \notin \{SupportedKernels\}\end{cases}
+
+
+% \\
+% Count_{pe} = F_{unroll}C_{unroll}
+
+% \\
+
+% Count_{Tiles} = \lceil \frac{\hat{F}}{F_{unroll}} \rceil \lceil \frac{\hat{C}}{C_{unroll}} \rceil
+
+
+% \\
+
+% utilization^{UnPadded}_{Tile} = \frac{ C_{eff} F_{eff}K_{unroll}^2}{Count_{pe}}.\lfloor \frac{\hat{F}}{F_{eff}} \rfloor \lfloor \frac{\hat{C}}{C_{eff}}\rfloor
+
+
+% \\
+
+% utilization^{Padded}_{ChannelTiles} = \begin{cases} \frac{(\hat{C} \bmod C_{eff}) F_{eff} K_{unroll}^2}{Count_{pe}}.\lfloor \frac{\hat{F}}{F_{eff}} \rfloor
+%  & \hat{C} \bmod C_{eff} > 0 \\ 1
+%  & \hat{C} \bmod C_{eff} = 0 \end{cases}
+
+% \\
+
+% utilization^{Padded}_{FilterTiles} = \begin{cases} \frac{ C_{eff} (\hat{F} \bmod F_{eff}) K_{unroll}^2}{Count_{pe}}.\lfloor \frac{\hat{C}}{C_{eff}} \rfloor
+%  & \hat{F} \bmod F_{eff} > 0 \\ 1
+%  & \hat{F} \bmod F_{eff} = 0 \end{cases}
+
+% \\
+
+% utilization^{Padded}_{ChannelAndFilterTile} = \begin{cases} \frac{(\hat{C} \bmod C_{eff}) (\hat{F} \bmod F_{eff}) K_{unroll}^2}{Count_{pe}} & \hat{F} \bmod F_{eff} > 0 \land \hat{C} \bmod C_{eff} > 0 \\ 1 & else\end{cases}
+
+% \\
+
+% utilization^{Padded}_{Tile(s)} = utilization^{Padded}_{ChannelTiles} + utilization^{Padded}_{FilterTiles} + utilization^{Padded}_{ChannelAndFilterTiles}
+
+% \\
+% LayerUtilization = \frac{utilization^{UnPadded}_{Tiles} + utilization^{Padded}_{Tile(s)}}{Count_{Tiles}}
+
+% \\
+
+% \operatorname*{argmax}_{F_{unroll}, C_{unroll}, K_{axis}} avg(\{avg(\{LayerUtilization(l).Latency(l)\space|\space l \in m_{layers}\})\space |\space m \in \{ModelLibrary\}\})
+
+% \\
+% \text{subject to}
+% \\
+% PeBudget_{lower} <= Count_{pe} <= PeBudget_{upper}
+
+% \end{gather}
