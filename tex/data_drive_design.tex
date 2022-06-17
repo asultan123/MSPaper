@@ -1,4 +1,4 @@
-\chapter{Data-Aware Accelerator Dataflow Design Space Exploration}
+\chapter{Data-Aware Accelerator Design}
 \label{chap:dataflow_dse:intro}
 
 As discussed in \autoref{chap:background:intro}, any convolution accelerator can
@@ -8,7 +8,7 @@ explorable through the nested loop structure that makes up a convolution
 layer introduced in \autoref{chap:background:intro}.
 The design space dimensions of dataflows is comprised of:
 \begin{itemize}
-    \item Loop ordering of the nested loops structure
+    % \item Loop ordering of the nested loops structure
     \item Loop unroll targets (which loops are unrolled and which are not) 
     \item Loop unroll factors for the loop unroll targets
     \item Mapping of loops to an accelerators spatial axis of which there are 2
@@ -45,8 +45,8 @@ the effective channel unroll factor would be 36 instead of 4 in the original
 configuration.
 
 In this chapter we will first prune the dataflow design space dimensions in
-\autoref{chap:dataflow_dse:pruning} by determining the apprioriate loop ordering
-and loop unroll targets and loop unroll factors using insights acquired from
+\autoref{chap:dataflow_dse:pruning} by determining the apprioriate
+loop unroll targets and loop unroll factors using insights acquired from
 \ac{CIGAR} a convolutional network analysis tool discussed in
 \autoref{chap:dataflow_dse:pruning:cigar}. Then, given the complexity of
 exploring loop unroll factors and loop axis mapping, an automated accelerator
@@ -89,9 +89,10 @@ An illustration of this process is given in \autoref{fig:cigar_extraction}.
 After all forward hooks are attached to the model, a forward pass of the model
 is performed. Model layer statistics are added to the $model^{stats}_{dict}$ and
 the collector's internal layer statistics tracker is reset. The layer statistics
-collected are 1) the kernel sizes 2) strides 3) any additional padding 4)
-input/output tensor dimensionalities 5) the number of convolution groups. After
-processing all of the models in $model_{dict}$, a $model^{stats}_{dict}$ is
+collected for convolution layers are 1) the kernel sizes 2) strides 3) any additional padding
+4) the number of convolution groups 5) kernel dilation. For linear layers the input and output feature sizes are collected.
+For both layer types, input feature map dimensions are collected. 
+After processing all of the models in $model_{dict}$, a $model^{stats}_{dict}$ is
 returned for further analysis used to derive the necessary library insights for
 pruning the dataflow design space. An illustration of that process is available
 in \autoref{fig:cigar_flow}. New layers can be analysed by CIGAR provided that the
@@ -116,7 +117,7 @@ function to the newly supported layer.
     \Function{Attach\_Collection\_Hooks}{$model, collector$}
         \State $hooks \gets []$
         \For{$layer \in model.named\_modules()$}
-            \If{$type(layer)$ is $conv2d$} 
+            \If{$type(layer)$ is $conv2d$ or $type(layer)$ is $linear$} 
                 \State $hooks.push(layer.register\_forward\_hook(collector.layer\_collector))$
             \EndIf 
         \EndFor
@@ -150,22 +151,20 @@ of the model sizes vs number of MAC diversity is presented in
 it is clear that a wide range of models were selected as part of the CIGAR
 library explored. The library includes smaller models like squeezenet and
 mobilenetv2 as well as larger models like VGG16 \cite{dnn_is_sota_image}.
-Additionally, in addition to image recognition networks, the library includes
-object detection networks like yolov5 \cite{DBLP:journals/corr/abs-2108-11539}.
 In terms of layer diversity the library includes conventional networks with both
 convolution layers and linear layers as well as newer more exotic networks that
 combine tranformer self attention layers with convolution layers like CoAtNet
 \cite{xu_co-scale_2021}. An illustration of that layer type diversity is
-reflected in figure \autoref{fig:cigar_library_overview}.b. A total of 63 base networks where explored, of which there
-are 419 variants. The full list of networks explored is available in the
+reflected in figure \autoref{fig:cigar_library_overview}.b. A total of 695 networks where explored.
+The full list of networks explored is available in the
 appendix of this thesis. All models explored by CIGAR were implemented in
 pytorch and provided by either torchhub in \cite{pytorch} or the PyTorch Image
 Models (timm) package in \cite{timm}.  
 
 \begin{figure}
     \centering
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/CIGAR_Library_Overview.pdf}}
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/layer_types_freq.pdf}}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/overview/macs_vs_size.pdf}}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/overview/layer_types.pdf}}
     \caption{Illustration of CIGAR's library diversity based on (a) Model sizes and number of MACS (b) Model layer types}
     \label{fig:cigar_library_overview}
 \end{figure}
@@ -178,34 +177,61 @@ Models (timm) package in \cite{timm}.
 \subsubsection{Loop Unroll Targets}
 \label{chap:dataflow_dse:pruning:applying_it:loop_unroll_targets}
 
+The choice of loop unroll targets affects the stationarity of the data elements
+in the convolution operation. For example, assuming a convolution layer with a
+kernel size of (2, 2), if we unroll the F, C, KY, KX loops by a factor of 2,
+weight element batches of size 16 will be loaded on to the chip in order to
+compute the output feature map. These weight will remain stationary until all
+input featuremap elements are loaded and consumed to evaluate the relevant
+partial sums associated with the filter weights loaded. In this scenario, the
+stationarity of the weight elements exceeds that of the input featuremap and
+output featuremap elmements.   
+We can determine determine what loop targets should be unrolled based on the
+stationarity of each date type present in the convolution operation. A data
+element that exhibits a high degree of stationarity should remain on chip for as
+long as possible in order to minimize excessive reloads from off chip memory. We
+can use the number of MAC operations a data element participates in as a
+surrogate for stationarity. A data elements element reused accross many MAC operations
+should be kept on chip for as long as possible to avoid excessive reloading of
+that element from of-chip dram. Using CIGAR we can analyse data element reuse
+behavior in all models of the TIMM library for the three data elements present in the convolution operation, input
+feature maps elements (ifmaps), output feature map elements (ofmaps), and weight
+elements. The results from this analysis are present in
+\autoref{fig:reuse_behavior}. 
+
 \begin{figure}
     \centering
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/WeightVsFmap_hist_no_lowering.pdf}}
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/fmap_size_trends_no_lowering.pdf}}
-    \caption{Exploration of Feature map vs Weights sizing statistics a) in entire CIGAR library b) as trends within networks}
-    \label{fig:fmap_vs_weight_hist}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/reuse/reuse_box.pdf}}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/reuse/reuse_trends.pdf}}
+    \caption{Exploration of data element reuse behavior in convolution layers of models from the TIMM library, a) shows overall reuse behavior as a boxplot b) shows reuse behavior trends within models with multiple convolution layers}
+    \label{fig:reuse_behavior}
 \end{figure}
 
 
-
-After running CIGAR on the model library referenced in
-\autoref{chap:dataflow_dse:pruning:cigar:algo} the aggregate library statistics
-show that there exists a discrepancy in layer feature map sizing vs layer weight
-sizing as seen in \autoref{fig:fmap_vs_weight_hist}. While both data types share
-similair median sizes at ~$2^{17}$ (assuming 8 bit precision for both), for 95\%
-of layers, IFmap sizes fell below $2^{19.11}$ bytes, but for 95\% of layers
-weights, weight sizes falls below $2^{22.17}$ bytes. This descripency in sizing
-suggests that a weight stationary dataflow involving the loop unroll targets F,
-C, KY, and KX might be appropriate given that it maximizes on-chip reuse of
-weights and minimizes expensive reloads of weights from DRAM. A reduction of
-DRAM activity generally leads to better energy efficiency during processing of a
-convolution layer. Additionally, due to the overlap between 1x1 convolutions and
-GEMM discussed in \autoref{chap:conv_gemm_equiv}, the choice of a weight
+From \autoref{fig:reuse_behavior}.a the reuse
+behavior between all three data elements is comparable with the exception ofmap
+reuse having a much lower 0.25 quantile. Ifmap elements have a slightly higher
+reuse with the median MAC operations performed per element load equal to 256
+MACs. Weight and ofmap elements exhibit lower reuse at 192 and 196 MACs per
+load. Reuse trends within networks show a general shift from high weight reuse
+to high ifmap and ofmap reuse depending on the relative position from start
+within a network. Weight reuse is initially almost 2 orders of magnitude higher
+than ifmap and ofmap reuse, however, since the shift in reuse behavior happens
+relatively early in most networks, higher ifmap reuse exceeding weight and ofmap
+reuse persists for more layers within an network. These findings indicate that
+all elements can exhibit a high degree of stationarity depending on the network and
+even the layer position within a network. For an accelerator with a fixed
+dataflow the choice of dataflow and hence which loops to unroll is heavily
+influenced by the target networks expected to run on the accelerator.
+The most flexible dataflow in this case is a weight stationary dataflow in which
+the F, C, KY and KX loops are the unroll targets. This is due to the overlap
+between weight stationary under 1x1 convolutions and GEMM discussed in (REF CHAP HERE), the choice of a weight
 stationary dataflow lends itself well to \ac{GEMM} given the similarities in the
 loop structure with regards to F and C loops for both applciations. Furthermore,
 a weight stationary based dataflow allows support for linear layers which are
 quite prevelant in many moder networks as seen in
-\autoref{fig:cigar_library_overview}.b.
+\autoref{fig:cigar_library_overview}.b. Given the flexibility of weight
+stationary, F, C, KY and KX loops will be the loop unroll targets. 
 
 \clearpage
 \begin{lstlisting}[language=C, caption=Weight stationary dataflow, label={lst:conv_loop}]
@@ -235,15 +261,15 @@ for(int f = 0; f < F; f+=F_UNROLL) // Filter loop
 \label{chap:dataflow_dse:pruning:applying_it:loop_unroll_factors}
 
 There exists significant variation with regards to the kernel sizes present in
-CIGAR's library. This makes the question of unroll factors and axis mapping for
+the TIMM library. This makes the question of unroll factors and axis mapping for
 the KY and KX loops more difficult.
 
-From \autoref{fig:kernel_sizes}.a 1x1 and 3x3 kernel sizes dominate in
+From \autoref{fig:kernel_stats:freq}.a 1x1 and 3x3 kernel sizes dominate in
 comparison to all other kernel sizes. This renders the choice of keeping KY and
 KX loops folded impractical because if support is extended to an arbitrary K x K
 kernel while KY and KX loops are folded the onboard storage for weights would
 then need to be at least $K^2$ where $K$ is the upperbound of kernels supported
-directly to avoid excessive weight fetches from DRAM. Unfortunatly, for ~60\% of
+directly to avoid excessive weight fetches from DRAM. Unfortunatly, for ~80\% of
 the layers in the network, that additional storage area would be significantly
 underutilized by a factor of $\frac{1}{K^2}$ due to the overrepresentation of
 1x1 kernels. To mitigate this underutilization of onboard memory for weights, KY
@@ -251,46 +277,50 @@ and KX loops need to be unrolled fully. However, this begs the question, what
 kernel sizes should be assumed when unrolling the KY and KX loops? Any kernel
 sizes assumed when unrolling KY and KX loops become kernel sizes that are
 supported directly. Kernel sizes that are not assumed when unrolling KY and KX
-loops can be supported indirectly through the approach outlined in
-\autoref{chap:conv_gemm_equiv}. This means that 1x1 kernels are assumed when
+loops can be supported indirectly through a lowering/lifting approach similair
+to the ones discussed in \autoref{chap:background:intro}. This means that 1x1 kernels are assumed when
 unrolling KY and KX loops, hence they are by definition supported directly.
 Other kernel sizes to support directly can be derived from
-\autoref{fig:kernel_sizes}. 
-
-In \autoref{fig:kernel_sizes}.b many networks contain at least 1 convolution
-layer that is not 1x1 or 3x3. For example a 7x7 kernel exists in around ~37\% of
+\autoref{fig:kernel_stats:freq}. In \autoref{fig:kernel_stats:freq}.b many networks contain at least 1 convolution
+layer that is not 1x1 or 3x3. For example a 7x7 kernel exists in around ~20\% of
 networks. The reason for the prevalance of 7x7 convolutions originates from the
 historical use of resnet \cite{resnet} as a feature extractor for a significant
-portion of networks analyzed by CIGAR. In \autoref{fig:kernel_sizes}.c, when
-adjusting for the the number of MACs present in layers where these kernel sizes
-exist, 1x1 and 3x3 kernels share a similar computational burden on the network
-with 1x1 having a much wider spread. 7x7 kernels have a much tighter spread but
-they still represent a similar computational burden to 3x3 kernels in networks
-where they are present. In \autoref{fig:kernel_sizes}.d we can see that in
-networks where non 1x1 and 3x3 kernels exist, they are not likely to dominate
-network layers which echo's the prevalance data in \autoref{fig:kernel_sizes}.a.
-For example the median percentage of 7x7 and 5x5 layers in a network that has
-them is 1.5\% and 11.1\% respectively.
-From \autoref{fig:kernel_sizes} it is clear that 1x1 and 3x3 kernels need to be
-supported directly while all other kernels need to be supported indirectly
-through the approach in \autoref{chap:conv_gemm_equiv}. This limits the space of
-possible unroll factors for the loop unroll targets and thus prunes the dataflow
-design space. Supporting kernels indirectly will lead to an expansion of the
-IFmap due to the duplication introduced by lowering, however that expansions is
-negligble given the scarcity of non 1x1 and 3x3 layers. Applying lowering to
-unsupported layers increases the required storage for IFmap due to lowering from 
-from $2^{19.11}$ to at most $2^{19.25}$ for 95\% of layers.
+portion of networks analyzed by CIGAR.
+
+\clearpage
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/freq.pdf}}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/at_least.pdf}}
+    \caption{(a) Percentage of total layers in the TIMM library's networks that have a kernel size (k, k) (b) The percentage of networks in TIMM that have at least one kernel of size (k, k)}
+    \label{fig:kernel_stats:freq}
+\end{figure}
+
+
+In \autoref{fig:kernel_vs_mac}.a, when adjusting for the the number of MACs
+present in layers where these kernel sizes exist, 1x1 and 3x3 kernels share a
+similar computational burden on the network with 1x1 having a much wider spread.
+7x7 kernels have a much tighter spread but they still represent a similar
+computational burden to 1x1 and 3x3 kernels in networks where they are present.
+Adjusting for kernel frequency in \autoref{fig:kernel_vs_mac}.b, 1x1 and 3x3
+kernels dominate all other kernel sizes in terms of number of MACs in most
+network layers. From \autoref{fig:kernel_vs_mac} it is clear that 1x1 and 3x3
+kernels need to be supported directly while all other kernels need to be
+supported indirectly through a lifting/lowering approach like those discussed in
+\autoref{chap:background:intro}. This limits the space of possible unroll
+factors for the loop unroll targets and thus prunes the dataflow design space.
+Supporting kernels indirectly will lead to an expansion of the IFmap due to the
+duplication introduced by lowering, however that expansions is negligble given
+the scarcity of non 1x1 and 3x3 layers. 
 
 \clearpage
 \begin{figure}
     % Todo: update figure titles to reflect origins of statistics
     \centering
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel_size_prcnt.pdf}}
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel_size_atleast_once.pdf}}
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/Kernel_Size_vs_MACS.pdf}}
-    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel_dominance.pdf}}
-    \caption{Feature map vs Weights sizing statistics in (a) Entire CIGAR library (b) For each convolution layer in the network}
-    \label{fig:kernel_sizes}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/macs.pdf}}
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/macs_adjusted.pdf}}
+    \caption{(a) Kernel size vs number of layer MACs  (b) Kernel size vs number of layer MACs adjusted by kernel frequency}
+    \label{fig:kernel_vs_mac}
 \end{figure}
 
 % TODO: Introduce tiling discussion here using tiling figure
@@ -311,94 +341,95 @@ $K_{unroll}=2$ with kernel loops mapped to the horizontal axis alongside channel
 loops. Additional padding in the horizontal and verticle axis is added given
 excess allocation of PEs in both spatial axis in all tiles except the top left
 one. This representation of the weight tensor as a series of tiles processed by
-the architecture is useful when considering different schedules for processing
-weights. A discussion of tile scheduling is given in the next section. 
+the architecture is useful when considering the scheduling of a convolution
+operation in a network. Tiling of weights and their effect on scheduling is
+discussed in \autoref{chap:net_compile}.
 
 \begin{figure}[]
     \centering
     \includegraphics[scale=0.5]{fig/tiling.pdf}
-    \caption{\ac{GEMM} and 1x1 Convolution Equivelence}
+    \caption{An illustration of weight tiling by loop unroll factors}
     \label{fig:tiling_connection_to_unroll_targets}
 \end{figure}
 
 \clearpage 
 
-\subsubsection{Loop ReOrdering}
-\label{chap:dataflow_dse:pruning:applying_it:loop_ordering}
+% \subsubsection{Loop ReOrdering}
+% \label{chap:dataflow_dse:pruning:applying_it:loop_ordering}
 
-% In the final template there are 4 template parameters that are customizable
-% depending on the target performance/area/energy efficiency requirements of the
-% acclerator. The first and the second are the unroll factors for filters
-% ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
-% supported kernels. Finally the fourth is the spatial axis mapping of the kernel
-% loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
-% required for the different memories accessed.
+% % In the final template there are 4 template parameters that are customizable
+% % depending on the target performance/area/energy efficiency requirements of the
+% % acclerator. The first and the second are the unroll factors for filters
+% % ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
+% % supported kernels. Finally the fourth is the spatial axis mapping of the kernel
+% % loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
+% % required for the different memories accessed.
 
-\begin{figure}
-    \centering
-    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
-    \hspace{0.1cm} 
-    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
-    \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator template parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) archictural illustration}
-    \label{fig:Fmap_scaling}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
+%     \hspace{0.1cm} 
+%     \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
+%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
+%     \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator template parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) archictural illustration}
+%     \label{fig:Fmap_scaling}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
-    \hspace{0.1cm} 
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
-    \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
-    \label{fig:tile_scheduling}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
+%     \hspace{0.1cm} 
+%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
+%     \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
+%     \label{fig:tile_scheduling}
+% \end{figure}
 
 
-While a weight stationary offers limited flexibility with regards to loop
-reoredering it does offer some degree of flexibiltiy with regards to ordering
-filter loops and channel loops. F, C loop ordering affects required on-chip
-storage for IFmaps and OFmaps.
-Under Direct mode and Gemm mode with balanced lowering, IFmap sizes
-do not exceed $2^{19.25}$ bytes (assuming 8 bit precision) for 95\% of all
-convolution layers in CIGAR's library. An estimation of the
-on-chip area required to store IFmaps using the model presented in
-\cite{area_model} yields a total on-chip area per sram bit stored equal to 0.013
-$um^2$ which translates to $0.064 mm^2$ on-chip area dedicated to sram buffers
-for storing entire input feature maps for a layer at 14nm technology.
-This area/storage does not scale with increased/decreased filter unroll factor,
-channel unroll factor or max directly supported kernel size. On-Chip area
-dedicated to storing Weights scales with the afformentioned parameters.
-Storage with regards to OFmaps depends on the loop ordering in the chosen
-dataflow. Specifically on-chip OFmap storage depends on whether filter loops and
-channel loops are reordered such that OFmaps are retired as fast as possible
-(ASAP tile scheduling) by iterating through IFmap channels first while
-processing a groups of filter, or as late as possible (ALAP tile scheduling) by
-iterating through filters first while processing a group channels. These two
-orderings for filter loops and channel loops represent different tile schedules
-for processing convolution layers. An illustration of both tile scheduling
-approaches is illustrated in \autoref{fig:tile_scheduling}. In
-\autoref{fig:tile_scheduling} a 1x1 convolution layer's weights are shown with
-the architecture's unroll factors overlayed on top. The overlay of the
-architecture's unroll factor creates distinct weight tiles where componenets of
-the OFmap are computed. The order of executing these weight tiles depends on the
-chosen tile schedule. ASAP which represents F, C loop ordering and ALAP which
-represents C, F loop ordering. 
+% While a weight stationary offers limited flexibility with regards to loop
+% reoredering it does offer some degree of flexibiltiy with regards to ordering
+% filter loops and channel loops. F, C loop ordering affects required on-chip
+% storage for IFmaps and OFmaps.
+% Under Direct mode and Gemm mode with balanced lowering, IFmap sizes
+% do not exceed $2^{19.25}$ bytes (assuming 8 bit precision) for 95\% of all
+% convolution layers in CIGAR's library. An estimation of the
+% on-chip area required to store IFmaps using the model presented in
+% \cite{area_model} yields a total on-chip area per sram bit stored equal to 0.013
+% $um^2$ which translates to $0.064 mm^2$ on-chip area dedicated to sram buffers
+% for storing entire input feature maps for a layer at 14nm technology.
+% This area/storage does not scale with increased/decreased filter unroll factor,
+% channel unroll factor or max directly supported kernel size. On-Chip area
+% dedicated to storing Weights scales with the afformentioned parameters.
+% Storage with regards to OFmaps depends on the loop ordering in the chosen
+% dataflow. Specifically on-chip OFmap storage depends on whether filter loops and
+% channel loops are reordered such that OFmaps are retired as fast as possible
+% (ASAP tile scheduling) by iterating through IFmap channels first while
+% processing a groups of filter, or as late as possible (ALAP tile scheduling) by
+% iterating through filters first while processing a group channels. These two
+% orderings for filter loops and channel loops represent different tile schedules
+% for processing convolution layers. An illustration of both tile scheduling
+% approaches is illustrated in \autoref{fig:tile_scheduling}. In
+% \autoref{fig:tile_scheduling} a 1x1 convolution layer's weights are shown with
+% the architecture's unroll factors overlayed on top. The overlay of the
+% architecture's unroll factor creates distinct weight tiles where componenets of
+% the OFmap are computed. The order of executing these weight tiles depends on the
+% chosen tile schedule. ASAP which represents F, C loop ordering and ALAP which
+% represents C, F loop ordering. 
 
-A tradeoff between required IFmap storage and required OFmap storage is apparent
-in \autoref{fig:fmap_size_trends}. Under ASAP scheduling, storage requirements for
-OFmaps scales with $F_{unroll}$ because $F_{unroll}$ represents the maxmimum
-number of filters in flight. Storage requirements for IFmaps is maximized under
-ASAP because all channel data would need to be held on-chip assuming no
-additional reads can be made from DRAM for IFmap channels. Under ALAP
-scheduling, storage requirements for IFmap scale with $C_unroll$ because
-$C_{unroll}$ represents the maximum number of channels in flight. Storage for
-OFmaps is maximized under ALAP. In this thesis it is assumed that chip
-area (and thus on-chip memory) is always sufficient at least one of the
-afformentioned tile schedules without requiring loop blocking and additional
-DRAM accesses for feature maps. An exploration of the effect of loop blocking
-under more restrictive area constraints is relegated to future work. 
+% A tradeoff between required IFmap storage and required OFmap storage is apparent
+% in \autoref{fig:fmap_size_trends}. Under ASAP scheduling, storage requirements for
+% OFmaps scales with $F_{unroll}$ because $F_{unroll}$ represents the maxmimum
+% number of filters in flight. Storage requirements for IFmaps is maximized under
+% ASAP because all channel data would need to be held on-chip assuming no
+% additional reads can be made from DRAM for IFmap channels. Under ALAP
+% scheduling, storage requirements for IFmap scale with $C_unroll$ because
+% $C_{unroll}$ represents the maximum number of channels in flight. Storage for
+% OFmaps is maximized under ALAP. In this thesis it is assumed that chip
+% area (and thus on-chip memory) is always sufficient at least one of the
+% afformentioned tile schedules without requiring loop blocking and additional
+% DRAM accesses for feature maps. An exploration of the effect of loop blocking
+% under more restrictive area constraints is relegated to future work. 
 
-\clearpage
+% \clearpage
 
 \section{Hardware Implementation design space exploration with the Polyhedral Model}
 \label{chap:hw_dse:intro}

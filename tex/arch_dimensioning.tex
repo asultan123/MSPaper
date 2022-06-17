@@ -1,204 +1,6 @@
 \chapter{Architecture Dimensioning}
 \label{chap:conv_gemm_equiv}
 
-\section{Layer Equivalence}
-
-Accelerator generality can be maintained by supporting general matrix
-multiplication operations as well as convolution operations common in many
-modern deep neural networks. Convolution operations can be converted into
-general matrix multiplication through the use of lowering and lifting techniques
-like Im2col discussed in \cite{cafe_con_troll}. To support matrix multiplication
-within a convolution accelerator we can reporpose existing compute and memory
-hardware on chip to perform both GEMM and convolutions operations or we can
-establish a mathematical equivelence between GEMM operations and Conv by
-reinterpret GEMM into a special case of convolution, namely convolutions with a
-1x1 kernel size. This avoids the overhead of reporposing existing convolution
-hardware to support GEMM. In \autoref{chap:conv_gemm_equiv:proof}, a proof for
-the equivelence between GEMM and 1x1 Convolutions is given. Additionally, in
-\autoref{chap:conv_gemm_equiv:application} the afformentioned proof will be used
-in tandem with the approach in \cite{cafe_con_troll} to provide support for
-arbitrary convolution operations. Finally in
-\autoref{chap:conv_gemm_equiv:overhead} a discussion of the overheads associated
-with the approach in \autoref{chap:conv_gemm_equiv:application} is given.
-
-\clearpage
-
-\subsection{Functional equivelence between GEMM and 1x1 Convolutions}
-\label{chap:conv_gemm_equiv:proof}
-
-We can establish functional equivelence between GEMM and 1x1 convolutions with
-the following proof. An illustration of this proof is given in
-\autoref{fig:gemmTo1x1Conv}.  
-Given two matricies $A\in \mathbb{R}^{Z \times C}$ and $B \in \mathbb{R}^{C
-\times F}$, let $R \in \mathbb{R}^{Z\times F} = A.B$. A different way to express
-the matrix multiplication $A.B$ is \autoref{math:gemm_array_notation}.  
-
-\begin{equation}
-    \begin{aligned}
-        R[z][f] = \displaystyle\sum\limits_{c=0}^{C-1}A[z][c]\times B[c][f] \\ \forall z\in[0, n^2-1]
-    \end{aligned}
-    \label{math:gemm_array_notation}
-\end{equation}
-
-Transposing $A$ and $B$ yields $\hat{A} \in \mathbb{R}^{C\times Z}$ and $\hat{B} \in
-\mathbb{R}^{F\times C}$. Using the identity $(A.B)^T = B^T.A^T$ we can rewrite
-\autoref{math:gemm_array_notation} as
-\autoref{math:gemm_array_notation_transpose} where $\hat{R} \in
-\mathbb{R}^{F\times Z}$
-
-\begin{equation}
-    \begin{aligned}
-        \hat{R}[f][z] = \displaystyle\sum\limits_{c=0}^{C-1}\hat{B}[f][c]\times \hat{A}[c][z] \\ \forall z\in[0, Z-1]
-    \end{aligned}
-    \label{math:gemm_array_notation_transpose}
-\end{equation}
-
-We can reshape $\hat{A}$ and $\hat{B}$ using \autoref{math:a_b_reshape} into 3D
-tensors by adding an additional dimention of size 1 for $\hat{A}$ and 2
-additional dimentions of size 1 for $\hat{B}$.
-
-\begin{equation}
-    \begin{aligned}
-        \hat{A} \xrightarrow[]{Reshape} &\hat{A}  \in \mathbb{R}^{C \times Z\times 1}   &\hat{B} & \xrightarrow[]{Reshape} \hat{B}  \in \mathbb{R}^{F \times C\times 1\times 1} \\
-    \end{aligned}
-    \label{math:a_b_reshape}
-\end{equation}
-
-Applying \autoref{math:a_b_reshape} to
-\autoref{math:gemm_array_notation_transpose} yields
-\autoref{math:gemm_as_conv_1} where $\hat{R} \in \mathbb{R}^{F \times Z\times 1}
-$ remains the transposed output of $A.B$. 
-
-\begin{equation}
-    \begin{aligned}
-        \hat{R}[f][z][0] = \displaystyle\sum\limits_{c=0}^{C-1}\hat{A}[c][z][0]*\hat{B}[f][c][0][0] \\ \forall z \in [0, Z-1] 
-        \end{aligned}
-    \label{math:gemm_as_conv_1}
-\end{equation}
-
-Adding kernel summations to \autoref{math:gemm_as_conv_1} yields
-\autoref{math:gemm_as_conv_2} which is equivelent to a 1x1 convolution of stride
-1. To recover $R$ from $\hat{R}$ we can reshape $\hat{R}$ by removing the
-last dimention and then transpose it. 
-
-\begin{equation}
-    \begin{aligned}
-        \hat{R}[f][z][0] = \displaystyle\sum\limits_{c=0}^{C-1}\displaystyle\sum\limits_{k_x=0}^{1} \displaystyle\sum\limits_{k_y=0}^{1}\hat{A}[c][y+ky][x+kx]*\hat{B}[f][c][k_y][k_x] \\ \forall y \in [0, Z-1] \land x = 0
-    \end{aligned}
-    \label{math:gemm_as_conv_2}
-\end{equation}
-
-\begin{figure}[]
-    \centering
-    \includegraphics[scale=0.5]{fig/GemmTo1x1Conv.pdf}
-    \caption{\ac{GEMM} and 1x1 Convolution Equivelence}
-    \label{fig:gemmTo1x1Conv}
-\end{figure}
-
-
-\subsection{Supporting unsupported kernel sizes in a direct convolution accelerator}
-\label{chap:conv_gemm_equiv:application}
-
-We can support previously unsupported kernel sizes by combining the GEMM to 1x1
-Conv conversion in \autoref{chap:conv_gemm_equiv:proof} with any tensor
-lowering/lifting approach in \cite{cafe_con_troll}. Lowering converts a
-convolution into a GEMM operation, and the approach in
-\autoref{chap:conv_gemm_equiv:proof} reinterprets that operation as another 1x1
-Convolution. This approach allows any convolution accelerator that can support
-1x1 convolution operations to support any arbitrary convolution operation. A
-visual illustration for this technique is presented in \autoref{fig:conv2gemm2conv}.
-To demonstrate this approach we begin by lowering both IFmap using
-\autoref{math:balanced_lowering_ifmap} and Weights using
-\autoref{math:balanced_lowering_weight}. This results in two matricies IFmap and
-Weights in \autoref{math:conv2gemm2conv:lowering}. Lowering should be performed
-if the kernel size of the Weight tensor is unsupported $K' \notin
-\{SupportedKernels\}$. 
-
-\begin{equation}
-    \begin{aligned}
-        IFmap \in R^{C\times n\times n} & \xrightarrow[]{Balanced Lowering} \hat{IFmap} \in R^{nm\times K'C} \\
-        Weight \in R^{F\times C\times K' \times K'} & \xrightarrow[]{Balanced Lowering} \hat{Weight} \in R^{K'C\times K'F} \\
-    \end{aligned}
-    \label{math:conv2gemm2conv:lowering}
-\end{equation}
-
-After lowering both tensors, we apply the transformations in
-\autoref{math:conv2gemm2conv:transform} to reinterpret the anticipated GEMM
-operation that occurs after lowering into a 1x1 convolution operation. The
-transformations are composed of a transpose operation followed by a reshape
-operation that appends additional dimentions of size 1 to both IFmap and
-Weights. The transformations yields two new tensors $\hat{IFmap}$ and
-$\hat{Weight}$.
-
-\begin{equation}
-    \begin{aligned}
-        \hat{IFmap}^T \in R^{K'C \times nm} & \xrightarrow[]{Reshape} \hat{IFmap} \in R^{K'C \times nm \times 1} \\
-        \hat{Weight}^T \in R^{K'F\times K'C} & \xrightarrow[]{Reshape} Weight \in R^{K'F\times K'C \times 1 \times 1} \\
-        \end{aligned}
-    \label{math:conv2gemm2conv:transform}
-\end{equation}
-
-After performing the transformations in \autoref{math:conv2gemm2conv:transform}
-the output $\hat{OFmap_{prelift}}$ can be calculated after performing a 1x1
-convolution in \autoref{math:conv2gemm2conv:conv} using the $\hat{IFmap}$ and
-$\hat{Weight}$ tensors. 
-
-\begin{equation}
-    \begin{aligned}
-        \hat{OFmap_{prelift}} \in R^{K'F\times nm \times 1} = \hat{IFmap}*\hat{Weight}
-        \end{aligned}
-    \label{math:conv2gemm2conv:conv}
-\end{equation}
-
-Finally we can lift $\hat{OFmap_{prelift}}$ by first reshaping it into a 2D
-matrix by dropping the last dimension and then transposing it. After that, we
-can apply balanced lifting in \autoref{math:balanced_lifting_ofmap} to get the
-final OFmap in \autoref{math:conv2gemm2conv:lift}.
-
-\begin{equation}
-    \begin{aligned}
-        \hat{OFmap_{prelift}} \in R^{K'F \times nm \times 1} \xrightarrow[]{Reshape} OFmap_{prelift} \in R^{K'F\times nm} \\
-        OFmap_{prelift}^T \in R^{nm\times FK} \xrightarrow[]{Balanced Lifting} OFmap \in R^{F \times m \times m} \\
-            \end{aligned}
-    \label{math:conv2gemm2conv:lift}
-\end{equation}
-
-\begin{figure}[]
-    \centering
-    \includegraphics[scale=0.5]{fig/ConvToGemmToConv.pdf}
-    \caption{Illustration of approach Conv2Gemm2Conv approach}
-    \label{fig:conv2gemm2conv}
-\end{figure}
-
-\subsection{Overhead of extending support}
-\label{chap:conv_gemm_equiv:overhead}
-
-Lowering and lifting introduce additional overheads with regards to latency and
-tensor sizing. The latency for performing balanced lowering and lifting is
-$m^{2}K$ for a layer with a Weight tensor $\mathbb{R}^{F\times C\times K\times
-K}$ and an OFmap tensor $\mathbb{R}^{F\times m\times m\times}$. While lowering
-and lifting can be performed by a convolutions accelerator, in this thesis it is
-assumed that a software processor on the same chip performs these operations.
-Lowering also introduces duplicate data elements in the IFmap tensor thus
-increasing it's overall size. In this thesis, it is assumed that on-chip memory
-can account for this increase and that any additional DRAM accesses incurred
-from lowering will be included in energy calculations when reporting energy
-consumption of the accelerator.
-
-To enable GEMM operations using the approach in
-\autoref{chap:conv_gemm_equiv:proof} both input and output matricies are
-transposed and reshaped. All reshape operations discussed in this chapter add a
-dimention of size 1 to the data and they incur no data reorganization overhead.
-Additionally, all transpose operations are assumed to be performed during
-transfer to and from accelerator on-chip and thus incur no latency penalty. A
-discussion of how transfers to and from on-chip memory can mask the latency of
-transposing matricies is left as part of future work along with incorporating
-lowering and lifting into the accelerator. 
-
-% TODO: Mention savings as percentage of im2col
-% https://www.desmos.com/calculator/p1qhtddjpa
-
-
 \section{Exploring the dataflow design space with TEMPO}
 \label{chap:dataflow_dse:exploring}
 
@@ -237,7 +39,7 @@ in in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
 of running \ac{TEMPO} on CIGAR's library of CNNs are presented in
 \autoref{chap:dataflow_dse:exploring:results}. 
 
-\subsection{TEMPO Algorithm}
+\section{TEMPO Algorithm}
 \label{chap:dataflow_dse:exploring:algorithm}
 
 TEMPO's algorithm is presented in algorithm \ref{alg:tempo_algo}. TEMPO explores the
@@ -302,10 +104,10 @@ library $model^{stats}_{dict}$. Prior to the search being performed algorithm
     \end{algorithmic}
 \end{algorithm}
 
-\subsection{TEMPO analytical model}
+\section{TEMPO analytical model}
 \label{chap:dataflow_dse:exploring:tempo_model}
 
-\subsubsection{Layer equivelence}
+\subsection{Layer equivelence}
 \label{chap:dataflow_dse:exploring:tempo_model:layer_equivelence}
 
 In TEMPO's analytical model, an automatic layer conversion step is performed to
@@ -346,7 +148,7 @@ channel size $\hat{Z}$ values are reflected in \autoref{math:layer_equivelence}.
     \label{math:layer_equivelence}
 \end{align}
 
-\subsubsection{Axis mapping}
+\subsection{Axis mapping}
 \label{chap:dataflow_dse:exploring:tempo_model:axis_mapping}
 
 When determining axis mapping, F and C loops are assumed to be bound to an
@@ -386,7 +188,7 @@ $C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
     \label{math:effective_unroll_factors_f}
 \end{align}
 
-\subsubsection{Metric: Utilization}
+\subsection{Metric: Utilization}
 \label{chap:dataflow_dse:exploring:tempo_model:utilization}
 
 \begin{figure}[]
@@ -515,11 +317,11 @@ variation is given in \autoref{math:tile_utilization_padded_both}.
     \label{math:tile_utilization_padded_both}
 \end{align}
 
-\subsubsection{Metric: Latency}
+\subsection{Metric: Latency}
 \label{chap:dataflow_dse:exploring:tempo_model:latency}
 
 Estimating latency follows the same tiling model discussed the previous
-subsection. The latency of executing a layer based on the template paremeters
+section. The latency of executing a layer based on the template paremeters
 chosen is given in \autoref{math:latency}. Latency is a function of the number of
 tiles present in the layer multiplied by the number of cycles spent processing a
 single IFmap channel $\hat{Z}$ plus the additional latency incured due to
@@ -547,7 +349,7 @@ however, that is left as part of future work.
     \label{math:latency_lowering_lifting}
 \end{align}
 
-\subsubsection{Metric: Memory access counts}
+\subsection{Metric: Memory access counts}
 \label{chap:dataflow_dse:exploring:tempo_model:access_counts}
 
 Following the tiling model discussed earlier, memory access counts are
@@ -580,10 +382,10 @@ weight access counts are given in \autoref{math:memory_access_weights}.
     \label{math:memory_access_weights}
 \end{equation}
 
-\subsection{TEMPO results}
+\section{TEMPO results}
 \label{chap:dataflow_dse:exploring:results}
 
-\subsubsection{Assumed objective function}
+\subsection{Assumed objective function}
 \label{chap:dataflow_dse:exploring:results:obj_fn}
 
 Since TEMPO expects an objective function to maximize based on any or a
@@ -605,17 +407,3 @@ discussion in \autoref{chap:dataflow_dse:exploring:tempo_model:utilization}.
     \caption{\ac{GEMM} and 1x1 Convolution Equivelence}
     \label{fig:axis_mapping}
 \end{figure}
-
-
-
-% \State $arch_{config} \gets (f_{unroll}, c_{unroll}, k_{axis})$
-% \For{$(model,\space layers) \in model^{stats}_{dict}$}
-%     \For{$layer \in layers$}
-%     \If{$layer.kernel\_size \notin kernels_{supported}$}
-%         \State $\hat{layer} \gets supported\_layer\_equivelent(layer)$
-%     \Else
-%         \State $\hat{layer} \gets layer$
-%     \EndIf
-%     \State $layer_{metrics}.push (metrics\_fn(\hat{layer}, arch_{config}))$
-%     \EndFor
-% \EndFor 

@@ -164,27 +164,27 @@ for(int y = 0; y < y_count; y++)
     addr += y_modify;
 \end{lstlisting}
 
-For stuttering descriptors, again a C code representation is given in
-\autoref{lst:descriptor:stut}. As in the previous listing "addr" is initialized
-with the value in the start field. However, unlike the previous listing the loop
-structure of the descriptor is different. In \autoref{lst:descriptor:stut} the
-outermost loop represents is bounded by the y\_count field in the descriptor
-strut. Within the outer loop two loops exist, one loop dedicated to generating
-the address stream based on the fields x\_count and x\_modify while the other is
-dedicated to pausing for a predetermined number of cycles based on the contents
-of y\_modify field. In between the nested loops the "en" is de-asserted to
-disable reads/writes to the data SRAM connected to the address generator
-controller.
+% For stuttering descriptors, again a C code representation is given in
+% \autoref{lst:descriptor:stut}. As in the previous listing "addr" is initialized
+% with the value in the start field. However, unlike the previous listing the loop
+% structure of the descriptor is different. In \autoref{lst:descriptor:stut} the
+% outermost loop represents is bounded by the y\_count field in the descriptor
+% strut. Within the outer loop two loops exist, one loop dedicated to generating
+% the address stream based on the fields x\_count and x\_modify while the other is
+% dedicated to pausing for a predetermined number of cycles based on the contents
+% of y\_modify field. In between the nested loops the "en" is de-asserted to
+% disable reads/writes to the data SRAM connected to the address generator
+% controller.
 
-\begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:stut}]
-addr = start;
-for(int y = 0; y < y\_count; y++)
-    en = 1;
-    for(int x = 0; x < x_count; x++)
-        addr += x_modify;
-    en = 0;
-    for(int w = 0; w < y_modify; w++);
-\end{lstlisting}
+% \begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:stut}]
+% addr = start;
+% for(int y = 0; y < y\_count; y++)
+%     en = 1;
+%     for(int x = 0; x < x_count; x++)
+%         addr += x_modify;
+%     en = 0;
+%     for(int w = 0; w < y_modify; w++);
+% \end{lstlisting}
 
 \subsection{Creating timed memory operations with descriptor programs}
 \label{chap:sams:memory_transactions}
