@@ -1,5 +1,5 @@
 \chapter{Data-Aware Accelerator Design}
-\label{chap:dataflow_dse:intro}
+\label{chap:dda}
 
 As discussed in \autoref{chap:background:intro}, any convolution accelerator can
 be reduced into it's dataflow and hardware implementation choices. Based on the
@@ -45,23 +45,23 @@ the effective channel unroll factor would be 36 instead of 4 in the original
 configuration.
 
 In this chapter we will first prune the dataflow design space dimensions in
-\autoref{chap:dataflow_dse:pruning} by determining the apprioriate
+\autoref{chap:dda:dataflow_dse:pruning} by determining the apprioriate
 loop unroll targets and loop unroll factors using insights acquired from
 \ac{CIGAR} a convolutional network analysis tool discussed in
-\autoref{chap:dataflow_dse:pruning:cigar}. Then, given the complexity of
+\autoref{chap:dda:dataflow_dse:pruning:cigar}. Then, given the complexity of
 exploring loop unroll factors and loop axis mapping, an automated accelerator
 Template optimizer TEMPO introduced in \autoref{chap:dataflow_dse:exploring} is
 used to explore the the afformentioned design space dimensions to produce
 utilization optimized accelerator template configurations. 
 
-\section{Pruning the design space with CIGAR}
-\label{chap:dataflow_dse:pruning}
+\section{Pruning the dataflow design space with CIGAR}
+\label{chap:dda:dataflow_dse:pruning}
 
 \subsection{CIGAR: The ConvolutIon statIstics GAtherer}
-\label{chap:dataflow_dse:pruning:cigar}
+\label{chap:dda:dataflow_dse:pruning:cigar}
 
 \subsubsection{Algorithm}
-\label{chap:dataflow_dse:pruning:cigar:algo}
+\label{chap:dda:dataflow_dse:pruning:cigar:algo}
 
 Psudocode for \ac{CIGAR}'s algorithm is presented in algorithm
 \ref{alg:cigar_algo}. In algorithm \ref{alg:cigar_algo}, \ac{CIGAR} begins by
@@ -141,7 +141,7 @@ function to the newly supported layer.
 \end{algorithm}
 
 \subsubsection{Neural Network Library Explored}
-\label{chap:dataflow_dse:pruning:cigar:library}
+\label{chap:dda:dataflow_dse:pruning:cigar:library}
 
 A diverse range of networks were explored by CIGAR for dataflow design space
 pruning. The diversity of networks is reflected in the diversity of model types,
@@ -172,10 +172,10 @@ Models (timm) package in \cite{timm}.
 \clearpage
 
 \subsection{Applying CIGAR to prune the dataflow design space}
-\label{chap:dataflow_dse:pruning:applying_it}
+\label{chap:dda:dataflow_dse:pruning:applying_it}
 
 \subsubsection{Loop Unroll Targets}
-\label{chap:dataflow_dse:pruning:applying_it:loop_unroll_targets}
+\label{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_targets}
 
 The choice of loop unroll targets affects the stationarity of the data elements
 in the convolution operation. For example, assuming a convolution layer with a
@@ -227,38 +227,58 @@ The most flexible dataflow in this case is a weight stationary dataflow in which
 the F, C, KY and KX loops are the unroll targets. This is due to the overlap
 between weight stationary under 1x1 convolutions and GEMM discussed in (REF CHAP HERE), the choice of a weight
 stationary dataflow lends itself well to \ac{GEMM} given the similarities in the
-loop structure with regards to F and C loops for both applciations. Furthermore,
-a weight stationary based dataflow allows support for linear layers which are
-quite prevelant in many moder networks as seen in
+loop structure with regards to F and C loops for both applications. Furthermore,
+a weight stationary based dataflow allows support for linear layers throught
+this overlap which are quite prevelant in many moder networks as seen in
 \autoref{fig:cigar_library_overview}.b. Given the flexibility of weight
-stationary, F, C, KY and KX loops will be the loop unroll targets. 
+stationary, F, C, KY and KX loops will be the loop unroll targets. This choice
+of dataflow effectively creates two operational modes. A direct mode where
+convolution operations with kernels that are supported directly are executed on
+the accelerator and an indirect mode where kernels that are not supported directly are supported by
+lowering/ lifting followed by conversion of the proceeding GEMM operation into a
+1x1 convolution. A full explanation of indirect mode is given in
+\autoref{chap:net_compile}. Note that convolution layers with non 1x1 strides are executed
+under indirect mode. Supporting convolution layers with non 1x1 strides directly
+is left as part of future work. From \autoref{fig:kernel_stats:strides} 1x1
+strides are represent ~95\% of convolution layers so the implications of
+indirect support of non 1x1 strides will likely be negligible when asscessing
+the overall performance and energy efficiency of an accelerator implementing the
+afformentioned operation modes.
 
-\clearpage
-\begin{lstlisting}[language=C, caption=Weight stationary dataflow, label={lst:conv_loop}]
-#pragma UNROLL F_UNROLL
-for(int f = 0; f < F; f+=F_UNROLL) // Filter loop
-#pragma UNROLL C_UNROLL
-    for(int c = 0; c < C; c+=C_UNROLL) // Channel loop
-        for(int y = 0; y < Y; y+=1) // Output feature map row
-            for(int x = 0; x < X; x+=1)  // Output feature map col
-#pragma UNROLL KY_UNROLL
-                for(int ky = 0; ky < KY; ky+=KY_UNROLL)  // Kernel row
-#pragma UNROLL KX_UNROLL
-                    for(int kx = 0; kx < KX; kx+=KX_UNROLL)  // Kernel col
-                        O[f][y][x] += I[c][y+ky][x+kx]*W[f][c][ky][kx];
-\end{lstlisting}
+% \clearpage
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/strides.pdf}}
+    \caption{Percentage of total layers in the TIMM library's networks that have a stride size (k, k)}
+    \label{fig:kernel_stats:strides}
+\end{figure}
 
-\begin{lstlisting}[language=C, caption=GEMM loops, label={lst:W_S_Generic_Loop}]
-    #pragma unroll F_UNROLL
-    for(int f = 0; f < F; f+=F_UNROLL) // Filter loop
-    #pragma unroll C_UNROLL
-        for(int c = 0; c < C; c+=C_UNROLL) // Channel loop
-            for(int z = 0; z < Z; z+=1)
-                O[f][z] += W[f][z]*I[c][z];
-\end{lstlisting}
+% \clearpage
+% \begin{lstlisting}[language=C, caption=Weight stationary dataflow, label={lst:conv_loop}]
+% #pragma UNROLL F_UNROLL
+% for(int f = 0; f < F; f+=F_UNROLL) // Filter loop
+% #pragma UNROLL C_UNROLL
+%     for(int c = 0; c < C; c+=C_UNROLL) // Channel loop
+%         for(int y = 0; y < Y; y+=1) // Output feature map row
+%             for(int x = 0; x < X; x+=1)  // Output feature map col
+% #pragma UNROLL KY_UNROLL
+%                 for(int ky = 0; ky < KY; ky+=KY_UNROLL)  // Kernel row
+% #pragma UNROLL KX_UNROLL
+%                     for(int kx = 0; kx < KX; kx+=KX_UNROLL)  // Kernel col
+%                         O[f][y][x] += I[c][y+ky][x+kx]*W[f][c][ky][kx];
+% \end{lstlisting}
+
+% \begin{lstlisting}[language=C, caption=GEMM loops, label={lst:W_S_Generic_Loop}]
+%     #pragma unroll F_UNROLL
+%     for(int f = 0; f < F; f+=F_UNROLL) // Filter loop
+%     #pragma unroll C_UNROLL
+%         for(int c = 0; c < C; c+=C_UNROLL) // Channel loop
+%             for(int z = 0; z < Z; z+=1)
+%                 O[f][z] += W[f][z]*I[c][z];
+% \end{lstlisting}
 
 \subsubsection{Loop Unroll Factors}
-\label{chap:dataflow_dse:pruning:applying_it:loop_unroll_factors}
+\label{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_factors}
 
 There exists significant variation with regards to the kernel sizes present in
 the TIMM library. This makes the question of unroll factors and axis mapping for
@@ -279,7 +299,7 @@ sizes assumed when unrolling KY and KX loops become kernel sizes that are
 supported directly. Kernel sizes that are not assumed when unrolling KY and KX
 loops can be supported indirectly through a lowering/lifting approach similair
 to the ones discussed in \autoref{chap:background:intro}. This means that 1x1 kernels are assumed when
-unrolling KY and KX loops, hence they are by definition supported directly.
+unrolling KY and KX loops, hence they have to be supported directly.
 Other kernel sizes to support directly can be derived from
 \autoref{fig:kernel_stats:freq}. In \autoref{fig:kernel_stats:freq}.b many networks contain at least 1 convolution
 layer that is not 1x1 or 3x3. For example a 7x7 kernel exists in around ~20\% of
@@ -331,7 +351,7 @@ illustration of this concept is present in
 \autoref{fig:tiling_connection_to_unroll_targets}. Loop unroll factors determine
 PE allocation 
 Tiling of a weight tensor arises from the processing of filters, channels and
-kernels in chunks whose size depend on the unroll factors. 
+kernels in batches whose size depend on the unroll factors. 
 Padding of a weight tensors is performed wherever the chosen PE
 binding for filter or channel loops exceeds the number of channels and filters
 being processed in the tile. In
@@ -431,43 +451,46 @@ discussed in \autoref{chap:net_compile}.
 
 % \clearpage
 
-\section{Hardware Implementation design space exploration with the Polyhedral Model}
-\label{chap:hw_dse:intro}
+\section{Exploring The Hardware Implementation Design Space}
+\label{chap:dda:hw_dse}
 
-Based on the conclusion derived from \autoref{chap:dataflow_dse:intro},
-the ideal conv. accelerator operates in two modes, direct Mode where 3x3 kernel
-with stride 1 are supported and GEMM mode where all other kernel sizes and
-strides are supported in GEMM mode via the approach in (REFERENCE LOWERING/
-LIFTING CHAPTER). In this section we will deduce the optimal hardware
-implementation for the weight stationary dataflow chosen in
-\autoref{chap:dataflow_dse:intro} by analyzing data reuse in the loop based
-representation of the aforementioned dataflow. To perform this deduction we will
-use the polyhedral model to analyse temporal reuse in
-\autoref{chap:hw_dse:temporal_analysis} and spatial reuse in
-\autoref{chap:hw_dse:spatial_reuse_analysis}. Finally, in
-\autoref{chap:hw_dse:simplifying_hierarchy} a simplification of the IFmap memory
-hierarchy present in the optimal hardware implementation derived in
-\autoref{chap:hw_dse:temporal_analysis} and
-\autoref{chap:hw_dse:spatial_reuse_analysis} is presented.
+Based on the conclusions derived from \autoref{chap:dda:dataflow_dse:pruning},
+weight stationary is the most flexible dataflow choice given the overlap between
+under 1x1 convolutions and GEMM. This gives rise to an accelerator with two
+operational modes, direct Mode where a subset of possible kernel sizes are
+supported and GEMM mode where all other kernel sizes and strides are supported
+in via lowering/ lifting based approach. In this section we will determine an
+appropriate hardware implementation for the weight stationary dataflow chosen in
+\autoref{chap:dda:dataflow_dse:pruning:applying_it} using the hardware
+implementation taxonomy from \cite{maestro}, Based on the reuse and
+communication behavior of the different elements (ifmap, ofmap and weights) in a
+convolution operation using weight stationary we can infer the appropriate
+hardware implementation for on-chip communication and memory from
+\cite{maestro}. To perform this deduction we will use the polyhedral model to
+analyse temporal reuse in \autoref{chap:dda:hw_dse:temporal_analysis} and
+spatial reuse in \autoref{chap:dda:hw_dse:spatial_reuse_analysis}. Based on the
+analysed reuse behavior an initial hardware implementation for HERO will be
+given and further improved after applying a simplification of the on-chip memory
+hierarchy in \autoref{chap:dda:hw_dse:simplifying_hierarchy}. The final hardware
+implementation for HERO will be given in \autoref{chap:dda:hw_dse:final}.
 
 \subsection{Temporal Reuse Analysis}
-\label{chap:hw_dse:temporal_analysis}
+\label{chap:dda:hw_dse:temporal_analysis}
 
 Unrolling convolution dataflow loops yield multiple instances of the \ac{MAC}
 statement present in the original convolution nested loops in
-\autoref{lst:conv_loop}. These instances will be referred to as \ac{MAC} spatial
-instances to distinguish them from temporal instances discussed in this chapter.
-\ac{MAC} spatial instances can be distinguished based on the memory access
-offsets that exist in them as a result of unrolling filter, channel and kernel
-loops. For unroll factors F\_T for filters, C\_T for channels, KY\_T and KX\_T
-for kernels each statement will have a coresponding access offset based on the
-spatial instance index $j \in [0, F\_T*C\_T*KY\_T*KX\_T]$ for each of the data
-elements (IFmap, OFmap and Weights) accessed in the loop body. Each \ac{MAC}
-spatial instance at index j is characterized by a set of access offsets {Fj, Cj,
-KYj, KXj} used by the memory accesses in the \ac{MAC} statement. Applying the
-unroll factors and distinguishing each \ac{MAC} statement based on it's
-statement index j yields the loop configuration in
-\autoref{lst:conv_loops_unrolled}. 
+\autoref{lst:conv_loop}. These statements represent \ac{PE}s performing MAC
+operations concurrently. 
+\ac{MAC} statement instances can be distinguished from eachother based on the memory access offsets that
+exist in them as a result of unrolling filter, channel and kernel loops. For
+unroll factors F\_T for filters, C\_T for channels, KY\_T and KX\_T for kernels
+each statement will have a coresponding access offset based on the statement
+index $j \in [0, F\_T*C\_T*KY\_T*KX\_T]$ for each of the data elements
+(IFmap, OFmap and Weights) accessed in the loop body. Each \ac{MAC} statement
+at index j is characterized by a set of access offsets {Fj, Cj, KYj,
+KXj} used by the memory accesses in the \ac{MAC} statement. Applying the unroll
+factors and distinguishing each \ac{MAC} statement based on it's statement index
+j yields the loop configuration in \autoref{lst:conv_loops_unrolled}. 
 
 \begin{lstlisting}[language=C, caption=Fully unrolled convolution dataflow loops, label={lst:conv_loops_unrolled}]
     for(int f = 0; f < F; f+=F_T) // Filter loop
@@ -481,18 +504,21 @@ statement index j yields the loop configuration in
                         ...
 \end{lstlisting}
 
-Temporal reuse analysis is performed on the above loops. The different
-operational modes (GEMM/ Direct) are analysed concurrently using the same loop
-representation below as they only differ based on whether we fuse feature map
-height and width loops, and set upper bounds of the kernel loops to 1. Since
+Each MAC statement is composed of three seperate memory accesses for ifmap,
+ofmaps and weights. For each of those memory access has a temporal index (it's location in time) defined by the
+iteration domain vector $[f, c, y, x, ky, kx]$. A mapping exists between each
+iteration domain vector and MAC statement's memory accesses.  
+Temporal reuse analysis for each of the memory accesses in the MAC statements is performed on the loops in \autoref{lst:conv_loops_unrolled}. The different
+operational modes (Indirect/ Direct) are analysed concurrently using the same loop
+representation as they only differ based on whether we set the width loop
+upperbound to 1, and set the kernel loops upper bounds to 1. Since
 kernel loops are always unrolled fully this sets KY\_T and KX\_T to 1. We can
 analyse temporal reuse in the dataflow represented in
 \autoref{lst:conv_loops_unrolled} by adapting the approach in \cite{meeus} 
 to the afformentioned dataflow iteration domain and access functions.
 Given iteration domain restrictions imposed by the polyhedral model,
 \autoref{lst:poly:analysis} assumes unroll factors F\_T =
-C\_T = 4. Setting F\_T and C\_T to concrete values does not affect output
-results of temporal reuse analysis.
+C\_T = 4. Setting F\_T and C\_T to concrete values does not overall reuse behavior during temporal reuse analysis.
 
 \clearpage
 \begin{lstlisting}[caption=Polyhedral analysis of reuse in iscc for convolution loops, label={lst:poly:analysis}]
@@ -514,16 +540,18 @@ In \autoref{lst:poly:analysis}, the iteration domain for the loops in
 line 2 where for some access statement S the loop iteration vector [f, c, y, x,]
 is bound by the upper and lower bounds [0, F], [0, C], [0, Y], [0, X]
 respectively. These bounds are represented by the associated parameters passed
-to the iteration domain set assignment in line 2. Each memory accessed in the
-body of the loop has an access function at each level of that memory's
-hierarchy. As a result, each instance of the loop iteration vector [f, c, y, x]
+to the iteration domain set assignment in line 2. 
+
+Each memory accessed for ifmaps, ofmaps and weights in each MAC statement has
+an associated memory access function. 
+
+Each instance of the loop iteration vector [f, c, y, x]
 is mapped to a memory access for each of the memories in lines 4-6. Access
 offsets used in the memory access functions are passed as parameters based on
 the convention established in \autoref{lst:conv_loops_unrolled}. This mapping
 creates multiple temporal instances for each memory access in each \ac{MAC}
-spatial instance.  For
-example, for some iteration vector [f = 1, c = 1, y = 0, x = 1],
- the OFmap access that occurs at iteration vector [f = 2, c= 1, y = 0,
+statement instance.  For
+example, for example, the OFmap access that occurs at iteration vector [f = 2, c= 1, y = 0,
 x = 1] is a different temporal instance of the same OFmap access at [f = 1, c = 1,
 y = 0, x = 1]. 
 Two accesses that access the same index but at different
@@ -531,7 +559,9 @@ iteration vectors are different temporal instances of the same access.
 After applying the operation in lines 8-10, we can determine the
 temporal reuse behavior of the accessed memories in the convolution loops.  
 \autoref{lst:poly:result} shows the reuse behavior for each memory. Original
-iteration domains constraints are ommited for brevity. 
+iteration domains constraints are ommited for brevity. The operation in lines
+8-10 map all iteration domains to all proceeding iteration domains that access
+the same memory locations for each of the data elements.
 
 \clearpage
 \begin{lstlisting}[caption=Polyhedral analysis results w.r.t data elements in convolution loops, label={lst:poly:result}]
@@ -569,7 +599,7 @@ For (WEIGHT\_REUSE) Weights exhibit temporal reuse w.r.t feature map width and
 height, the X and Y loops. 
 
 Applying the hardware taxonomy in \cite{maestro}, IFmap exhibits temporal reuse,
-multicast communication. OFmap exhibits temporal reuse, reduction communication
+multicast communication given their repeated read only behavior. OFmap exhibits temporal reuse, reduction communication
 given their read-modify-write behavior. Weights exhibit temporal multicast
 communication. Given the limited implementation options derivable from temporal
 reuse we can comfortably define the appropriate connectivity and memory
@@ -595,8 +625,8 @@ In addition to the temporal reuse behavior exhibited across IFmap channels,
 temporal reuse exists within individual IFmap channels due to the stencil based
 access pattern arising from the X, Y, KY, KX loops in the dataflow. That
 temporal reuse is affected by the decision to fully unroll kernel loops which
-causes temporal reuse to exist between unrolled IFmap kernel ports. Proof of the
-existence of that temporal reuse is given in the polyhedral analysis in
+causes temporal reuse to exist between unrolled different PEs processing the
+same kernel. Proof of the existence of that temporal reuse is given in the polyhedral analysis in
 \autoref{lst:poly:xy_reuse}. 
 
 \begin{lstlisting}[caption=Analysis of IFmap channel reuse, label={lst:poly:xy_reuse}]
@@ -627,23 +657,23 @@ directions where that reuse is exhibited, vertical and horizontal with an IFmap
 channel. The loops that control the verticle and horizontal stencil position in
 the IFmap are the Y and X loops in the dataflow. Because kernel loops are fully
 unrolled, the temporal reuse exhibited in \autoref{lst:poly:xy_reuse} occurs
-accross unrolled kernel loop ports. To determine the appropriate memory
+accross different PEs processing the unrolled kernel. To determine the appropriate memory
 infrastructure to support that stencil based access pattern, we can apply the
 technique in \cite{meeus} to construct a reuse chain that moves reused data
-between urnolled kernel ports. The advantage of using a reuse chain is that the
+between different PEs. The advantage of using a reuse chain is that the
 temporal reuse that exists within an IFmap channel is relegated to a smaller
 memory with lower memory access cost.
 
 \cite{meeus} constructs a reuse chain for applications with a sliding window
 access pattern that connects each unrolled kernel port with it's neighbors using
 a FIFO or a shift register. If the temporal reuse distances between the accesses
-of neighboring ports are constant \cite{meeus} uses a shift register, otherwise
+of neighboring PE ports are constant \cite{meeus} uses a shift register, otherwise
 they use a FIFO. The reuse distance between accesses of neighboring ports are
 then converted into storage of the same size. So if two ports share the same
 data but with a lag of 2 iterations in the iteration domain they're operating
 in, then a shift register of size 2 can be placed between them. Similar to the
 sliding window application explored in \cite{meeus} the reuse distances between
-the unrolled kernel ports in the convolution dataflow are also constant. To
+the PEs processing the unrolled kernel in the convolution dataflow are also constant. To
 determine the reuse distances necessary between ports we can apply the analysis
 in \autoref{lst:poly:xy_buffer_sizing:analysis} adapted from \cite{meeus} to
 determine the sizing of the buffers in the reuse chain for IFmap accesses within
@@ -734,7 +764,7 @@ results in the updated template \autoref{fig:reuse_chain}.
 
 
 \subsection{Spatial Reuse Analysis}
-\label{chap:hw_dse:spatial_reuse_analysis}
+\label{chap:dda:hw_dse:spatial_reuse_analysis}
 
 So now we know the hierarchy needed to express X and Y reuse in IFmap. Applying
 the unroll factors in the target loops in the dataflow will yield a loop
@@ -805,7 +835,7 @@ delays yields a simplification to the L1 memory present in
 \end{figure}
 
 \subsection{Simplifying the memory hierarchy}
-\label{chap:hw_dse:simplifying_hierarchy}
+\label{chap:dda:hw_dse:simplifying_hierarchy}
 
 \begin{figure}[]
     \centering
@@ -905,8 +935,8 @@ discussed in this section is given in
 group of 3 processing engines as well as the 1x1 vertical broadcast busses
 highlighted in red. 
 
-\section{HERO-T: A Hybrid GEMM and Direct Conv. Accelerator Template}
-\label{chap:hero}
+\section{HERO: A Hybrid GEMM and Direct Conv. Accelerator}
+\label{chap:dda:hw_dse:final}
 
 TEMPO's analytical model is hardware implementation agnostic
 Tempo optimizes utilization given a library of networks + a pe budget
