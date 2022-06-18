@@ -492,6 +492,8 @@ KXj} used by the memory accesses in the \ac{MAC} statement. Applying the unroll
 factors and distinguishing each \ac{MAC} statement based on it's statement index
 j yields the loop configuration in \autoref{lst:conv_loops_unrolled}. 
 
+\clearpage 
+
 \begin{lstlisting}[language=C, caption=Fully unrolled convolution dataflow loops, label={lst:conv_loops_unrolled}]
     for(int f = 0; f < F; f+=F_T) // Filter loop
         for(int c = 0; c < C; c+=C_T) // Channel loop
@@ -667,19 +669,21 @@ memory with lower memory access cost.
 \cite{meeus} constructs a reuse chain for applications with a sliding window
 access pattern that connects each unrolled kernel port with it's neighbors using
 a FIFO or a shift register. If the temporal reuse distances between the accesses
-of neighboring PE ports are constant \cite{meeus} uses a shift register, otherwise
-they use a FIFO. The reuse distance between accesses of neighboring ports are
-then converted into storage of the same size. So if two ports share the same
-data but with a lag of 2 iterations in the iteration domain they're operating
-in, then a shift register of size 2 can be placed between them. Similar to the
-sliding window application explored in \cite{meeus} the reuse distances between
-the PEs processing the unrolled kernel in the convolution dataflow are also constant. To
-determine the reuse distances necessary between ports we can apply the analysis
-in \autoref{lst:poly:xy_buffer_sizing:analysis} adapted from \cite{meeus} to
-determine the sizing of the buffers in the reuse chain for IFmap accesses within
-a channel. The analysis in \autoref{lst:poly:xy_buffer_sizing:analysis} assumes
-a kernel size of 3x3. 
-
+of neighboring PE ports are constant \cite{meeus} uses a shift register,
+otherwise they use a FIFO. The reuse distance between accesses of neighboring
+ports are then converted into storage of the same size. So if two ports share
+the same data but with a lag of 2 iterations in the iteration domain they're
+operating in, then a shift register of size 2 can be placed between them.
+Similar to the sliding window application explored in \cite{meeus} the reuse
+distances between the PEs processing the unrolled kernel in the convolution
+dataflow are also constant. To determine the reuse distances necessary between
+ports we can apply the analysis in \autoref{lst:poly:xy_buffer_sizing:analysis}
+adapted from \cite{meeus} to determine the sizing of the buffers in the reuse
+chain for IFmap accesses within a channel. The analysis in
+\autoref{lst:poly:xy_buffer_sizing:analysis} assumes a kernel size of 3x3 based
+on the conclusions of
+\autoref{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_factors}. Note
+that 1x1 kernels exhibit no temporal reuse within the kernel loops.  
 
 \begin{lstlisting}[caption=Determining buffer sizes in 3x3 convolutions, label={lst:poly:xy_buffer_sizing:analysis}]
     ID:=[IFMAP_Y, IFMAP_X] -> {S[y,x]:y>=0 and x>=0 and y<=IFMAP_Y-3 and x<=IFMAP_X-3};
@@ -766,13 +770,9 @@ results in the updated template \autoref{fig:reuse_chain}.
 \subsection{Spatial Reuse Analysis}
 \label{chap:dda:hw_dse:spatial_reuse_analysis}
 
-So now we know the hierarchy needed to express X and Y reuse in IFmap. Applying
-the unroll factors in the target loops in the dataflow will yield a loop
-structure similar to the one in \ref{lst:conv_loops_unrolled_fully}. Using the
-convention established in \ref{chap:hw_dse:temporal_analysis}, each
-\ac{MAC} statement in the unrolled loop body has an associated j index. In the
+Each MAC statement in the unrolled loop body has an associated j index. In the
 loop body there exists duplicate memory accesses across individual \ac{MAC}
-spatial instances. Those duplicate accesses are highlighted in
+statements. Those duplicate accesses are highlighted in
 \autoref{lst:conv_loops_unrolled_fully} and they are the origin of spatial reuse
 in the dataflow. IFmaps exhibit spatial reuse with multicast communication w.r.t
 to filter loops. OFmap exhibit spatial reuse with reduction communication
@@ -809,21 +809,21 @@ for(int f = 0; f < F; f+=F_T) // Filter loop
 Applying the taxonomy in \autoref{fig:hw_taxonomy} to data elements that are
 spatially reused, IFmap channels that are spatially reused across unrolled
 filter loops can be broadcast with a bus. The reuse chain discussed in
-\autoref{chap:hw_dse:temporal_analysis} can be thought of as a
+\autoref{chap:dda:hw_dse:temporal_analysis} can be thought of as a
 Store\&Forward scheme to deliver individual IFmap channel data elements to the
 \ac{PE}s for reduction into OFmaps.Weights reused for channel iteration and are
 discarded. They exhibit no spatial reuse, just temporal. Therefore they should
 be kept in small on chip buffers, preferably close to the computation they are
 used in. OFmap exhibit spatial reuse across concurrent channels as well as
 temporal reuse across channel sets as discussed in
-\autoref{chap:hw_dse:temporal_analysis}. A reduction tree as in
+\autoref{chap:dda:hw_dse:temporal_analysis}. A reduction tree as in
 \autoref{fig:reduction_styles}.a or a systolic array reduce and fwd as in
 \autoref{fig:reduction_styles}.b are both possible assuming no restrictions
 arising from synthesis. Combining the reuse chain derived in
-\autoref{chap:hw_dse:temporal_analysis} with the required systolic
+\autoref{chap:dda:hw_dse:temporal_analysis} with the required systolic
 delays yields a simplification to the L1 memory present in
 \autoref{fig:reuse_chain}. This simplification is discussed in
-\autoref{chap:hw_dse:simplifying_hierarchy}.
+\autoref{chap:dda:hw_dse:simplifying_hierarchy}.
 
 
 \begin{figure}
@@ -846,7 +846,7 @@ delays yields a simplification to the L1 memory present in
 
 We can reinterpret the accesses made by the IFmap memory hierarchy in
 \autoref{fig:reuse_chain} as a stream function $F(i, t)$ whose output produces
-element from an IFmap channel. The variable $i$ is the port index of IFmap
+element from an IFmap channel. The variable $i$ is the port index of the IFmap
 hierarchy and $t$ is the time in cycles since the beginning of the convolution
 operation. A representation of this reinterpretation of the accesses made in the
 IFmap memory hierarchy can be seen in \autoref{fig:delay_proof}. Since it's
@@ -862,26 +862,25 @@ the size of the kernel being processed in direct mode.
                     0 & else
                 \end{cases} \\
     StreamSize = n(n-K)+(n-K) \\
-    A(i, t) = InitialOffset(i) + t\\
+    A(i, t) = InitialOffset(i) + t
 \end{gather}
 
-Each data element streamed from the IFmap depends on the an access function that
+Each data element streamed from the IFmap depends on an access function that
 also takes the same variables $i$ and $t$. Depending on the port index $i$ the
-access function for each port is composed on an initial offset in the IFmap and
-the current cycle count. The number of cycles in which output from the IFmap
-memory hierarchy can be produced is limited to the stream size of the IFmap
-currently being processed. The stream size is a function of the IFmap dimensions
+access function for each port is composed of an initial offset in the IFmap and
+the current cycle count $t$. A total of $StreatSize$ elements are streamed the IFmap
+memory hierarchy. The stream size is a function of the IFmap dimensions
 and the kernel Size. 
 
 \begin{gather}
     InitialOffset = C_in^2+Y_in+X_i \\
     C_i = \lfloor \frac{\lfloor \frac{i}{K} \rfloor}{K} \rfloor \\
     Y_i = (\lfloor \frac{i}{K} \rfloor ) \bmod K\\
-    X_i = i \bmod K = (i - \lfloor \frac{i}{K} \rfloor K)\\
+    X_i = i \bmod K = (i - \lfloor \frac{i}{K} \rfloor K)
 \end{gather}
 
 The initial offset function defines the initial index
-offset in the IFmap the stream starts from for each port $i$. It can be
+offset in the IFmap tensor where stream begins from for each port $i$. It can be
 decomposed into three main offsets. A channel offset $C_i$, a row offset $Y_i$
 and a column offset $X_i$. 
 
@@ -891,7 +890,7 @@ and a column offset $X_i$.
     0 & else
     \end{cases} \\
     \Delta_i = i \\
-    A_\Delta(i,t) = A(i, t) - \Delta_i\\
+    A_\Delta(i,t) = A(i, t) - \Delta_i
     % \hat{OFmap}(j) = \displaystyle\sum\limits_{i=0}^{ub(i)} A_\Delta(i, j+i)
 \end{gather}
 
@@ -924,10 +923,10 @@ groups of IFmap ports provided that we relax the start time constraints to the
 $\lceil \frac{i}{K} \rceil$ for each group of ports $\lfloor \frac{i}{K}
 \rfloor$. Delays in accessing IFmap data elements accross $K$ groups of ports
 as well as accross $K^2$ groups of ports accessing different channels still
-remain. This simplifying the hierarchy by removing the systolic delays thus still
-requiring complex delayed reads from the IFmap hierarchy which necessitates smart
+remain. This simplification of the IFmap memory hierarchy by removing the systolic delays still
+requires complex delayed reads from the IFmap hierarchy which necessitates smart
 SRAMS whose access times can be programmed. A discussion of these smart memories
-is presented in \autoref{chap:acc_sched:primitives:da-sram}. The final
+is presented in \autoref{chap:data_orchestration}. The final
 hardware implementation with the added IFmap memory hierarchy optimization
 discussed in this section is given in
 \autoref{fig:simplified_systolic_reduction}.
@@ -938,25 +937,41 @@ highlighted in red.
 \section{HERO: A Hybrid GEMM and Direct Conv. Accelerator}
 \label{chap:dda:hw_dse:final}
 
-TEMPO's analytical model is hardware implementation agnostic
-Tempo optimizes utilization given a library of networks + a pe budget
-TEMPO reports average utilization, latency, and access count 
-statistics
-Then move on hero-t-sim to cycle accurate simulation results
-Show performance for some popular networks
+After applying the simplification in
+\autoref{chap:dda:hw_dse:simplifying_hierarchy} we arrive at the final HERO
+template architecture variants in \autoref{fig:hero:horizontal} and
+\autoref{fig:hero:vertical}. Both figures illustrate templates with unroll
+factors for F, C loops undefined. Both variants in each of the figures represent
+two different spatial axis mappings for the unrolled kernel loops. Depending on
+the choice of axis mapping the effective channel concurrency available (in the
+horizontal case in \autoref{fig:hero:horizontal}) and the effective number
+filter concurrency available (in the vertical case in
+\autoref{fig:hero:vertical}) for 1x1 convolutions will change. A flexible
+any-to-anyinterconnect that allows arbitrary bank access is assumed to exist for
+both L3 IFmap memory and OFmap memory. Arbitrary access to any IFmap and OFmap
+bank enables flexible distribution of IFmap and OFmap data across multiple
+banks. The beenfit of this flexible distribution will be discussed in
+\autoref{chap:net_compile}. In addition to arbitrary IFmap bank access in
+\autoref{fig:hero:horizontal}, the IFmap interconnect enables broadcasting of
+IFmap pixels vertically to all filters rows in HERO as well as broadcasting
+IFmap pixels accross groups of PEs for 3x3 kernel computations. The choice of
+which spatial axis mapping and F and C unroll factors is discussed further in
+\autoref{chap:arch_dimensioning} where these HERO template parameters are
+optimized based on the layer configurations present in the TIMM Library's
+networks.   
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-t-horizontal.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \label{fig:hero:horizontal}
 \end{figure}
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-t-verticle.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \label{fig:hero:vertical}
 \end{figure}
 
 

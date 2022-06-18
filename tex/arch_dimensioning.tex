@@ -1,5 +1,5 @@
 \chapter{Architecture Dimensioning}
-\label{chap:conv_gemm_equiv}
+\label{chap:arch_dimensioning}
 
 \section{Exploring the dataflow design space with TEMPO}
 \label{chap:dataflow_dse:exploring}
@@ -13,29 +13,27 @@
 
 From the previous section we have concluded that loops F, C, KY and KX are all
 unroll targets, and KY and KX loops should be unrolled assuming that 1x1 and 3x3
-kernels are supported directly. Additionally, the loop ordering of F and C loops
-was discussed as well as it's implications with regards to on-chip memory
-sizing. What remains of the dataflow design space is the unroll factors for F
+kernels are supported directly. What remains of the dataflow design space is the unroll factors for F
 and C loops as well as the accelerator spatial axis mapping for all unrolled
 loops F, C, KY, KX. From this point these parameters will be referred to as
-accelerator template paremeters from which a concrete accelerator instance can
+HERO template paremeters from which a concrete accelerator instance can
 be defined. These accelerator template parameters define the number of
 processing engines allocated to process channels, filters, and kernels
-concurrently in the concrete architectures. An illustration of this \ac{PE}
+concurrently in the a HERO instance. An illustration of this \ac{PE}
 allocation is present in \autoref{fig:axis_mapping}. The space of possible
 unroll factors is as large as the space of possible loop upperbounds for the
 afformentioned unrolled loops. However, as discussed earlier, some combinations
 of loop upperbounds are unlikely in real networks. Additionally, spatial axis
 mapping affects the effective unroll factors when executing different
 convolution layers than the ones assumed when unrolling said loops. This further
-expands the design space of a concrete accelerator's template parameters. To
+expands the design space of a possible template parameters. To
 effectively explore the space of loop unroll factors and accelerator spatial
 axis mapping we introduce \ac{TEMPO}, a dataflow exploration and analysis tool
 used to optimize an accelerator's weight stationary dataflow based on a target
 CNN library as well as an arbitrary objective function. A discussion of
 \ac{TEMPO}'s algorithm model is presented in
 \autoref{chap:dataflow_dse:exploring:algorithm} as well as it's analytical model
-in in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
+in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
 of running \ac{TEMPO} on CIGAR's library of CNNs are presented in
 \autoref{chap:dataflow_dse:exploring:results}. 
 
@@ -54,20 +52,19 @@ expects the following inputs.
 \item Set of kernels supported directly  $kernels_{supported}$ 
 \end{itemize}
 
-Tempo then produces an optimal filter, channel unroll factors and kernel axis
+TEMPO then produces an optimal filter, channel unroll factors and kernel axis
 mapping that maximizes the given objective function under the $pe_{budget}$
 constraint specified. 
 
-In algorithm \ref{alg:tempo_algo} TEMPO effectively runs an optimization program
-that performs the optimization in \autoref{math:tempo_algo_tldr} where for some
-arbitrary objective function $obj\_fn$ is evaluated using some template config and
-the model library. The objective function is a function that evaluates an
-architectures score based on any of metrics discussed in
-\autoref{chap:dataflow_dse:exploring:tempo_model} and layers in the model
-library $model^{stats}_{dict}$. Prior to the search being performed algorithm
-\ref{alg:tempo_algo} converts all layer not supported directly in the model to
-1x1 equivelent layers based on the method discussed in
-\autoref{chap:conv_gemm_equiv}.
+In algorithm \ref{alg:tempo_algo} TEMPO effectively runs an exhaustive search
+using an objective function $obj\_fn$ and a set of layers from a model library.
+The objective function is a function that evaluates an architectures score when
+executing layers in the model library $model^{stats}_{dict}$. An architcture
+score is based on any of the metrics that will be discussed in
+\autoref{chap:dataflow_dse:exploring:tempo_model}. Prior to the search being
+performed algorithm \ref{alg:tempo_algo} converts all layer not supported
+directly in the model to 1x1 equivelent layers based on the equivelence method
+that will be discussed in \autoref{chap:net_compile}.
 
 \begin{equation}
     \begin{aligned}
