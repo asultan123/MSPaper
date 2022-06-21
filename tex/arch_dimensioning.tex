@@ -1,7 +1,7 @@
 \chapter{Architecture Dimensioning}
 \label{chap:arch_dimensioning}
 
-\section{Exploring the dataflow design space with TEMPO}
+\section{Exploring what remains of the dataflow design space with TEMPO}
 \label{chap:dataflow_dse:exploring}
 
 \begin{figure}[]
@@ -32,9 +32,9 @@ axis mapping we introduce \ac{TEMPO}, a dataflow exploration and analysis tool
 used to optimize an accelerator's weight stationary dataflow based on a target
 CNN library as well as an arbitrary objective function. A discussion of
 \ac{TEMPO}'s algorithm model is presented in
-\autoref{chap:dataflow_dse:exploring:algorithm} as well as it's analytical model
-in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
-of running \ac{TEMPO} on CIGAR's library of CNNs are presented in
+\autoref{chap:dataflow_dse:exploring:algorithm} as well as it's analytical models
+for utilization, latency and access counts, in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
+of running \ac{TEMPO} on TIMMS's library of networks is presented in
 \autoref{chap:dataflow_dse:exploring:results}. 
 
 \section{TEMPO Algorithm}
@@ -46,7 +46,7 @@ mappings by exhaustively iterating through the space of possible values. TEMPO
 expects the following inputs. 
 
 \begin{itemize}
-\item Processed $model^{stats}_{dict}$ from CIGAR
+\item Processed $model^{stats}_{dict}$ from TIMM
 \item An objective function $obj\_fn$
 \item Maximum $pe_{budget}$ 
 \item Set of kernels supported directly  $kernels_{supported}$ 
@@ -55,7 +55,6 @@ expects the following inputs.
 TEMPO then produces an optimal filter, channel unroll factors and kernel axis
 mapping that maximizes the given objective function under the $pe_{budget}$
 constraint specified. 
-
 In algorithm \ref{alg:tempo_algo} TEMPO effectively runs an exhaustive search
 using an objective function $obj\_fn$ and a set of layers from a model library.
 The objective function is a function that evaluates an architectures score when
@@ -64,7 +63,7 @@ score is based on any of the metrics that will be discussed in
 \autoref{chap:dataflow_dse:exploring:tempo_model}. Prior to the search being
 performed algorithm \ref{alg:tempo_algo} converts all layer not supported
 directly in the model to 1x1 equivelent layers based on the equivelence method
-that will be discussed in \autoref{chap:net_compile}.
+that discussed in \autoref{chap:dda:dataflow_dse:indirect_mode}.
 
 \begin{equation}
     \begin{aligned}
@@ -104,88 +103,46 @@ that will be discussed in \autoref{chap:net_compile}.
 \section{TEMPO analytical model}
 \label{chap:dataflow_dse:exploring:tempo_model}
 
-\subsection{Layer equivelence}
-\label{chap:dataflow_dse:exploring:tempo_model:layer_equivelence}
-
-In TEMPO's analytical model, an automatic layer conversion step is performed to
-change the dimensionality of the IFmap and Weight tensors on the basis of
-whether a layer's kernel size is supported directly or not. This conversion
-follows the approach outlined in \autoref{chap:conv_gemm_equiv} which is used to
-extend support to unsupported convolution layers. Wheather or not a convolution
-layer's kernel size is supported directly has an effect on the assumed
-dimensionalities of the IFmap and Weight tensors as well as the kernel loops
-unroll factor K. Kernels are assumed to be symmetric so both kernel KY and KX
-loops and share a single unroll factor $K_{unroll}$. If the convolution layer's
-kernel size is supported directly no changes are assumed to have been made to
-the dimensionality of the input. The kernel unroll factor is then equal to the
-kernel size of the layer in accordance with the conclusions drawn from
-\autoref{chap:dataflow_dse:pruning:applying_it:loop_unroll_factors}. However, if
-a convolutions layer's kernel size is not supported directly, the layer's kernel
-size is converted to 1x1 as seen in \autoref{math:K_unroll_factor} and lowering
-is assumed to have been performed on IFmap and Weight tensors in accordance with
-the approach discussed in \autoref{chap:conv_gemm_equiv}. For a convolution
-layer with IFmap dimensionality $R^{C\times n\times n}$, Weight dimensionality
-$R^{F\times C\times K\times K}$ and OFmap dimensionality $R^{F\times m\times m}$
-the layer's new filter count $\hat{F}$, channel count $\hat{C}$, and IFmap
-channel size $\hat{Z}$ values are reflected in \autoref{math:layer_equivelence}. 
-
-\begin{align}
-    \begin{gathered}
-        K_{unroll} = \begin{cases} K & K \in \{SupportedKernels\}\\1 &K \notin \{SupportedKernels\}\end{cases}
-            \end{gathered}
-    \label{math:K_unroll_factor}
-\end{align}
-
-\begin{align}
-    \begin{gathered}
-        \hat{C} = \begin{cases} C &  K \in \{SupportedKernels\}\\ CK & K \notin \{SupportedKernels\}\end{cases} \\
-        \hat{F} = \begin{cases} F &  K \in \{SupportedKernels\}\\ FK & K \notin \{SupportedKernels\}\end{cases} \\
-        \hat{Z} = \begin{cases} m^2 &  K \in \{SupportedKernels\}\\ nm & K \notin \{SupportedKernels\}\end{cases}
-            \end{gathered}
-    \label{math:layer_equivelence}
-\end{align}
-
-\subsection{Axis mapping}
-\label{chap:dataflow_dse:exploring:tempo_model:axis_mapping}
-
-When determining axis mapping, F and C loops are assumed to be bound to an
-accelerator's verticle and horizontal spatial axis. Utilizing both axis results
-in better overall on-chip area utilization assuming conventional 2 dimensional
-constraints for chip fabrication. Mapping all loops to the same axis can provide
-the most flexibility with regards to the allocation of PEs as a resource to
-process different filters, channels and kernels. However, this complicates on
-chip connectivity and is not considered by TEMPO. KY and KX loops can then be
-bound to either the horizontal or veticle axis of an accelerator based on the
-variable $K_{axis}$.  Depending on which axis KY and KX loops are mapped, the
-effective unroll factors for F and C loops ($F_{eff}$ and $C_{eff}$) are
-changed. If the unrolled kernel loops share the same axis as the C loops, the
-effective $C_{unroll}$ factor for the C loops is then $\lfloor
-\frac{C_{unroll}}{K_{unroll}} \rfloor$ which means the effective C unroll factor
-decreases depending on the size of the kernel unroll factor. This decrease in
-effective unroll factor arises from the fact that, within the same axis as the C
-loops, \ac{PE}s are allocated to process a single $K^2_{unroll}$ kernel. This
-results in a decrease of \ac{PE}s available to process other channels
-concurrently. The same logic applies to F loops if the Kernel loops are mapped
-to the same axis verticle axis as they are. This idea is presented in
-\autoref{math:effective_unroll_factors_c} and
-\autoref{math:effective_unroll_factors_f}. In both equations $F_{unroll}$ and
-$C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
+On-chip memory constraints are ignored for each of the metrics evaluated using
+TEMPO's analytical model. This means that TEMPO's results are the most accurate
+when there are no constraints for on-chip memory. On-chip memory constraints may
+limit available concurrency in a layer which will cause PEs to be underutilized.
+To clarify why this happens, assume we have a convolution layer with a kernel
+size of (k, k) and an ifmap of size 2 MB. Additionally, assume a single channel
+of that ifmap is 512 KB. If the available on-chip ifmap memory is constrained to
+512 KB the accelerator can only process one channel at a time despite the
+existence of 4 channels in the ifmap tensor. If there are many PE's dedicated to
+processing channels concurrently then PE utilization will suffer due to the
+single channel restriction mentioned earlier. If constraints for on-chip memory
+are required then an additional layer decomposition step is necessary in order
+to properly evalute all metrics that can be calculated using TEMPO's analytical
+model. The inclusion of on-chip memory constraints in TEMPO's analytical model
+are left as part of future work.  
 
 
-\begin{align}
-    \begin{gathered}
-        C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Verticle\end{cases} \\
-        \end{gathered}
-    \label{math:effective_unroll_factors_c}
-\end{align}
-\begin{align}
-    \begin{gathered}
-        F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Verticle\\ F_{unroll} & K_{axis} = Horizontal\end{cases} \\
-        \end{gathered}
-    \label{math:effective_unroll_factors_f}
-\end{align}
+% \subsection{Layer equivelence}
+% \label{chap:dataflow_dse:exploring:tempo_model:layer_equivelence}
 
-\subsection{Metric: Utilization}
+% In TEMPO's analytical model, an automatic layer conversion step is performed to
+% change the dimensionality of the IFmap and Weight tensors on the basis of
+% whether a layer's kernel size is supported directly or not. This conversion will
+% be outlined in more detail in \autoref{chap:net_compile} which is used to extend
+% support to unsupported convolution layers. Layer equivelence affects the
+% dimentionality of the layers being executed on HERO and as a result it affects
+% the anticipated utilization of the HERO architecture's PEs. Layer equivelence
+% assumes a lowering/lifting step is performed for kernel sizes that are not (1,
+% 1) and (3, 3). As discussed earlier in \autoref{chap:background:intro}, there
+% are several lowering techniques available that increase the size of the ifmap
+% and ofmap tensors. Of the techniques discussed is balanced lowering that aims to
+% strike a balance between the memory ineficciency of lower and
+% computational complexity of lowering an lifting. Balanced lowering/lifting is assumed to
+% have been performed on the layers that are not directly supported by HERO.
+% Lowering and lifting affect the kernel unroll factors assumed by HERO where
+% unsupported layers with non (1, 1) and (3, 3) kernels are assumed to have (1, 1)
+% kernl sizes  
+
+
+\subsection{Utilization}
 \label{chap:dataflow_dse:exploring:tempo_model:utilization}
 
 \begin{figure}[]
@@ -197,8 +154,7 @@ $C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
 
 TEMPO models accelerator utilization based on how the template parameters (loop
 unroll factors and loop axis mapping) tile and pad a convolution layer's
-stationary weight tensor.  Kernel axis mapping is assumed to be inflexible
-across accelerator spatial axis at runtime. An illustration of TEMPO's
+stationary weight tensor.  Kernel axis mapping is assumed to be fixed in HERO. An illustration of TEMPO's
 utilization model in action is present in \autoref{fig:tempo_model}. In
 \autoref{fig:tempo_model} a layer with a weight tensor of dimensionality
 $R^{6\times 3\times 2\times 2}$ is tiled and padded based on the template
@@ -218,12 +174,13 @@ number of tiles is then reflected in \autoref{math:total_tiles}.
     \label{math:total_tiles}
 \end{align}
 
-Utilization is calculated on a per-tile basis. There are two different types of
-tiles, padded and unpadded, each with their own utilization calculation. Layer
-utilization is then an average of the utilizations of each tile type weighted by
-their frequency of occurence in the layer as reflect in
-\autoref{math:layer_utilization}. For brevity each of the utilization equations
-are multiplied by their frequency of occurence in the same equation. 
+Since HERO processes the weight tensor in tiles, utilization is calculated on a
+per-tile basis. There are two different types of tiles, padded and unpadded,
+each with their own utilization calculation. Layer utilization is then an
+average of the utilizations of each tile type weighted by their frequency of
+occurence in the layer as reflect in \autoref{math:layer_utilization}. For
+brevity each of the utilization equations are multiplied by their frequency of
+occurence in the same equation. 
 
 \begin{align}
     \begin{gathered}
@@ -314,7 +271,7 @@ variation is given in \autoref{math:tile_utilization_padded_both}.
     \label{math:tile_utilization_padded_both}
 \end{align}
 
-\subsection{Metric: Latency}
+\subsection{Latency}
 \label{chap:dataflow_dse:exploring:tempo_model:latency}
 
 Estimating latency follows the same tiling model discussed the previous
@@ -346,7 +303,7 @@ however, that is left as part of future work.
     \label{math:latency_lowering_lifting}
 \end{align}
 
-\subsection{Metric: Memory access counts}
+\subsection{Memory access counts}
 \label{chap:dataflow_dse:exploring:tempo_model:access_counts}
 
 Following the tiling model discussed earlier, memory access counts are
@@ -390,8 +347,17 @@ combination of all the discussed metrics in
 \autoref{chap:dataflow_dse:exploring:tempo_model}
 \autoref{math:tempo_results_obj_fn} defines an objective function based solely
 on the average layer utilization metric over the entire set of convolution
-layers in CIGAR's model library. Layer utilization is evaluated based on the
-discussion in \autoref{chap:dataflow_dse:exploring:tempo_model:utilization}. 
+layers in TIMM's model library. Layer utilization is evaluated based on the
+discussion in \autoref{chap:dataflow_dse:exploring:tempo_model:utilization}.
+Results for optimal configurations are given in \autoref{fig:tempo_results}.
+\autoref{fig:tempo_results} shows a boxplot of average layer utilizations under
+different utilization optimal configurations found with TEMPO. Median
+utilization achieved for the architecture with 576 PEs was 98\%. As stated
+earlier, TEMPO does not consider any restrictions for on-chip memory. This may
+affect utilization results due to limited available concurrency in a layer.
+Regardless, the configurations suggested by TEMPO in \autoref{fig:tempo_results} without on-chip memory
+constraints are a good starting point for generating results from a cycle
+accurate model of HERO.
 
 \begin{equation}
         obj\_fn \gets average (\{LayerUtilization(layers)\space|\space \forall layers \in m, \forall m \in \{ModelLibrary\}\})
@@ -400,7 +366,7 @@ discussion in \autoref{chap:dataflow_dse:exploring:tempo_model:utilization}.
 
 \begin{figure}[]
     \centering
-    \includegraphics[scale=0.4]{fig/axis_mapping.pdf}
-    \caption{\ac{GEMM} and 1x1 Convolution Equivelence}
-    \label{fig:axis_mapping}
+    \includegraphics[scale=0.4]{Plots/tempo.pdf}
+    \caption{Utilization results for different optimal configurations found using TEMPO}
+    \label{fig:tempo_results}
 \end{figure}

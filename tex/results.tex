@@ -55,3 +55,32 @@ no actual simulation of DRAM occurs.
 Prominent model's convolution layers were are assessed using the simulation platform  
 namely resnet-50 mobilenetv3 and vgg16. Performance for each of the three conrete
 architectures suggested by tempo is reported below.
+
+
+
+
+% Resources
+\subsection{Overhead of extending support}
+\label{chap:conv_gemm_equiv:overhead}
+
+Lowering and lifting introduce additional overheads with regards to latency and
+tensor sizing. The latency for performing balanced lowering and lifting is
+$m^{2}K$ for a layer with a Weight tensor $\mathbb{R}^{F\times C\times K\times
+K}$ and an OFmap tensor $\mathbb{R}^{F\times m\times m\times}$. While lowering
+and lifting can be performed by a convolutions accelerator, in this thesis it is
+assumed that a software processor on the same chip performs these operations.
+Lowering also introduces duplicate data elements in the IFmap tensor thus
+increasing it's overall size. In this thesis, it is assumed that on-chip memory
+can account for this increase and that any additional DRAM accesses incurred
+from lowering will be included in energy calculations when reporting energy
+consumption of the accelerator.
+
+To enable GEMM operations using the approach in
+\autoref{chap:conv_gemm_equiv:proof} both input and output matricies are
+transposed and reshaped. All reshape operations discussed in this chapter add a
+dimention of size 1 to the data and they incur no data reorganization overhead.
+Additionally, all transpose operations are assumed to be performed during
+transfer to and from accelerator on-chip and thus incur no latency penalty. A
+discussion of how transfers to and from on-chip memory can mask the latency of
+transposing matricies is left as part of future work along with incorporating
+lowering and lifting into the accelerator. 
