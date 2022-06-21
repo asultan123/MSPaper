@@ -2,36 +2,131 @@
 \label{chap:net_compile}
 
 \section{Layer Decomposition}
+\label{chap:net_compile:layer_decomposition}
 
-% \subsubsection{Loop SCheduling}
-% \label{chap:dataflow_dse:pruning:applying_it:loop_ordering}
+Given the potential restrictions on chip area, a hero instance may have
+insufficient on-chip storage available to hold ifmap and ofmap memory on chip
+during layer processing. This results in the need for a way to decompose a
+larger layer into sublayers that can fit in the accelerator's on-chip memory.
+Decomposition can occur due to either large ifmap or large ofmaps or in some cases
+both. In this work it's assumed that decomposition occurs accross channel and
+filter axis for input and output feature maps. Decomposition can occur by
+decomposing large fmaps along the width and height dimentions however that
+complicates the process of aggregating sub layers. This is due to the potential overlaps
+of kernel windows accross decomposition boundaries. This issue arises
+specifically with (3, 3) kernels under direct mode in HERO. In layers with (1,
+1) kernel sizes no overlaps accross decomposition boundaries can occur due to
+the small kernel size. 
 
-% % In the final template there are 4 template parameters that are customizable
-% % depending on the target performance/area/energy efficiency requirements of the
-% % acclerator. The first and the second are the unroll factors for filters
-% % ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
-% % supported kernels. Finally the fourth is the spatial axis mapping of the kernel
-% % loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
-% % required for the different memories accessed.
+Depending on the cause of layer decomposition, the dimensionality of either the
+input or output featuremaps may change. Beginning with the case of decomposition due
+to large ifmap tensors, \autoref{fig:ifmap_decomposition} shows how an ifmap
+of size (4, 4) with 4 channels is decomposed into two separate ifmap tensors
+each with 2 channels. Each sub layer consists of half the ifmap tensor. Sub
+layers are processed sequentially. When
+processing the second sub layer a bias is assumed to be loaded in which contains
+the partial sums from the first sub layer's output. Once the second sub layer's
+output is computed the final ofmap for the filter being processed becomes
+available. An illustration of how ifmap decomposition affects weight tiling is
+available in \autoref{fig:ifmap_decomposition:weight_tiling}. When decomposing a
+large featuremap along the channel axis, the weight tensor has to also be
+decomposed. Using the tiling representation of weight tensors, ifmap based
+decomposition halves the size of tiles being processed by the architecture. 
 
-% \begin{figure}
-%     \centering
-%     \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
-%     \hspace{0.1cm} 
-%     \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
-%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
-%     \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator template parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) archictural illustration}
-%     \label{fig:Fmap_scaling}
-% \end{figure}
 
-% \begin{figure}
-%     \centering
-%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
-%     \hspace{0.1cm} 
-%     \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
-%     \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
-%     \label{fig:tile_scheduling}
-% \end{figure}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.25]{fig/ifmap_decomposition.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:ifmap_decomposition}
+\end{figure}
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.4]{fig/ifmap_decomposition_tiling_repr.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:ifmap_decomposition:weight_tiling}
+\end{figure}
+
+Decomposition due to large ofmaps follows the same logic as in the ifmap case.
+An illustration of ofmap based decompsotion is available in
+\autoref{fig:ofmap_decomposition:weight_tiling}. If on-chip memory is
+insufficient for storing partial sums of large ofmaps from different the layer will be
+decomposed into sub layers that will process only a portion of the available
+filters in the layers. Ofmap based layer decomposition is also used when
+processing depthwise convolution layers given that they are not supported
+directly by HERO.  
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.4]{fig/ofmap_decomposition_tiling_repr.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:ofmap_decomposition:weight_tiling}
+\end{figure}
+
+Decomposition primarily affects PE utilization since it may limit available
+concurrency when processing channels and filters. In some cases it may cause a
+significant reduction of PE utilization. In cases of low utilization due to
+layer decomposition other forms of concurrency may need to be supported beyond
+the filter/ channel/ kernel concurrency chosen by HERO. An exploration of other
+forms of concurrency is left as part of future work. 
+
+\section{Layer Scheduling}
+\label{chap:net_compile:layer_scheduling}
+
+On-chip storage requriements for ifmaps and ofmaps are influenced by the
+ordering of tiles in the tiling representation of weights discussed in
+\autoref{chap:dda}. The order of processing weight tiles is equivelent to the
+ordering of the F, and C loops in the loop based representation of the
+convolution operation discussed in \autoref{chap:dda}. Processing tiles in F, C
+order (ASAP) results in retiring output featuremaps as soon as possible while retaining
+input featuremaps for as long as possible. Conversly, processing tiles in C, F
+order (ALAP) retains output featuremaps for as long as possible while retiring ifmaps
+as soon as possible. An illustration of ASAP and ALAP tile schedules in
+available in \autoref{fig:tile_scheduling}. 
+% In the final template there are 4 template parameters that are customizable
+% depending on the target performance/area/energy efficiency requirements of the
+% acclerator. The first and the second are the unroll factors for filters
+% ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
+% supported kernels. Finally the fourth is the spatial axis mapping of the kernel
+% loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
+% required for the different memories accessed.
+
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
+    \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
+    \label{fig:tile_scheduling}
+\end{figure}
+
+An illustration of this architectural tradeoff is present
+in \autoref{fig:Fmap_scaling}.c. Note that depending on the tile scheduling
+chosen, different HERO template parameters affect the scaling of different
+on-chip memories. For example, under ASAP, input featuremap memory requriements
+remain unchanged with any template parameters, however, ofmap memory scales
+with the architecture's filter unroll factor. Under ALAP ofmap memory remains
+unaffected by any of HERO's template paramaters, however, ifmap memory scales
+with the architecture's channel unroll factor. An illustration of how both
+memories scale with tempalate paramaters is given in
+\autoref{fig:Fmap_scaling}.a \& \autoref{fig:Fmap_scaling}.b. 
+
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
+    \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator template parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) archictural illustration}
+    \label{fig:Fmap_scaling}
+\end{figure}
+
+In this work ASAP scheduling is always assumed given the relatively poor scaling
+of ofmap memory with architecture template paramaters. This poor scaling is due
+to the necessity of storing ofmap elements using higher precision values to
+prevent numeric overflow. 
 
 
 % While a weight stationary offers limited flexibility with regards to loop
@@ -78,7 +173,7 @@
 % DRAM accesses for feature maps. An exploration of the effect of loop blocking
 % under more restrictive area constraints is relegated to future work. 
 
-% \clearpage
+\clearpage
 
 
 \section{Descriptor Generation}

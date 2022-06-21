@@ -339,8 +339,10 @@ weight access counts are given in \autoref{math:memory_access_weights}.
 \section{TEMPO results}
 \label{chap:dataflow_dse:exploring:results}
 
-\subsection{Assumed objective function}
-\label{chap:dataflow_dse:exploring:results:obj_fn}
+\begin{equation}
+    obj\_fn \gets average (\{LayerUtilization(layers)\space|\space \forall layers \in m, \forall m \in \{ModelLibrary\}\})
+\label{math:tempo_results_obj_fn}
+\end{equation}
 
 Since TEMPO expects an objective function to maximize based on any or a
 combination of all the discussed metrics in
@@ -352,21 +354,18 @@ discussion in \autoref{chap:dataflow_dse:exploring:tempo_model:utilization}.
 Results for optimal configurations are given in \autoref{fig:tempo_results}.
 \autoref{fig:tempo_results} shows a boxplot of average layer utilizations under
 different utilization optimal configurations found with TEMPO. Median
-utilization achieved for the architecture with 576 PEs was 98\%. As stated
-earlier, TEMPO does not consider any restrictions for on-chip memory. This may
-affect utilization results due to limited available concurrency in a layer.
-Regardless, the configurations suggested by TEMPO in \autoref{fig:tempo_results} without on-chip memory
-constraints are a good starting point for generating results from a cycle
+utilization achieved for the architecture with 576 PEs was 98\% however outlier
+utilization can drop to as low as 2\%. As stated earlier, TEMPO does not
+consider any restrictions for on-chip memory. This may affect utilization
+results due to limited available concurrency in a layer. Regardless, the
+configurations suggested by TEMPO in \autoref{fig:tempo_results} without on-chip
+memory constraints are a good starting point for generating results from a cycle
 accurate model of HERO.
 
-\begin{equation}
-        obj\_fn \gets average (\{LayerUtilization(layers)\space|\space \forall layers \in m, \forall m \in \{ModelLibrary\}\})
-    \label{math:tempo_results_obj_fn}
-\end{equation}
 
 \begin{figure}[]
     \centering
-    \includegraphics[scale=0.4]{Plots/tempo.pdf}
+    \includegraphics[scale=0.7]{Plots/tempo.pdf}
     \caption{Utilization results for different optimal configurations found using TEMPO}
     \label{fig:tempo_results}
 \end{figure}
