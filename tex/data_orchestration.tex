@@ -2,31 +2,29 @@
 \label{chap:data_orchestration}
 
 To coordinate IFmap reads, OFmap read-modify-writes and Weight reads based on
-the final implementation in \autoref{chap:hw_dse:intro} we need smart
+the final implementation in \autoref{chap:dda:hw_dse:final} we need smart
 programmable memories that can 1) perform timed reads and writes between
-themselves and processing engines and 2) perform timed data transfers between
+themselves and PEs and 2) perform timed data transfers between
 themselves and other programmable memories. In this chapter, we introduce \ac{SAM}s, a programmable memory
 primitive that can execute descriptor based programs. Depending on the
 composition of these descriptor based programs, timed reads and writes can be
-made by on SAMs to and from processing engines. Additionally, with sufficient
+made by on-chip SAMs to and from processing engines. Additionally, with sufficient
 connectivity between SAMs as well as implicit coordination between different SAM
 programs we can orchestrate timed data transfers between SAMS. In this chapter
-we first discuss the structure of a SAM in \autoref{chap:sams:structure}
+we first discuss the structure of a SAM in \autoref{chap:data_orchestration:sams:structure}
 followed by the functional behavior of a SAMs address generator controller in
-\autoref{chap:sams:controller}. We then introduce descriptor based programs in
-\autoref{chap:sams:programs}, specifically the different types of descriptors
-available in \autoref{chap:sams:descriptor_types} as well as the different types
+\autoref{chap:data_orchestration:sams:controller}. Finally we introduce descriptor based programs in
+\autoref{chap:data_orchestration:sams:programs}, specifically the different types of descriptors
+available in \autoref{chap:data_orchestration:sams:descriptor_types} as well as the different types
 of memory transactions possible using coordinating descriptor based programs in
-\autoref{chap:sams:memory_transactions}. Finally, in \autoref{chap:sams:acc_scheduling}
-we show how SAMs can be used to schedule convolution operations in the final
-hardware implementation of \autoref{chap:hw_dse:intro}.
+\autoref{chap:data_orchestration:sams:memory_transactions}.
 % Finally a Verilog
 % implementation a Zynq7020 based SOC is discussed in
 % \autoref{chap:sams:verilog_implementation}. 
 
 \clearpage
 \section{Structure of a SAM}
-\label{chap:sams:structure}
+\label{chap:data_orchestration:sams:structure}
 
 \begin{figure}
     \centering
@@ -50,7 +48,7 @@ generators are equipped with an external memory mapped interface to allow
 transfer of descriptor programs from an a software based co-processor.
 
 \section{Address generator controller}
-\label{chap:sams:controller}
+\label{chap:data_orchestration:sams:controller}
 
 The finite state machine of address generator controllers is presented in
 \autoref{fig:ag_fsm}. After an initial reset, the controller waits until the
@@ -65,7 +63,7 @@ When the enable signal is re-asserted the controller goes back to the execute
 state. Once a descriptor is retired, the controller reads the next descriptor
 from the program memory and begins executing it without leaving the execute
 state. If the controller's cur\_desc pointer points to a suspend descriptor
-execution terminates the controller enters a suspend state.
+execution terminates and the controller enters a suspend state.
 
 \begin{figure}
     \centering
@@ -87,17 +85,17 @@ execution terminates the controller enters a suspend state.
 \end{figure}
 
 \section{Descriptor based programs}
-\label{chap:sams:programs}
+\label{chap:data_orchestration:sams:programs}
 
 Descriptor based programs are inspired by \cite{2d_dma_book} where the authors
-illustrates different ways to program a model Blackfin processor's DMA using
+illustrate different ways to program a model Blackfin processor's DMA using
 various descriptor configurations. The main difference between this work's
 approach to descriptors and \cite{2d_dma_book} is the inclusion of timing and
 hybrid access/timing descriptors that allow more complicated memory transactions
 to occur between SAMs.
 
 \subsection{Descriptor Types}
-\label{chap:sams:descriptor_types}
+\label{chap:data_orchestration:sams:descriptor_types}
 
 % TODO: Need to discuss nuances of descriptors being retired and how long it
 % takes to switch to a new descriptor (edge cases of first descriptor vs middle
@@ -109,18 +107,16 @@ to occur between SAMs.
 
 Before discussing descriptor based programs we must first discuss the properties
 of individual descriptors. Each descriptor can be represented as a struct as
-depicted in \autoref{lst:descriptor}. In a single descriptor, the state field
-describes the type of the descriptor. There are four different types of
-descriptors. Generate descriptors used for generating address streams.
-Stuttering descriptors used for generating stuttered address streams where the
-address streams are interrupted at predefined intervals. Wait descriptors that
+depicted in \autoref{lst:descriptor}. In a single descriptor, the type field
+describes the type of the descriptor. There are three different types of
+descriptors. Generate descriptors used for generating address streams. Wait descriptors that
 pause execution of descriptor based programs for a set number of cycles. Lastly,
 suspend descriptors used to mark the termination of a descriptor based program.
 
 \begin{lstlisting}[language=C, caption=Descriptor Struct, label={lst:descriptor}]
 struct Descriptor
 {
-    DescriptorState state; 
+    DescriptorType type; 
     unsigned int start;
     unsigned int x_count;
     int x_modify;
@@ -129,31 +125,34 @@ struct Descriptor
 };
 \end{lstlisting}
 
-Each descriptor can be thought of as a self contained program. For generate
-descriptors a C code representation for their execution behavior when they are executed
-by an address generator is given in \autoref{lst:descriptor:generator}. The
-output signals from the address generator "en" and "addr" are referred to as
-global variables in \autoref{lst:descriptor:generator}. Suspend descriptors are
-the simplest of the different descriptor types. All fields except the state
-field are set to 0 in the descriptor struct. The state field is set to some
-predetermined value that represents the SUSPEND state. The next simplest
-descriptor is the wait descriptor which can be represented using the for loop
-representation in \autoref{lst:descriptor:wait} where the SRAM port enable pin is
-de-asserted and a busy loop runs for x\_count cycles. The wait descriptor is used
-to synchronize different descriptor programs across SAMs as well as create timed
-writes and reads to and from SAMs.
+Each descriptor can be thought of as a self contained address stream generation
+program. The C code representation for the generate and wait descriptor types is
+given in \autoref{lst:descriptor:generator} and \autoref{lst:descriptor:wait}.
+Suspend descriptors are the simplest of the different descriptor types. All
+fields except the type field are set to 0 in the descriptor struct. The state
+field is set to some predetermined value that represents the SUSPEND state.
+
+In both generate and wait c code listings, the output signals from the address
+generator "en" and "addr" are referred to as global variables. In
+\autoref{lst:descriptor:wait}, the wait descriptor is represented as a for loop
+that runs for x\_count iterations while the SRAM port enable pin is de-asserted.
+The address output signal is left undefined as it has no effect when the SRAM
+port enable pin is de-asserted. 
+The wait descriptor is used to synchronize different descriptor programs across
+SAMs as well as create timed writes and reads to and from SAMs.
+
 
 \begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:wait}]
     en = 0;
     for(int x = 0; x < x_count; x++);
 \end{lstlisting}
 
-Generate descriptors use the y\_count, and x\_count fields in the descriptor struct
-to define the upper bounds for two nested loops within which an addr
-variable is incremented by x\_modify in the inner loop and y\_modify in the
-outer loop. The "addr" output signal is initialized with the contents of the
-start field and the "en" signal is asserted for the duration of the descriptors
-execution.
+In \autoref{lst:descriptor:generator}, generate descriptors use the y\_count,
+and x\_count fields in the descriptor struct to define the upper bounds for two
+nested loops within which an addr variable is incremented by x\_modify in the
+inner loop and y\_modify in the outer loop. The "addr" output signal is
+initialized with the contents of the start field and the "en" signal is asserted
+for the duration of the descriptors execution.
 
 \begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:generator}]
 en = 1;
@@ -187,9 +186,9 @@ for(int y = 0; y < y_count; y++)
 % \end{lstlisting}
 
 \subsection{Creating timed memory operations with descriptor programs}
-\label{chap:sams:memory_transactions}
+\label{chap:data_orchestration:sams:memory_transactions}
 
-Depending on the composition of different descriptor programs one can create
+Depending on the composition of different descriptor programs we can create
 timed memory operations with SAMs. An illustration of some of the possible timed
 operations involving single address generators is given in
 \autoref{fig:single_ag_ops}. In \autoref{fig:single_ag_ops}.a the contents of C0
@@ -214,7 +213,7 @@ coordination of multiple address generators across SAMs or within the same SAM.
 An illustration of that coordination is presented in \autoref{fig:mlti_ag_ops}.
 In \autoref{fig:mlti_ag_ops}.a a data transfer between two SAMs is achieved
 using one read address generator in C0 and one write address generator in C1 as
-well a connection between the dout pins of C0 and dout pins of C1.
+well a connection between the dout pins of C0 and din pins of C1.
 The read address generator executes a generate descriptor that reads out the
 contents of the SAM. The write address generator waits for 1 cycle then executes
 a write operation to store the contents of the C0 in C1. These two descriptor

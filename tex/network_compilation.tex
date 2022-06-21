@@ -4,9 +4,9 @@
 \section{Layer Decomposition}
 \label{chap:net_compile:layer_decomposition}
 
-Given the potential restrictions on chip area, a hero instance may have
+Given that chip area may be restricted, a hero instance may have
 insufficient on-chip storage available to hold ifmap and ofmap memory on chip
-during layer processing. This results in the need for a way to decompose a
+during layer processing. To minimize excessive reloads from DRAM we need a way to decompose a
 larger layer into sublayers that can fit in the accelerator's on-chip memory.
 Decomposition can occur due to either large ifmap or large ofmaps or in some cases
 both. In this work it's assumed that decomposition occurs accross channel and
@@ -126,8 +126,9 @@ memories scale with tempalate paramaters is given in
 In this work ASAP scheduling is always assumed given the relatively poor scaling
 of ofmap memory with architecture template paramaters. This poor scaling is due
 to the necessity of storing ofmap elements using higher precision values to
-prevent numeric overflow. 
-
+prevent numeric overflow. Note that in allowing different tile schedules may
+sometimes negate the need for layer decomposition. The interaction between layer
+decomposition and layer scheduling is left as part of future work.  
 
 % While a weight stationary offers limited flexibility with regards to loop
 % reoredering it does offer some degree of flexibiltiy with regards to ordering
@@ -180,7 +181,7 @@ prevent numeric overflow.
 \label{chap:sams:acc_scheduling}
 
 We can generate descriptor programs for the memories (now referred to as SAMs)
-in the final architecture template discussed in \autoref{chap:hw_dse:intro}.
+in the final architecture template discussed in \autoref{chap:dda:hw_dse:final}.
 These descriptor programs will be used to perform memory operations necessary
 for the convolution operation to take place in the final architectural template.
 Since we have two operational modes based on the discussion in
