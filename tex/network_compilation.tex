@@ -193,7 +193,7 @@ followed by a (1, 1) convolution operation as discuseed in
 \autoref{chap:dda:dataflow_dse:indirect_mode}. Indirect mode data
 transformations (lowering/ lifting) are assumed to be performed off chip. Moving
 these transformations on-chip is left as part of future work. This leaves us
-with effectively two operations we need to generate descriptors for, (1, 1) and 3x3
+with effectively two operations we need to generate descriptors for, (1, 1) and (3, 3)
 convolutions. For each operation, descriptor based programs need to be generated
 to perform the necessary data transfer operations between on-chip memories and
 PEs. It's assumed that all on-chip SRAMs in HERO are SAMs capable of being
@@ -209,7 +209,7 @@ ports connected PEs. An illustration of this interconnect scheme is available in
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.3]{fig/interconnect.pdf}
-    \caption{Illustration interconnects for control and data in on-chip featuremap memories}
+    \caption{Illustration of interconnects for control and data in on-chip featuremap memories}
     \label{fig:interconnect}
 \end{figure}
 
@@ -278,7 +278,7 @@ with no modifications.
 \end{figure}
 
 Since (1, 1) convolutions involve entire channel feature maps streamed into PEs
-with no reuse within a feature map occuring as in the 3x3 case, the only
+with no reuse within a feature map occuring as in the (3, 3) case, the only
 memories that need to be programmed are the L3 channel memories and the OFmap
 memories. An illustration of the required descriptor programs for the
 afformentioned memories is given in \autoref{fig:1x1conv_sched}. In
@@ -352,11 +352,11 @@ the read generate descriptor.
 \subsection{3x3 convolution programs}
 \label{chap:sams:acc_scheduling:3x3}
 
-Since 3x3 convolution operations involve the ifmap L2 vertical reuse memory,
+Since (3, 3) convolution operations involve the ifmap L2 vertical reuse memory,
 data transfer operations between L3 an L2 have to be performed by the descriptor
 based programs in memories of both layers. Thankfully, the programs for L3
 memories are similair to the (1, 1) convoltuion case where each memory streams a
-series of ifmap channels after a systolic delay. The main difference between 3x3
+series of ifmap channels after a systolic delay. The main difference between (3, 3)
 and (1, 1) L3 programs is is the existence of an initial setup phase where the
 first two lines of a featuremap are transferred into the L2 followed by a delay
 that allows partial sums to propogate down to the set of PEs each L3 featuremap

@@ -2,51 +2,51 @@
 \chapter{HERO Architecture Simulation}
 \label{chap:results}
 
-so lets say we have a concrete instance of hero-t and we want to assess its
-performance in a cycle accurate simulator with real layers from a network. We do
-this with a platform simulator that has a front end that takes a mode library
-and produces latency, utilization and access cost results.  
+% so lets say we have a concrete instance of hero-t and we want to assess its
+% performance in a cycle accurate simulator with real layers from a network. We do
+% this with a platform simulator that has a front end that takes a mode library
+% and produces latency, utilization and access cost results.  
 
-\section{Simulation platform}
+\section{Simulation Enviornment}
 \label{chap:hero:sim_platform}
 
-Sim runs a CIGAR pass over the input model library if stats dict not available.
-It then performs a layer equivelence pass that converts an unsupported
-convolution layer to an equivelent GEMM using balanced lowering. Overhead Of
-lowering and lifting is automatically added to the overall latency of the cycle
-accurate simulation. Simulation only targets conv layers. 
+% Sim runs a CIGAR pass over the input model library if stats dict not available.
+% It then performs a layer equivelence pass that converts an unsupported
+% convolution layer to an equivelent GEMM using balanced lowering. Overhead Of
+% lowering and lifting is automatically added to the overall latency of the cycle
+% accurate simulation. Simulation only targets conv layers. 
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.58]{fig/hero-t-sim-platform.pdf}
+    \includegraphics[scale=0.58]{fig/hero-sim-frontend.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}
 
-
-\section{SystemC Model}
-\label{chap:hero:sim_platform:sysc_side}
-
-SystemC models takes in arch config. Arch config usually comes out of a tempo.
-Currently systemc model only considers horizontal mapping of kernel loops. All
-muxing/ interconnect logic handled with how individual banks are accessed in the
-architecture simulation loops. After systemc backend recieves sim config. It
-instantiates an arch with the required config. It generates an equivelent layer
-following dimensions of layer sent in from front end and then it generates the
-descriptor program based on the method discussed in (REFERENCE SAM SUBSECTION)
-Finally the backend performs a cycle accurate simulation of the instantiated
-architecture. After simulation concludes, ofmap memory contents are scanned to
-validate output and if output is valid, latency, access counts and utilization
-statistics are returned to the platform frontend for high level analysis. Model
-is simulated in isolation. DRAM access counts are estimated in the backend but
-no actual simulation of DRAM occurs.
-
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.58]{fig/hero-t-sysc.pdf}
+    \includegraphics[scale=0.58]{fig/hero-sim-backend.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}
+
+% \section{SystemC Model}
+% \label{chap:hero:sim_platform:sysc_side}
+
+% SystemC models takes in arch config. Arch config usually comes out of a tempo.
+% Currently systemc model only considers horizontal mapping of kernel loops. All
+% muxing/ interconnect logic handled with how individual banks are accessed in the
+% architecture simulation loops. After systemc backend recieves sim config. It
+% instantiates an arch with the required config. It generates an equivelent layer
+% following dimensions of layer sent in from front end and then it generates the
+% descriptor program based on the method discussed in (REFERENCE SAM SUBSECTION)
+% Finally the backend performs a cycle accurate simulation of the instantiated
+% architecture. After simulation concludes, ofmap memory contents are scanned to
+% validate output and if output is valid, latency, access counts and utilization
+% statistics are returned to the platform frontend for high level analysis. Model
+% is simulated in isolation. DRAM access counts are estimated in the backend but
+% no actual simulation of DRAM occurs.
+
 
 
 \section{Experimental Results}
@@ -56,31 +56,25 @@ Prominent model's convolution layers were are assessed using the simulation plat
 namely resnet-50 mobilenetv3 and vgg16. Performance for each of the three conrete
 architectures suggested by tempo is reported below.
 
+\subsection{Latency and Speedup over CPU Baseline}
+\label{chap:hero:sim_platform:cigar_side}
 
+\subsection{Energy}
+\label{chap:hero:sim_platform:cigar_side}
 
+\subsection{Utilization}
+\label{chap:hero:sim_platform:cigar_side}
 
-% Resources
-\subsection{Overhead of extending support}
+\subsection{Per network results}
+\label{chap:hero:sim_platform:cigar_side}
+
+\subsection{DRAM Bandwidth}
+\label{chap:hero:sim_platform:cigar_side}
+
+\subsection{Descriptor program scaling}
+\label{chap:hero:sim_platform:cigar_side}
+
+\subsection{Area}
 \label{chap:conv_gemm_equiv:overhead}
 
-Lowering and lifting introduce additional overheads with regards to latency and
-tensor sizing. The latency for performing balanced lowering and lifting is
-$m^{2}K$ for a layer with a Weight tensor $\mathbb{R}^{F\times C\times K\times
-K}$ and an OFmap tensor $\mathbb{R}^{F\times m\times m\times}$. While lowering
-and lifting can be performed by a convolutions accelerator, in this thesis it is
-assumed that a software processor on the same chip performs these operations.
-Lowering also introduces duplicate data elements in the IFmap tensor thus
-increasing it's overall size. In this thesis, it is assumed that on-chip memory
-can account for this increase and that any additional DRAM accesses incurred
-from lowering will be included in energy calculations when reporting energy
-consumption of the accelerator.
-
-To enable GEMM operations using the approach in
-\autoref{chap:conv_gemm_equiv:proof} both input and output matricies are
-transposed and reshaped. All reshape operations discussed in this chapter add a
-dimention of size 1 to the data and they incur no data reorganization overhead.
-Additionally, all transpose operations are assumed to be performed during
-transfer to and from accelerator on-chip and thus incur no latency penalty. A
-discussion of how transfers to and from on-chip memory can mask the latency of
-transposing matricies is left as part of future work along with incorporating
-lowering and lifting into the accelerator. 
+% Resources

@@ -34,7 +34,7 @@ factors becomes more complicated. When two loops are unrolled in the same
 spatial axis, the effective unroll factor for each one of them may change when
 processing a layer with a different convolution layer configuration than the one
 assumed when unrolling the loops. For example, consider the following situation.
-For a convolution layer with kernel size 3x3 and channel count 32, if the kernel
+For a convolution layer with kernel size (3, 3) and channel count 32, if the kernel
 loops are unrolled fully with an unroll factor of 9, and the channel loops are
 unrolled partially with an unroll factor of 4, and they were both mapped to the
 same spatial axis, then the total number of processing engines allocated to that
@@ -286,7 +286,7 @@ There exists significant variation with regards to the kernel sizes present in
 the TIMM library. This makes the question of unroll factors and axis mapping for
 the KY and KX loops more difficult to answer.
 
-From \autoref{fig:kernel_stats:freq}.a (1, 1) and 3x3 kernel sizes dominate in
+From \autoref{fig:kernel_stats:freq}.a (1, 1) and (3, 3) kernel sizes dominate in
 comparison to all other kernel sizes. This renders the choice of keeping KY and
 KX loops folded impractical because if support is extended to an arbitrary K x K
 kernel while KY and KX loops are folded the onboard storage for weights would
@@ -304,7 +304,7 @@ to the ones discussed in \autoref{chap:background:intro}. This means that (1, 1)
 kernels are assumed when unrolling KY and KX loops, hence they have to be
 supported directly. Other kernel sizes to support directly can be derived from
 \autoref{fig:kernel_stats:freq}. In \autoref{fig:kernel_stats:freq}.b many
-networks contain at least 1 convolution layer that is not (1, 1) or 3x3. For
+networks contain at least 1 convolution layer that is not (1, 1) or (3, 3). For
 example a 7x7 kernel exists in around ~20\% of networks. The reason for the
 prevalance of 7x7 convolutions originates from the historical use of resnet
 \cite{resnet} as a feature extractor for a significant portion of networks
@@ -321,20 +321,20 @@ analyzed by CIGAR.
 
 
 In \autoref{fig:kernel_vs_mac}.a, when adjusting for the the number of MACs
-present in layers where these kernel sizes exist, (1, 1) and 3x3 kernels share a
+present in layers where these kernel sizes exist, (1, 1) and (3, 3) kernels share a
 similar computational burden on the network with (1, 1) having a much wider spread.
 7x7 kernels have a much tighter spread but they still represent a similar
-computational burden to (1, 1) and 3x3 kernels in networks where they are present.
-Adjusting for kernel frequency in \autoref{fig:kernel_vs_mac}.b, (1, 1) and 3x3
+computational burden to (1, 1) and (3, 3) kernels in networks where they are present.
+Adjusting for kernel frequency in \autoref{fig:kernel_vs_mac}.b, (1, 1) and (3, 3)
 kernels dominate all other kernel sizes in terms of number of MACs in most
-network layers. From \autoref{fig:kernel_vs_mac} it is clear that (1, 1) and 3x3
+network layers. From \autoref{fig:kernel_vs_mac} it is clear that (1, 1) and (3, 3)
 kernels need to be supported directly while all other kernels need to be
 supported indirectly through a lifting/lowering approach like those discussed in
 \autoref{chap:background:intro}. This limits the space of possible unroll
 factors for the loop unroll targets and thus prunes the dataflow design space.
 Supporting kernels indirectly will lead to an expansion of the IFmap due to the
 duplication introduced by lowering, however that expansions is negligble given
-the relative infrequency of non (1, 1) and 3x3 layers. What remains of the dataflow
+the relative infrequency of non (1, 1) and (3, 3) layers. What remains of the dataflow
 design space under weight stationary is 1) the unroll factors for F and C loops
 and 2) the axis mapping for F, C, KY and KX loops for the 2 spatial axis of a
 convolution accelerator. To explore the what remains of the dataflow design
@@ -639,6 +639,29 @@ $C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
     \label{math:effective_unroll_factors_f}
 \end{align}
 
+\subsection{Overhead of lowering and lifting}
+\label{chap:dda:dataflow_dse:indirect_mode:overhead}
+
+Lowering and lifting introduce additional overheads with regards to latency and
+tensor sizing. The latency for performing balanced lowering and lifting is
+$m^{2}K$ for a layer with a Weight tensor $\mathbb{R}^{F\times C\times K\times
+K}$ and an OFmap tensor $\mathbb{R}^{F\times m\times m\times}$. While lowering
+and lifting can be performed by a convolutions accelerator, in this thesis it is
+assumed that a software processor on the same chip performs these operations.
+Lowering also introduces duplicate data elements in the IFmap tensor thus
+increasing it's overall size. 
+
+To enable GEMM operations using the approach in
+\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof} both input
+and output matricies are transposed and reshaped. All reshape operations
+discussed in this chapter add a dimention of size 1 to the data and they incur
+no data reorganization overhead. Additionally, all transpose operations are
+assumed to be performed during transfer to and from accelerator on-chip and thus
+incur no latency penalty. A discussion of how transfers to and from on-chip
+memory can mask the latency of transposing matricies is left as part of future
+work along with incorporating lowering and lifting into the accelerator. 
+
+
 \section{Exploring The Hardware Implementation Design Space}
 \label{chap:dda:hw_dse}
 
@@ -874,7 +897,7 @@ dataflow are also constant. To determine the reuse distances necessary between
 ports we can apply the analysis in \autoref{lst:poly:xy_buffer_sizing:analysis}
 adapted from \cite{meeus} to determine the sizing of the buffers in the reuse
 chain for IFmap accesses within a channel. The analysis in
-\autoref{lst:poly:xy_buffer_sizing:analysis} assumes a kernel size of 3x3 based
+\autoref{lst:poly:xy_buffer_sizing:analysis} assumes a kernel size of (3, 3) based
 on the conclusions of
 \autoref{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_factors}. Note
 that (1, 1) kernels exhibit no temporal reuse within the kernel loops.  
@@ -1024,7 +1047,7 @@ delays yields a simplification to the L1 memory present in
     \centering
     \subfigure[]{\includegraphics[width=0.5\textwidth]{fig/treeReduction.pdf}}
     \subfigure[]{\includegraphics[width=0.7\textwidth]{fig/SystolicReduction.pdf}}
-    \caption{Illustration of different partial sum reduction styles assuming kernel size is 3x3 (a) Tree Reduction (b) Systolic array reduction}
+    \caption{Illustration of different partial sum reduction styles assuming kernel size is (3, 3) (a) Tree Reduction (b) Systolic array reduction}
     \label{fig:reduction_styles}
 \end{figure}
 
@@ -1148,7 +1171,7 @@ banks. The beenfit of this flexible distribution will be discussed in
 \autoref{chap:net_compile}. In addition to arbitrary IFmap bank access in
 \autoref{fig:hero:horizontal}, the IFmap interconnect enables broadcasting of
 IFmap pixels vertically to all filters rows in HERO as well as broadcasting
-IFmap pixels accross groups of PEs for 3x3 kernel computations. The choice of
+IFmap pixels accross groups of PEs for (3, 3) kernel computations. The choice of
 which spatial axis mapping and F and C unroll factors is discussed further in
 \autoref{chap:arch_dimensioning} where these HERO template parameters are
 optimized based on the layer configurations present in the TIMM Library's
