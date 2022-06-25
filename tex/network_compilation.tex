@@ -37,7 +37,7 @@ decomposition halves the size of tiles being processed by the architecture.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.25]{fig/ifmap_decomposition.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of layer decomposition's effect on Ifmap tensors}
     \label{fig:ifmap_decomposition}
 \end{figure}
 
@@ -45,7 +45,7 @@ decomposition halves the size of tiles being processed by the architecture.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.4]{fig/ifmap_decomposition_tiling_repr.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of layer decomposition's effect on weight tiling}
     \label{fig:ifmap_decomposition:weight_tiling}
 \end{figure}
 
@@ -61,7 +61,7 @@ directly by HERO.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.4]{fig/ofmap_decomposition_tiling_repr.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of layer decomposition's effect on weight tiling}
     \label{fig:ofmap_decomposition:weight_tiling}
 \end{figure}
 
@@ -153,7 +153,7 @@ decomposition and layer scheduling is left as part of future work.
 % orderings for filter loops and channel loops represent different tile schedules
 % for processing convolution layers. An illustration of both tile scheduling
 % approaches is illustrated in \autoref{fig:tile_scheduling}. In
-% \autoref{fig:tile_scheduling} a 1x1 convolution layer's weights are shown with
+% \autoref{fig:tile_scheduling} a (1, 1) convolution layer's weights are shown with
 % the architecture's unroll factors overlayed on top. The overlay of the
 % architecture's unroll factor creates distinct weight tiles where componenets of
 % the OFmap are computed. The order of executing these weight tiles depends on the
@@ -176,86 +176,119 @@ decomposition and layer scheduling is left as part of future work.
 
 \clearpage
 
-
-\section{Descriptor Generation}
+\section{Descriptor Program Generation}
 \label{chap:sams:acc_scheduling}
 
-We can generate descriptor programs for the memories (now referred to as SAMs)
-in the final architecture template discussed in \autoref{chap:dda:hw_dse:final}.
+We can generate descriptor programs for the SAMs present in
+in the final architecture template for HERO discussed in \autoref{chap:dda:hw_dse:final}.
 These descriptor programs will be used to perform memory operations necessary
 for the convolution operation to take place in the final architectural template.
-Since we have two operational modes based on the discussion in
-\autoref{chap:dataflow_dse:intro} 1x1/GEMM and 3x3 convolutions we will discuss the
+It's assumed that all on-chip SRAMs present in the HERO architecture are SAMs
+capable of being programmed with descriptor based programs.   
+Since we have two operational modes based on the findings of
+\autoref{chap:dda} (direct and Indirect mode) we will discuss the
 descriptor programs required for both of these modes to take place independently of
-the other. In both modes we will first highlight the memories participating in
-the operation followed by the required descriptor programs for each of those
-memories. Please note that muxing plays a part in coordinate the transfer of
-data between different memories. The programming of muxes in tandem with SAMs is
-left as part of future work. Additionally, all interactions between SAMs and
-DRAM are left as part of future work. IFmap and OFmap data is assumed to be read
-from and written to DRAM before and after the operation of the SAM programs
-discussed in thi section. Latencies and energy penalties associated with DRAM
-will be considered in \autoref{chap:hero} but SAM program generation discussed
-here is DRAM agnostic.
+the other. Note that indirect mode is just a data transformation operation
+followed by a (1, 1) convolution operation as discuseed in
+\autoref{chap:dda:dataflow_dse:indirect_mode}. Indirect mode data
+transformations (lowering/ lifting) are assumed to be performed off chip. Moving
+these transformations on-chip is left as part of future work. This leaves us
+with effectively two operations we need to generate descriptors for, (1, 1) and 3x3
+convolutions. For each operation, descriptor based programs need to be generated
+to perform the necessary data transfer operations between on-chip memories and
+PEs. It's assumed that all on-chip SRAMs in HERO are SAMs capable of being
+programmed with descriptor based memories. 
+For now it's assumed that there exists two flexible interconnects for routing
+control signals between address generators and on-chip SRAMS. One between all
+address generators and banks in Ifmap L3 and another between all address
+generators and Ofmap banks. These control interconnects are different from the
+data interconnects that allow routing of data from banks to arbitrary output
+ports connected PEs. An illustration of this interconnect scheme is available in
+\autoref{fig:interconnect}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.3]{fig/interconnect.pdf}
+    \caption{Illustration interconnects for control and data in on-chip featuremap memories}
+    \label{fig:interconnect}
+\end{figure}
+
+
+This flexible interconnect for routing control signals
+allows address generators of SAMs to be able to send read/write requests to
+different SRAMs connected to the same interconnect which enables arbitrary
+access of featuremap banks. This solution is likely not scalable to larger
+instances of HERO and will be superceeded by statically scheduled control
+interconnects in future work. 
+Additionally, all interactions between SAMs and DRAM are left as part of future
+work. IFmap and OFmap data is assumed to be read from and written to DRAM before
+and after the operation of the SAM programs discussed in thi section. Latencies
+and energy penalties associated with DRAM will be considered in
+\autoref{chap:results} but the descriptor programs discussed in this chapter are
+DRAM agnostic.
 
 \subsection{1x1 convolution programs}
 \label{chap:sams:acc_scheduling:1x1}
 
-To illustrate how SAMs can be programmed to perform a 1x1 convolution we will
-use the final architecture in \autoref{chap:hw_dse:intro} and a 1x1 convolution
-layer with 16 channels and 8 filters as a driving example. In
-\autoref{chap:hw_dse:intro} there are a total of 9 processing engines with all 9
+
+To illustrate how SAMs can be programmed to perform a (1, 1) convolution we will
+use a simplified version of HERO illustrated in \autoref{fig:1x1conv_sched_tiling} and a (1, 1) convolution
+layer with 16 channels and 8 filters as a driving example. The simplified
+version of HERO assumed that there are a total of 9 processing engines with all 9
 mapped to the accelerator horizontal spatial axis which enables creates an
-effective an unroll factor of 9 at kernel sizes 1x1. Based on the tiling
+effective an unroll factor of 9 at kernel sizes (1, 1). Based on the tiling
 discussion in
-\autoref{chap:dataflow_dse:pruning:applying_it:loop_unroll_factors}, the
+\autoref{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_factors}, the
 architecture tiles the weight tensor into 16 tiles (padding included) as
 illustrated in \autoref{fig:1x1conv_sched_tiling}.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.6]{fig/1x1conv_sched_tiling.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of weight tiling under (1, 1) convolution}
     \label{fig:1x1conv_sched_tiling}
 \end{figure}
 
 For each weight in the tiles of \autoref{fig:1x1conv_sched_tiling} the channel
 feature map corresponding to that weight has to be streamed into the PE
 processing the output of that weight. For example, tile highlighted in red needs
-channels C0-C8 streamed into the PEs storing those for processing. After the red
-tile is processed, the green tile is loaded into the PEs weight buffer (assuming
-ASAP scheduling as seen in
-\autoref{chap:dataflow_dse:pruning:applying_it:loop_ordering}). Channels C9-C15
-then needs to be streamed into the PEs holding the weights corresponding to
-those channels. This means that channel memories may need to hold multiple
-channels that are streamed out depending on the index of the tile being
-processed. An illustration of how channel feature maps are stored on the channel
-SAMs is present in \autoref{fig:channel_banking}. PEs holding 0 valued weights
-due to padding have no corresponding channel data so nothing is streamed into
-them as reflected in the 0 padding of the last channel SAM attached to the 9th
-PE in \autoref{fig:channel_banking}. Additionally, they are assumed to just
-forward any partial sums/ output feature maps recieved from their input to their
-output with no modifications.
+channels C0-C8 streamed into the PEs storing those weights for processing. After
+the red tile is processed, the green tile is loaded into the PEs weight buffer
+(assuming ASAP scheduling as seen in
+\autoref{chap:net_compile:layer_scheduling}). Channels C9-C15 then needs to be
+streamed into the PEs holding the weights corresponding to those channels. This
+means that channel memories may need to hold multiple channels that are streamed
+out depending on the index of the tile being processed. An illustration of how
+channel feature maps are stored on the channel SAMs is present in
+\autoref{fig:channel_banking}. Note that in cases where channel featuremaps
+exceed the size of one bank, layer decomposition spreads the feature map accross
+multiple banks. This causes a reduction in available channel concurrency which
+leads to low PE utilization. PEs holding 0 valued weights due to padding have no
+corresponding channel data so nothing is streamed into them as reflected in the
+0 padding of the last channel SAM attached to the 9th PE in
+\autoref{fig:channel_banking}. Additionally, they are assumed to just forward
+any partial sums/ output feature maps recieved from their input to their output
+with no modifications.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.495]{fig/1x1conv_ifmap_banking.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of channel banking in Ifmap L3 on-chip SRAMs}
     \label{fig:channel_banking}
 \end{figure}
 
-Since 1x1 convolutions involve entire channel feature maps streamed into PEs
+Since (1, 1) convolutions involve entire channel feature maps streamed into PEs
 with no reuse within a feature map occuring as in the 3x3 case, the only
 memories that need to be programmed are the L3 channel memories and the OFmap
 memories. An illustration of the required descriptor programs for the
 afformentioned memories is given in \autoref{fig:1x1conv_sched}. In
-\autoref{fig:1x1conv_sched} irrelevant layers and muxing as well as some PEs
-have been ommited to for brevity.
+\autoref{fig:1x1conv_sched} hirarchy layers unused by the computatation 
+as well as some PEs have been ommited to for brevity.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.495]{fig/1x1conv_sched.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Illustration of (1, 1) convolution scheduling}
     \label{fig:1x1conv_sched}
 \end{figure}
 
@@ -297,8 +330,7 @@ achieves this by setting x\_count to $XY$ to stream out partial sums of size
 $XY$ and y\_count to 2 which the number of tiles in a filter. To reset the
 "addr" index of the read descriptor the y\_modify is set to $-XY$. This generate
 descriptor is repeated 8 times where 8 is the number of filters present
-processed by the PEs assuming no filter padding. Assuming ASAP scheduling as
-discussed in \autoref{chap:dataflow_dse:pruning:applying_it:loop_unroll_factors}
+processed by the PEs assuming no filter padding. Assuming ASAP tile scheduling,
 OFmaps are written to DRAM as soon as they are completed and are not kept on
 chip.
 
@@ -306,18 +338,38 @@ The write port waits for $C_{UNROLL}$ number of cycles to write the first
 partial sums that will eventually become OFmaps once the filter being processed
 concludes. IFmaps of $XY$ size less than 9 (the number of PEs in the horizontal
 axis) will cause additional delay cycles to be introduced via wait descriptors
-to allow partial sums to propogate through the PEs to reach the OFmap. The
-reduction performed by the PEs are sequential and not combinatorial, hence the
-inclusion of registers between each PE. Alleviating dead cycles due to smaller
-input feature maps is left as part of future work. The descriptor required for
+to allow partial sums to propogate through the PEs to reach the OFmap.
+ The descriptor required for
 the write address generator are similair to the the read ones with the exception
 of an additional wait descriptor that gives the first partial sum/ Ofmap time to
 propogate through the systolic reduction. The delay required by the wait
 descriptor is equal to the number of PEs present in the horizontal axis. After
 the wait descriptor comes a generate descriptor that writes the partial sum
-output/ OFmap output into the OFmap SAM in a loop. The write generatord
+output/ OFmap output into the OFmap SAM in a loop. The write generate
 descriptor is repeated 8 times as well assuming no padding similair to
-the read generate descriptor loop.
+the read generate descriptor.
 
 \subsection{3x3 convolution programs}
 \label{chap:sams:acc_scheduling:3x3}
+
+Since 3x3 convolution operations involve the ifmap L2 vertical reuse memory,
+data transfer operations between L3 an L2 have to be performed by the descriptor
+based programs in memories of both layers. Thankfully, the programs for L3
+memories are similair to the (1, 1) convoltuion case where each memory streams a
+series of ifmap channels after a systolic delay. The main difference between 3x3
+and (1, 1) L3 programs is is the existence of an initial setup phase where the
+first two lines of a featuremap are transferred into the L2 followed by a delay
+that allows partial sums to propogate down to the set of PEs each L3 featuremap
+bank is connected to. Once this setup phase concludes the rest of the
+featuremap is out in the run phase. These two phases are repeated for every
+weight tile in the layer. The L2 memory acts as a series of programmable fifos
+that emit featuremaps after a delay determined by the width of the featuremap.
+An illustration of this behavior is given in \autoref{fig:mlti_ag_ops}.b. 
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.495]{fig/3x3conv_sched.pdf}
+    \caption{Illustration of (1, 1) convolution scheduling}
+    \label{fig:3x3conv_sched}
+\end{figure}

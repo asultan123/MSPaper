@@ -7,12 +7,12 @@
 \begin{figure}[]
     \centering
     \includegraphics[scale=0.4]{fig/axis_mapping.pdf}
-    \caption{\ac{GEMM} and 1x1 Convolution Equivelence}
+    \caption{\ac{GEMM} and (1, 1) Convolution Equivelence}
     \label{fig:axis_mapping}
 \end{figure}
 
 From the previous section we have concluded that loops F, C, KY and KX are all
-unroll targets, and KY and KX loops should be unrolled assuming that 1x1 and 3x3
+unroll targets, and KY and KX loops should be unrolled assuming that (1, 1) and (3, 3)
 kernels are supported directly. What remains of the dataflow design space is the unroll factors for F
 and C loops as well as the accelerator spatial axis mapping for all unrolled
 loops F, C, KY, KX. From this point these parameters will be referred to as
@@ -35,7 +35,9 @@ CNN library as well as an arbitrary objective function. A discussion of
 \autoref{chap:dataflow_dse:exploring:algorithm} as well as it's analytical models
 for utilization, latency and access counts, in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
 of running \ac{TEMPO} on TIMMS's library of networks is presented in
-\autoref{chap:dataflow_dse:exploring:results}. 
+\autoref{chap:dataflow_dse:exploring:results}. Finally a brief discussion on
+on-chip memory hierarchy sizing will be given in
+\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. 
 
 \section{TEMPO Algorithm}
 \label{chap:dataflow_dse:exploring:algorithm}
@@ -62,7 +64,7 @@ executing layers in the model library $model^{stats}_{dict}$. An architcture
 score is based on any of the metrics that will be discussed in
 \autoref{chap:dataflow_dse:exploring:tempo_model}. Prior to the search being
 performed algorithm \ref{alg:tempo_algo} converts all layer not supported
-directly in the model to 1x1 equivelent layers based on the equivelence method
+directly in the model to (1, 1) equivelent layers based on the equivelence method
 that discussed in \autoref{chap:dda:dataflow_dse:indirect_mode}.
 
 \begin{equation}
@@ -148,7 +150,7 @@ are left as part of future work.
 \begin{figure}[]
     \centering
     \includegraphics[scale=0.45]{fig/Lasso_ilus.pdf}
-    \caption{\ac{GEMM} and 1x1 asd Equivelence}
+    \caption{\ac{GEMM} and (1, 1) asd Equivelence}
     \label{fig:tempo_model}
 \end{figure}
 
@@ -369,3 +371,63 @@ accurate model of HERO.
     \caption{Utilization results for different optimal configurations found using TEMPO}
     \label{fig:tempo_results}
 \end{figure}
+
+
+\section{Memory Hierarchy Sizing}
+\label{chap:dataflow_dse:memory_hierarchy_sizing}
+
+To determine the necessary sizes of on-chip memories we need to first look at
+the sizing behavior of the different data elements in a convolution operation
+(ifmaps, ofmaps and weights). Note that all discussions of storage requirements
+are precision agnostic. All storage requirement results are given in number of
+elements. \autoref{fig:storage:no_lowering} is a boxplot of the sizes (in number
+of elements) for the storage requirements of different data element types
+present in the convolution layers of the TIMM library networks. The median
+storage requirements for all elements is given in \autoref{tab:median_storage}.
+From both figure and table, note the similarity in storage requirements of all
+data elements. Lowering and lifting operations required under indirect mode only
+increase median storage requirements by a factor of 1.01X and 1.02X for ifmap
+and ofmap respectively. To support as much as 85\% of convolution layers in TIMM
+without requiring layer decomposition (to be discussed in
+\autoref{chap:net_compile}) we only need to allocate 1 MB of storage for IFmap
+memory (L3) and Ofmap memory in either of the HERO architectures presented in
+\autoref{chap:dda:hw_dse:final}. Additionally since L2 storage in the ifmap
+hierarchy scales with the width of ifmap tensors, it's assumed that the maximum
+ifmap tensor width will not exceed 512 elements. Note that there are no storage
+requirements for weight storage due to the choice of weight stationary dataflow
+made in \autoref{chap:dda}. \autoref{tab:assumed_storage} shows the total
+storage in number of elements assumed by this work. 
+
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \hline
+    Data Element Type & Median Size    \\ \hline
+    Weights           & $2^{16.614}$   \\ \hline
+    IFmap             & $2^{16.614}$   \\ \hline
+    OFmap             & $2^{16.192}$   \\ \hline
+    \end{tabular}
+    \caption{Table of median storage requriements for data elements in convolution layers of networks in the TIMM Library}
+    \label{tab:median_storage}
+\end{table}
+
+\begin{figure}[]
+    \centering
+    \includegraphics[scale=0.7]{Plots/storage/no_lowering.pdf}
+    \caption{Boxplot of storage required for different data elements assuming no lowering}
+    \label{fig:storage:no_lowering}
+\end{figure}
+
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \hline
+    Data Element Type & On-Chip Storage    \\ \hline
+    Weights           & N/A   \\ \hline
+    IFmap L3          & $2^{20}$   \\ \hline
+    IFmap L2          & $2^{9}$   \\ \hline
+    OFmap             & $2^{20}$   \\ \hline
+    \end{tabular}
+    \caption{Assumed on-chip storage for different data elements in a convolution operation}
+    \label{tab:assumed_storage}
+\end{table}

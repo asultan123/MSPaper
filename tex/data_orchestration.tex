@@ -27,10 +27,10 @@ of memory transactions possible using coordinating descriptor based programs in
 \label{chap:data_orchestration:sams:structure}
 
 \begin{figure}
-    \centering
+    \centering`'
     \subfigure[]{\includegraphics[width=0.495\textwidth]{fig/sam_anatomy.pdf}}
     \subfigure[]{\includegraphics[width=0.495\textwidth]{fig/ag_anatomy.pdf}}
-    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
+    \caption{(a) SAM structure (b) Address generator structure}
     \label{fig:sam_structure}
 \end{figure}
 
@@ -204,7 +204,7 @@ start time of the loop descriptor.
     \subfigure[]{\includegraphics[width=0.4\textwidth]{fig/wait_descriptor.pdf}}
     % \hspace{0.2cm} 
     % \subfigure[]{\includegraphics[width=0.25\textwidth]{fig/stutter_descriptor.pdf}}
-    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
+    \caption{Illustration of different descriptor based programs with single address generators (a) Loop program (b) Delayed loop program}
     \label{fig:single_ag_ops}
 \end{figure}
 
@@ -221,7 +221,7 @@ programs across two SAMs implicitly coordinate with the inclusion of that wait
 descriptor. They are each unaware of the program executed by the other.
 Similarly this implicit coordination can occur between address generators in the
 same SAM. In \autoref{fig:mlti_ag_ops}.b a read and a write address generator
-coordinate to creates a shift register that reads out data received by the SAM
+coordinate to creates a variable sized FIFO that reads out data received by the SAM
 after a delay $\Delta_i$. This delay is introduced using similar descriptor
 programs as in \autoref{fig:mlti_ag_ops}.a. In \autoref{fig:mlti_ag_ops}.b the
 read address generator waits for $\Delta_i$ cycles before starting to read the
@@ -231,7 +231,7 @@ contents written by the write address generator.
     \centering
     \subfigure[]{\includegraphics[width=0.4\textwidth]{fig/sam_mem_to_mem.pdf}}
     \subfigure[]{\includegraphics[width=0.4\textwidth]{fig/sam_reuse_chain.pdf}}
-    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
+    \caption{Illustration of different descriptor based programs with dual address generators (a) Memory to memory transfer (b) variable sized FIFO }
     \label{fig:mlti_ag_ops}
 \end{figure}
 
