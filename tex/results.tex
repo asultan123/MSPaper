@@ -105,60 +105,6 @@ using runtime
     \label{fig:hw_taxonomy}
 \end{figure}
 
-\subsection{Latency and Speedup over CPU Baseline}
-\label{chap:hero:sim_platform:cigar_side}
-
-most networks/ layers benefit
-median network speedup over 
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/overview/percent.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-Some networks don't benefit
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/net_speedup.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-12\% of layers don't benefit
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/layer_speedup.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-
-why? see utilization
-here's a boxplot of per layer speedup excluding layers with no speedup
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/speedup_gt_1_boxplot.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-estimated fps based on supported layers, note that this should be taken as upper
-bound because unsupported supported layers may take up more of the runtime than
-anticipated (references earlier figure)
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/fps.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-
 \subsection{Utilization}
 \label{chap:hero:sim_platform:cigar_side}
 
@@ -236,17 +182,25 @@ KX
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/utilization/low_util_big_fmap.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    % \caption{Rzeason for low utilization in layers with:\n speedup < 1\n" + "utilization < " + str(util_ub) +'\n' + r"memory footprint > $2^{20}$ elements}
     \label{fig:hw_taxonomy}
 \end{figure}
 
 what about layers with high utilization but low speedup
 Not enough PES because of some many channels and filters
 
-
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/utilization/ratios.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+Why the increase?
+Lowering causes increase in layer macs
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/utilization/macs.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}
@@ -259,6 +213,60 @@ summary barplot
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}
+
+\subsection{Latency and Speedup over CPU Baseline}
+\label{chap:hero:sim_platform:cigar_side}
+
+most networks/ layers benefit
+median network speedup over 
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/overview/percent.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+Some networks don't benefit
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/latency/net_speedup.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+12\% of layers don't benefit
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/latency/layer_speedup.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+
+why? see utilization
+here's a boxplot of per layer speedup excluding layers with no speedup
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/latency/speedup_gt_1_boxplot.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+estimated fps based on supported layers, note that this should be taken as upper
+bound because unsupported supported layers may take up more of the runtime than
+anticipated (references earlier figure)
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/latency/fps.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
 
 
 \subsection{DRAM Bandwidth}
@@ -281,13 +289,37 @@ within ddr4 spec
 used energy model in cite energy model
 add energy model as table
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/energy/barplot.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
 
 mac is basically free
 dram dominates
+
+
 network inferences/ j median is around 57
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/energy/inferences.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
+
 excluding dram number jumps to 20K
 there's room to reduce on-chip data movement by exploiting different kinds of
 concurrency
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/energy/inferences_wo_dram.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
 
 \subsection{Area}
 \label{chap:conv_gemm_equiv:overhead}
@@ -296,11 +328,25 @@ area model as table
 bulk goes to ofmap storage and ifmap storage
 ofmap storage requires higher precision
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/resources/area.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
+
 \subsection{Descriptor program scaling}
 \label{chap:hero:sim_platform:cigar_side}
 
 median required storage for descriptors per address generator is around 100
 scaling can be improved with more complicated descriptors
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/resources/descriptors.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
 
 \subsection{Per network results}
 \label{chap:hero:sim_platform:cigar_side}
@@ -310,3 +356,19 @@ resnet50 (popular and backbone for alot of other networks)
 mobilenetv3 specific to edge devices and has depthwise layers (let's see effect
 of offloading on cpu)
 hrnet18 flexible network used for variety of tasks, also has larger layers
+
+\subsubsection{ResNet50}
+
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/speedup.pdf}}
+    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/energy.pdf}}
+    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/utilization.pdf}} 
+    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/bw.pdf}}
+    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
+    \label{fig:unroll_illustration}
+\end{figure}
+
+\subsubsection{HrNet}
+
+\subsubsection{MobilenetV3}
