@@ -361,7 +361,7 @@ and (1, 1) L3 programs is is the existence of an initial setup phase where the
 first two lines of a featuremap are transferred into the L2 followed by a delay
 that allows partial sums to propogate down to the set of PEs each L3 featuremap
 bank is connected to. Once this setup phase concludes the rest of the
-featuremap is out in the run phase. These two phases are repeated for every
+featuremap is streamed out in the run phase. These two phases are repeated for every
 weight tile in the layer. The L2 memory acts as a series of programmable fifos
 that emit featuremaps after a delay determined by the width of the featuremap.
 An illustration of this behavior is given in \autoref{fig:mlti_ag_ops}.b. 
