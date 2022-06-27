@@ -347,7 +347,8 @@ descriptor is equal to the number of PEs present in the horizontal axis. After
 the wait descriptor comes a generate descriptor that writes the partial sum
 output/ OFmap output into the OFmap SAM in a loop. The write generate
 descriptor is repeated 8 times as well assuming no padding similair to
-the read generate descriptor.
+the read generate descriptor. All decriptor based programs in the 1x1
+convolution program are terminated with suspend descriptrs. 
 
 \subsection{3x3 convolution programs}
 \label{chap:sams:acc_scheduling:3x3}
@@ -356,18 +357,20 @@ Since (3, 3) convolution operations involve the ifmap L2 vertical reuse memory,
 data transfer operations between L3 an L2 have to be performed by the descriptor
 based programs in memories of both layers. Thankfully, the programs for L3
 memories are similair to the (1, 1) convoltuion case where each memory streams a
-series of ifmap channels after a systolic delay. The main difference between (3, 3)
-and (1, 1) L3 programs is is the existence of an initial setup phase where the
-first two lines of a featuremap are transferred into the L2 followed by a delay
-that allows partial sums to propogate down to the set of PEs each L3 featuremap
-bank is connected to. Once this setup phase concludes the rest of the
-featuremap is streamed out in the run phase. These two phases are repeated for every
-weight tile in the layer. The L2 memory acts as a series of programmable fifos
-that emit featuremaps after a delay determined by the width of the featuremap.
-They also have an additional setup phase that enables them to recieve the first
-two lines from L3 channel memories and then wait until partial sums begin
-propogating to the OFmap memory. 
-An illustration of this behavior is given in \autoref{fig:mlti_ag_ops}.b. 
+series of ifmap channels after a systolic delay. The main difference between (3,
+3) and (1, 1) L3 programs is is the existence of an initial setup phase where
+the first two lines of a featuremap are transferred into the L2 followed by a
+delay that allows partial sums to propogate down to the set of PEs each L3
+featuremap bank is connected to. Once this setup phase concludes the rest of the
+featuremap is streamed out in the run phase. These two phases are repeated for
+every weight tile in the layer. The L2 memory acts as a series of programmable
+fifos that emit featuremaps after a delay determined by the width of the
+featuremap. They also have an additional setup phase that enables them to
+recieve the first two lines from L3 channel memories and then wait until partial
+sums begin propogating to the OFmap memory before entering their run phase. An
+illustration of this behavior is given in \autoref{fig:mlti_ag_ops}.b. All
+decriptor programs in the 3x3 convolution program are terminated with suspend
+descriptrs. 
 
 
 \begin{figure}[ht]

@@ -5,91 +5,117 @@
 To assess the performance of the HERO architecture a cycle accuracte simulation
 enviornment was implemented using SystemC and python. The enviornment was used
 to assess the architecture on real networks implemented in pytorch from the TIMM
-library.
-
-Brief intro of sim enviornment: what its made off, what each part handles
-Brief intro of results section and what's going to be discussed (arch config
-simulated and brief intro of each subsection)
+library. The simulator is composed of two parts. 1) A python based frontend that
+can analyse the performance results of any pytorch network on a configuration of
+HERO. 2) A SystemC based backend for cycle accurate simulations of HERO running
+convolution layers. In this chapter we will first discuss the simulation
+enviornment and it's components in \autoref{chap:hero:sim_platform}. The results
+from simulating all 695 networks from TIMM using a small HERO instance are given
+\autoref{chap:hero:results}.
 
 \section{Simulation Enviornment}
 \label{chap:hero:sim_platform}
 
 \subsection{Python Frontend}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:sim_platform:frontend}
 
-Inputs/ outputs
-layer transformations
-deduping test cases to save runtime
-worker threads to manage sim instances
-restrictions on layer sizes imposed by arch handled in frontend
-backend allows arbitrary layer and arch configs to maintain flexibility
+The python frontend depicted in \autoref{fig:frontend}, expects a list of pytorch models and a dictionary defining the
+configuration of a HERO instance as inputs. The configuration specifies the unroll factors
+for F, C, the list of kernels sizes supported in direct mode, and the on-chip
+storage dedicated for input and output featurmape reuse. The output of the
+frontend is a pandas dataframe containing the results from the backend
+simulation of the network(s) on the specified hero instance.  
+After the frontend
+recieves the list of pytorch models, CIGAR extracts the dimensions of all
+supported layers (Conv2D and Linear). Afterwhich two layer transformation
+operations are performed. The first converts convolution layers that are
+unsupported directly into equivelent (1, 1) convolutions as described in
+\autoref{chap:dda:dataflow_dse:indirect_mode}. Additionally, linear layers are
+reinterpreted as (1, 1) convolutions based on the proof derived from
+\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}. To
+determine what layers are supported directly the HERO arch. config being
+evaluated is used. After all layers have been converted to equivelent layers
+that are supported by HERO, a layer decomposition step is performed to
+decompose layers that have featuremaps that are two large to fit in the
+HERO's on-chip memory. Note that any restrictions regarding on-chip
+memory are imposed solely by the frontend. After all layer transformations are
+performed, the layers are converted to test cases and a testcase deduplication
+operation is used to limit the number of simulation runs required to simulate the network(s)
+on HERO. After the testcase queue is generated it gets passed off to several
+worker threads that manage independent backend instances that simulate the different
+layers of the input network(s) concurrently. Note that the layers being
+simulated don't use real weights and featuremaps from a forward inference pass
+of the original network. Instead equivelent layer weights and featuremaps are
+instantiated in the backend to avoid unnecessary transfer of data between the
+front and backend.      
 
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-sim-frontend.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \caption{Illustration of the simulation enviornment's python frontend}
+    \label{fig:frontend}
 \end{figure}
 
 
 \subsection{SystemC backend}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:sim_platform:backend}
 
-Inputs outputs
-initialization stages
-handling dram interaction
-metrics collected
-validation
+The SystemC backend depicted in \autoref{fig:backend}, expects all inputs to be passed in as command line
+arguments. The main inputs are the 1) architecture configuration and 2) layer
+configuration needed for simulation by the frontend. Sim results are generated
+and sent back to the frontend using protobufs. The backend first instantiates a
+HERO instance using the architecute configuration passed as input. Then it
+generates an equivelent layer based on the input layer configuration. Finally
+using both layer and architecture configuration it generates the SAM descriptors
+required to perform all data movement operations on-chip. A dram load is then
+simulated in zero time to transfer the layer data and descriptors to the on-chip
+memories of the newly constructed HERO instance. Once the initialized HERO
+instance is ready, the cycle accurate simulation starts and continues until all
+SAMs reach a suspend descriptor. Then a dram load operation is again performed
+in zero time to transfer the results from the HERO instance for validation.
+After the simulated dram load, a protobuf is constructed, then populated with
+the result of ouput validation and simulation results (assuming validation
+success) and sent back to the frontend for further analysis and aggregation. 
+
+The backend simulates interactions between the architecture and DRAM
+functionally, in zero-time to avoid the complexity of DRAM and SAM interactions.
+The interaction between SAMs and DRAM are left as part of future work. 
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.58]{fig/hero-sim-backend.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \includegraphics[scale=0.5]{fig/hero-sim-backend.pdf}
+    \caption{Illustration of the simulation enviornment's SystemC backend}
+    \label{fig:backend}
 \end{figure}
 
 \section{Experimental Results}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:results}
 
-CPU baseline
-arch config simulated
-To support as much as 85\% of convolution layers in TIMM
-without requiring layer decomposition (to be discussed in
-\autoref{chap:net_compile}) we only need to allocate 1 MB of storage for IFmap
-memory (L3) and Ofmap memory in either of the HERO architectures presented in
-\autoref{chap:dda:hw_dse:final}.
+The configuration for the simulated architecture is given in
+\autoref{tab:hero_config} based on the dimensions discovered in
+\autoref{chap:dataflow_dse:exploring:results} and the sizing conclusions from
+\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. The CPU baseline used in
+this work is an AMD 5950X processor. 
+
 \begin{table}[]
     \center
     \begin{tabular}{|l|l|}
-    \hline
-    Data Element Type & On-Chip Storage    \\ \hline
-    Weights           & N/A   \\ \hline
-    IFmap L3          & $2^{20}$   \\ \hline
-    IFmap L2          & $2^{9}$   \\ \hline
-    OFmap             & $2^{20}$   \\ \hline
-    \end{tabular}
-    \caption{Assumed on-chip storage for different data elements in a convolution operation}
-    \label{tab:assumed_storage}
+    \toprule
+    Config. Param. & On-Chip Storage in Bytes    \\ 
+    \midrule
+    Weight Storage            & 16 B / PE (8 bit precision)  \\ \hline
+    IFmap L3 Storage          & 1 MB (8 bit precision)   \\ \hline
+    IFmap L2 Storage          & 512 B (8 bit precision)   \\ \hline
+    OFmap Storage             & 1 MB (16 bit precision)   \\ \hline
+    $C_{unroll}$              & 18   \\ \hline
+    $f_{unroll}$              & 32   \\ \hline
+    Directly Supported Kernels             & {(1, 1), (3, 3)}   \\ \hline
+    Assumed CLK Speed             & 1 Ghz   \\ \hline
+\end{tabular}
+\caption{HERO configuration used for analysis}
+\label{tab:hero_config}
 \end{table}
-
-
-% # Config
-% arch_config
-% "filter_count": 32,
-% "channel_count": 18,
-% "directly_supported_kernels": [(1, 1), (3, 3)],
-% "ifmap_mem_ub": 2**20 // 18 * 18,
-% "allow_ifmap_distribution": True,
-% "ofmap_mem_ub": 2**20,
-% "allow_ofmap_distribution": True,
-% "reuse_chain_bank_size": 512,
-% "weight_bank_size": 16,
-% "groups_supported": False,
-
-assumed clk speed = 1Ghz
-assumed precisions of weights and featuremaps
-assumed rescaling when transfering back ofmaps (need to find citation)
 
 \subsection{Percent of network compute for supported layers}
 \label{chap:hero:sim_platform:cigar_side}
