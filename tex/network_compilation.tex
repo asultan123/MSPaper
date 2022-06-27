@@ -364,6 +364,9 @@ bank is connected to. Once this setup phase concludes the rest of the
 featuremap is streamed out in the run phase. These two phases are repeated for every
 weight tile in the layer. The L2 memory acts as a series of programmable fifos
 that emit featuremaps after a delay determined by the width of the featuremap.
+They also have an additional setup phase that enables them to recieve the first
+two lines from L3 channel memories and then wait until partial sums begin
+propogating to the OFmap memory. 
 An illustration of this behavior is given in \autoref{fig:mlti_ag_ops}.b. 
 
 

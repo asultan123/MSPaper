@@ -359,16 +359,105 @@ hrnet18 flexible network used for variety of tasks, also has larger layers
 
 \subsubsection{ResNet50}
 
-\begin{figure}
+\clearpage
+\begin{center}
+    \begin{tabular}{lrlrrlllll}
+        \toprule
+        {} &  Count & IFmap &     Cin &    Cout &       K &  Stride & Padding & Groups &   Bias \\
+        Name     &        &             &         &         &         &         &         &        &        \\
+        \midrule
+        conv\_0   & 1 &  (224, 224) &     3.0 &    64.0 &  (7, 7) &  (2, 2) &  (3, 3) &    1.0 &  False \\
+        conv\_1   & 1 &    (56, 56) &    64.0 &    64.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_2   & 3 &    (56, 56) &    64.0 &    64.0 &  (3, 3) &  (1, 1) &  (1, 1) &    1.0 &  False \\
+        conv\_3   & 4 &    (56, 56) &    64.0 &   256.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_4   & 2 &    (56, 56) &   256.0 &    64.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_5   & 1 &    (56, 56) &   256.0 &   128.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_6   & 1 &    (56, 56) &   128.0 &   128.0 &  (3, 3) &  (2, 2) &  (1, 1) &    1.0 &  False \\
+        conv\_7   & 4 &    (28, 28) &   128.0 &   512.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_8   & 1 &    (56, 56) &   256.0 &   512.0 &  (1, 1) &  (2, 2) &  (0, 0) &    1.0 &  False \\
+        conv\_9   & 3 &    (28, 28) &   512.0 &   128.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_10  & 3 &    (28, 28) &   128.0 &   128.0 &  (3, 3) &  (1, 1) &  (1, 1) &    1.0 &  False \\
+        conv\_11  & 1 &    (28, 28) &   512.0 &   256.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_12  & 1 &    (28, 28) &   256.0 &   256.0 &  (3, 3) &  (2, 2) &  (1, 1) &    1.0 &  False \\
+        conv\_13  & 6 &    (14, 14) &   256.0 &  1024.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_14  & 1 &    (28, 28) &   512.0 &  1024.0 &  (1, 1) &  (2, 2) &  (0, 0) &    1.0 &  False \\
+        conv\_15  & 5 &    (14, 14) &  1024.0 &   256.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_16  & 5 &    (14, 14) &   256.0 &   256.0 &  (3, 3) &  (1, 1) &  (1, 1) &    1.0 &  False \\
+        conv\_17  & 1 &    (14, 14) &  1024.0 &   512.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_18  & 1 &    (14, 14) &   512.0 &   512.0 &  (3, 3) &  (2, 2) &  (1, 1) &    1.0 &  False \\
+        conv\_19  & 3 &      (7, 7) &   512.0 &  2048.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_20  & 1 &    (14, 14) &  1024.0 &  2048.0 &  (1, 1) &  (2, 2) &  (0, 0) &    1.0 &  False \\
+        conv\_21  & 2 &      (7, 7) &  2048.0 &   512.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_22  & 2 &      (7, 7) &   512.0 &   512.0 &  (3, 3) &  (1, 1) &  (1, 1) &    1.0 &  False \\
+        linear\_0 & 1 &      (1, 1) &  2048.0 &  1000.0 &     N/A &     N/A &     N/A &    N/A &   True \\
+        \bottomrule
+        \end{tabular}
+\end{center}
+
+\begin{figure}[ht]
     \centering
-    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/speedup.pdf}}
-    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/energy.pdf}}
-    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/utilization.pdf}} 
-    \subfigure[]{\includegraphics[width=0.4\textwidth]{Plots/networks/resnet50/bw.pdf}}
-    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
-    \label{fig:unroll_illustration}
+    \includegraphics[scale=0.6]{Plots/networks/mobilenetv3_small_075.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
 \end{figure}
 
-\subsubsection{HrNet}
-
 \subsubsection{MobilenetV3}
+
+\clearpage
+% \Rotatebox{90}{%
+\begin{center}
+    \begin{tabular}{lrlrrlllll}
+        \toprule
+        {} &  Count &       IFmap &    Cin &    Cout &       K &  Stride & Padding & Groups &   Bias \\
+        Name    &        &             &        &         &         &         &         &        &        \\
+        \midrule
+        conv\_0  &      1 &  (224, 224) &    3.0 &    16.0 &  (3, 3) &  (2, 2) &  (1, 1) &    1.0 &  False \\
+        conv\_1  &      1 &  (112, 112) &   16.0 &    16.0 &  (3, 3) &  (2, 2) &  (1, 1) &   16.0 &  False \\
+        conv\_2  &      1 &      (1, 1) &   16.0 &     8.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_3  &      1 &      (1, 1) &    8.0 &    16.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_4  &      1 &    (56, 56) &   16.0 &    16.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_5  &      1 &    (56, 56) &   16.0 &    72.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_6  &      1 &    (56, 56) &   72.0 &    72.0 &  (3, 3) &  (2, 2) &  (1, 1) &   72.0 &  False \\
+        conv\_7  &      1 &    (28, 28) &   72.0 &    24.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_8  &      1 &    (28, 28) &   24.0 &    88.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_9  &      1 &    (28, 28) &   88.0 &    88.0 &  (3, 3) &  (1, 1) &  (1, 1) &   88.0 &  False \\
+        conv\_10 &      1 &    (28, 28) &   88.0 &    24.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_11 &      1 &    (28, 28) &   24.0 &    96.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_12 &      1 &    (28, 28) &   96.0 &    96.0 &  (5, 5) &  (2, 2) &  (2, 2) &   96.0 &  False \\
+        conv\_13 &      2 &      (1, 1) &   96.0 &    24.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_14 &      2 &      (1, 1) &   24.0 &    96.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_15 &      1 &    (14, 14) &   96.0 &    32.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_16 &      2 &    (14, 14) &   32.0 &   192.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_17 &      2 &    (14, 14) &  192.0 &   192.0 &  (5, 5) &  (1, 1) &  (2, 2) &  192.0 &  False \\
+        conv\_18 &      2 &      (1, 1) &  192.0 &    48.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_19 &      2 &      (1, 1) &   48.0 &   192.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_20 &      2 &    (14, 14) &  192.0 &    32.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_21 &      1 &    (14, 14) &   32.0 &    96.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_22 &      1 &    (14, 14) &   96.0 &    96.0 &  (5, 5) &  (1, 1) &  (2, 2) &   96.0 &  False \\
+        conv\_23 &      1 &    (14, 14) &   96.0 &    40.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_24 &      1 &    (14, 14) &   40.0 &   120.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_25 &      1 &    (14, 14) &  120.0 &   120.0 &  (5, 5) &  (1, 1) &  (2, 2) &  120.0 &  False \\
+        conv\_26 &      1 &      (1, 1) &  120.0 &    32.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_27 &      1 &      (1, 1) &   32.0 &   120.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_28 &      1 &    (14, 14) &  120.0 &    40.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_29 &      1 &    (14, 14) &   40.0 &   240.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_30 &      1 &    (14, 14) &  240.0 &   240.0 &  (5, 5) &  (2, 2) &  (2, 2) &  240.0 &  False \\
+        conv\_31 &      1 &      (1, 1) &  240.0 &    64.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_32 &      1 &      (1, 1) &   64.0 &   240.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_33 &      1 &      (7, 7) &  240.0 &    72.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_34 &      3 &      (7, 7) &   72.0 &   432.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_35 &      2 &      (7, 7) &  432.0 &   432.0 &  (5, 5) &  (1, 1) &  (2, 2) &  432.0 &  False \\
+        conv\_36 &      2 &      (1, 1) &  432.0 &   112.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_37 &      2 &      (1, 1) &  112.0 &   432.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        conv\_38 &      2 &      (7, 7) &  432.0 &    72.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &  False \\
+        conv\_39 &      1 &      (1, 1) &  432.0 &  1024.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
+        \bottomrule
+        \end{tabular}
+\end{center}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.6]{Plots/networks/resnet50.pdf}
+    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \label{fig:hw_taxonomy}
+\end{figure}
