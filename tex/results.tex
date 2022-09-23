@@ -1,16 +1,18 @@
-
 \chapter{HERO Architecture Simulation}
 \label{chap:results}
 
-To assess the performance of the HERO architecture a cycle accuracte simulation
+To assess the performance of the HERO architecture a cycle accurate simulation
 enviornment was implemented using SystemC and python. The enviornment was used
-to assess the architecture on real networks implemented in pytorch from the TIMM
-library. The simulator is composed of two parts. 1) A python based frontend that
-can analyse the performance results of any pytorch network on a configuration of
-HERO. 2) A SystemC based backend for cycle accurate simulations of HERO running
-convolution layers. In this chapter we will first discuss the simulation
-enviornment and it's components in \autoref{chap:hero:sim_platform}. The results
-from simulating all 695 networks from TIMM using a small HERO instance are given
+to a single configurations of the HERO architecture on real networks implemented
+in pytorch from the TIMM library. The simulator also enables a study of the HERO
+architecture by allowing different configurations of HERO to be passed in during
+simulation. This study is left as part of future work. The simulator is composed
+of two parts. 1) A python based frontend that can analyse the performance
+results of any pytorch network on a configuration of HERO. 2) A SystemC based
+backend for cycle accurate simulations of HERO running convolution/linear layers. In
+this chapter we will first discuss the simulation enviornment and it's
+components in \autoref{chap:hero:sim_platform}. The results from simulating all
+695 networks from TIMM using a small HERO instance are given
 \autoref{chap:hero:results}.
 
 \section{Simulation Enviornment}
@@ -22,28 +24,32 @@ from simulating all 695 networks from TIMM using a small HERO instance are given
 The python frontend depicted in \autoref{fig:frontend}, expects a list of pytorch models and a dictionary defining the
 configuration of a HERO instance as inputs. The configuration specifies the unroll factors
 for F, C, the list of kernels sizes supported in direct mode, and the on-chip
-storage dedicated for input and output featurmape reuse. The output of the
+storage dedicated for input and output feature map reuse, as well as the maximum
+line size in any IFmap tensor.  The output of the
 frontend is a pandas dataframe containing the results from the backend
 simulation of the network(s) on the specified hero instance.  
 After the frontend
 recieves the list of pytorch models, CIGAR extracts the dimensions of all
 supported layers (Conv2D and Linear). Afterwhich two layer transformation
 operations are performed. The first converts convolution layers that are
-unsupported directly into equivelent (1, 1) convolutions as described in
+unsupported directly into equivalent (1, 1) convolutions as described in
 \autoref{chap:dda:dataflow_dse:indirect_mode}. Additionally, linear layers are
 reinterpreted as (1, 1) convolutions based on the proof derived from
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}. To
-determine what layers are supported directly the HERO arch. config being
-evaluated is used. After all layers have been converted to equivelent layers
+\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}. 
+The HERO arch. config being
+evaluated is used to determine what layers are supported directly
+After all layers have been converted to equivelent layers
 that are supported by HERO, a layer decomposition step is performed to
 decompose layers that have featuremaps that are two large to fit in the
-HERO's on-chip memory. Note that any restrictions regarding on-chip
-memory are imposed solely by the frontend. After all layer transformations are
+HERO's on-chip memory. 
+After all layer transformations are
 performed, the layers are converted to test cases and a testcase deduplication
 operation is used to limit the number of simulation runs required to simulate the network(s)
-on HERO. After the testcase queue is generated it gets passed off to several
+on HERO. 
+After the testcase queue is generated it gets passed off to several
 worker threads that manage independent backend instances that simulate the different
-layers of the input network(s) concurrently. Note that the layers being
+layers of the input network(s) concurrently. Note that since we're only
+concerned with the architecutre metrics produced by the simulation the layers being
 simulated don't use real weights and featuremaps from a forward inference pass
 of the original network. Instead equivelent layer weights and featuremaps are
 instantiated in the backend to avoid unnecessary transfer of data between the
@@ -62,7 +68,7 @@ front and backend.
 \label{chap:hero:sim_platform:backend}
 
 The SystemC backend depicted in \autoref{fig:backend}, expects all inputs to be passed in as command line
-arguments. The main inputs are the 1) architecture configuration and 2) layer
+arguments. The main inputs are 1) architecture configuration and 2) layer
 configuration needed for simulation by the frontend. Sim results are generated
 and sent back to the frontend using protobufs. The backend first instantiates a
 HERO instance using the architecute configuration passed as input. Then it
@@ -95,8 +101,38 @@ The interaction between SAMs and DRAM are left as part of future work.
 The configuration for the simulated architecture is given in
 \autoref{tab:hero_config} based on the dimensions discovered in
 \autoref{chap:dataflow_dse:exploring:results} and the sizing conclusions from
-\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. The CPU baseline used in
-this work is an AMD 5950X processor. 
+\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. Note that sizes for on-chip
+storage are given in the aggregate. The number of banks for IFmap L3 and OFmap
+storage scales with the chosen $F_{unroll}$ and $C_{unroll}$ factors chosen. As
+a result, the size of individual IFmap L3 and OFmap bank is proportional with
+the overall size of IFmap L3 and OFmap on-chip storage but inversely
+proportional with the chosen unroll factors. The CPU baseline used in this work
+is an AMD 5950X processor. Thankfully since most networks in the TIMM library
+have very similair layer configurations, the total number of both convolution
+and linears layers to simulate on HERO are reduced from 182773 to 6048. As a
+result, the total simulation time for all 695 Networks was around ~1.5 hours.
+The layers simulated (convolution and linear) represent a substantial portion of
+total network computation as show in \autoref{fig:percent_of_compute}. 
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[scale=0.58]{Plots/overview/percent.pdf}
+    \caption{Percent of computation represented by layers studied in the TIMM library}
+    \label{fig:percent_of_compute}
+\end{figure}
+
+To determine percentage of compute Pytorch can be used to estimate the
+total number of MAC operations used by natively supported layers. Unfortunately
+many networks use custom layers constructed with pytorch primitives. For
+each of these layers an analytical expression would need to be created to calculate
+the number of operations in these layers. In the interest of time the runtimes
+of these layers on a CPU were used to estimate computational demand. In
+\autoref{fig:percent_of_compute}, the horizontal access defines the average
+percentage of total network runtime taken up by supported layers. The vertical
+axis defines the number of networks where convolution and linear layers take up
+x\% of the computation where x is defined on the horizontal axis. From
+\autoref{fig:percent_of_compute} it can be seen that the convolution and linear
+layers represent the majority of network runtimes in the TIMM library. 
 
 \begin{table}[]
     \center
@@ -105,7 +141,7 @@ this work is an AMD 5950X processor.
     Config. Param. & On-Chip Storage in Bytes    \\ 
     \midrule
     Weight Storage            & 16 B / PE (8 bit precision)  \\ \hline
-    IFmap L3 Storage          & 1 MB (8 bit precision)   \\ \hline
+    IFmap L3 Storage          & ~1 MB (8 bit precision)   \\ \hline
     IFmap L2 Storage          & 512 B (8 bit precision)   \\ \hline
     OFmap Storage             & 1 MB (16 bit precision)   \\ \hline
     $C_{unroll}$              & 18   \\ \hline
@@ -117,134 +153,111 @@ this work is an AMD 5950X processor.
 \label{tab:hero_config}
 \end{table}
 
-\subsection{Percent of network compute for supported layers}
-\label{chap:hero:sim_platform:cigar_side}
-
-layers supported represent a substantial amount of total compute by network
-how do I compute that since ops may be hard to estimate for some layers?
-using runtime
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/overview/percent.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
 \subsection{Utilization}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:results:utilization}
 
-utilization is a surrogate for how well layers map to the architecture
-some networks benefit substantially from the architecture
-others don't. 
+Utilization can be used as a surrogate for how well layers map to the selected
+HERO architecture based on the dataflow optimizations discussed in
+\autoref{chap:arch_dimensioning}. From figure
+\autoref{fig:network_layer_level_utilization} we can see that some networks benefit substantially from the architecture while
+others don't. Network level distribution of average layer utilization is generally flat with
+about a third of networks not benefiting from the architecture due to low
+utilization. Low utilization is defined as average PE utilization throughout a
+layer's computation that's less than 50\%.  
 
-network level distribution of utilization is generally flat with
-about a third not benefiting enough from the architecture due to low
-utilization. 
 
-
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/utilization/network.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/network.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/layers.pdf}}
+    \caption{Average layer utilization distributions by a) Network, b)Layer}
+    \label{fig:network_layer_level_utilization}
 \end{figure}
 
+At the layer level we can see a more pronounced disparity in how much the
+architecture benefits some layers over others. The next series of figures will
+explore the cause of this disparity in utilization. If the cause of low
+utilization in most layers is layer size as defined by number of operations then
+utilization would generally scale with number of operations. Figure
+\autoref{fig:utilization_macs_scaling} shows that the expected trend of
+utilization scaling with MACS generally holds. However for a portion of the
+layers on the bottom right utilization is low while MACs ops are high. This low
+utilization would be especially concerning if combined with a speedup factor
+$<1X$ over CPU baseline for that layer. One possible cause of low utilization,
+combined with high MAC OPs and low speedup could be a high layer memory
+footprint. To examine the effect of layer memory footprint as a cause for low
+utilization, a scatter plot of layer feature map size vs utilization is
+presented in \autoref{fig:scatter_plot_util_vs_fmap}. 
 
-At a more granular level it seems like utilization is bimodal
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/utilization/layers.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-if utilization is low for small layers that would make sense
-plotting utilization vs macs we see that we see that generally there's a trend where low
-utilization correlates with lower macs
-but there is a bulge MACS where high Macs correlates
-with low utilization. Why? 
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/utilization/util_vs_macs.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \caption{Shaded contour plot of average layer utilization vs number of MACs}
+    \label{fig:utilization_macs_scaling}
 \end{figure}
-
 
 Maybe layer decomposition and on chip memory plays a role here
 Scatter plot of layers with speedup < 1 
 
-\begin{figure}[ht]
+From \autoref{fig:scatter_plot_util_vs_fmap} memory footprint doesn't matter no
+clear trend 
+
+For layers with low utilization
+
+Layer type is a better predictor
+
+Depthwise/Grouped map poorly to the architecture
+
+Some non depthwise map poorly? Why?
+
+They don't have enough channels and filters, PEs are under utilized
+Individual channels and filters can be large though
+
+Like depthwise, other types of concurrency need to be exploited
+
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/utilization/util_vs_fmap.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/util_vs_ifmap.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/util_vs_ofmap.pdf}}
+    \caption{Average layer utilization distributions by a) Network, b)Layer}
+    \label{fig:scatter_plot_util_vs_fmap}
 \end{figure}
 
-
-Misteriously theres  a cluster of layers with high utilization and low speedup
-they fall on bouth sides of the on-chip memory line
-
-If we look at types of layers that have low util and low speedup they're all
-depthwise layers which are decomposed by group and poorly map to the
-architecture
-
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/utilization/type_of_low_util.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/type_of_low_util.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/low_util_big_fmap.pdf}}
+    \caption{Average layer utilization distributions by a) Network, b)Layer}
+    \label{fig:scatter_plot_util_vs_fmap}
 \end{figure}
 
+Some layers have high util, but low speedup
+Those layers generally have really high C/F vs Ceff vs Feff
+So we don't have resources for these layers
 
-If we look at layers with large footprint and low speedup they're size limits
-concurrency because the full throughput of on-chip memory can't be used, these
-layers need us to exploit a different kind of concurrency other than F, C Ky and
-KX
+For layers with high util, low speedup and sane C/Ceff and F/Feff ratios 
+are all lowered/lifted this increases their MACs which makes CPU competitve
+given it's allowance for more varied kernel sizes
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/utilization/low_util_big_fmap.pdf}
-    % \caption{Rzeason for low utilization in layers with:\n speedup < 1\n" + "utilization < " + str(util_ub) +'\n' + r"memory footprint > $2^{20}$ elements}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-what about layers with high utilization but low speedup
-Not enough PES because of some many channels and filters
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/utilization/ratios.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-Why the increase?
-Lowering causes increase in layer macs
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/utilization/macs.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-summary barplot
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/utilization/summary.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \includegraphics[scale=0.48]{Plots/utilization/ratios.pdf}
+    \hspace{0.1cm} 
+    \includegraphics[scale=0.48]{Plots/utilization/macs.pdf}
+    \caption{Average layer utilization distributions by a) Network, b)Layer}
+    \label{fig:scatter_plot_util_vs_fmap}
 \end{figure}
 
 \subsection{Latency and Speedup over CPU Baseline}
 \label{chap:hero:sim_platform:cigar_side}
 
+
 most networks/ layers benefit
-median network speedup over 
+mean network speedup is over 
 
 \begin{figure}[ht]
     \centering
@@ -299,7 +312,7 @@ anticipated (references earlier figure)
 \label{chap:hero:sim_platform:cigar_side}
 
 network and layer bandwidth histograms
-within ddr4 spec
+within ddr4 spec? cite here
 
 \begin{figure}[ht]
     \centering
@@ -324,7 +337,6 @@ add energy model as table
 
 mac is basically free
 dram dominates
-
 
 network inferences/ j median is around 57
 
@@ -379,9 +391,7 @@ scaling can be improved with more complicated descriptors
 
 networks chosen
 resnet50 (popular and backbone for alot of other networks)
-mobilenetv3 specific to edge devices and has depthwise layers (let's see effect
-of offloading on cpu)
-hrnet18 flexible network used for variety of tasks, also has larger layers
+mobilenetv3 specific to edge devices and has depthwise layers
 
 \subsubsection{ResNet50}
 
@@ -420,14 +430,13 @@ hrnet18 flexible network used for variety of tasks, also has larger layers
         \end{tabular}
 \end{center}
 
+\subsubsection{MobilenetV3}
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.6]{Plots/networks/mobilenetv3_small_075.pdf}
+    \includegraphics[scale=0.6]{Plots/networks/resnet50.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}
-
-\subsubsection{MobilenetV3}
 
 \clearpage
 % \Rotatebox{90}{%
@@ -481,9 +490,10 @@ hrnet18 flexible network used for variety of tasks, also has larger layers
         \end{tabular}
 \end{center}
 
+
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.6]{Plots/networks/resnet50.pdf}
+    \includegraphics[scale=0.6]{Plots/networks/mobilenetv3_small_075.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:hw_taxonomy}
 \end{figure}

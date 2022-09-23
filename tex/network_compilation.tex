@@ -33,7 +33,6 @@ large featuremap along the channel axis, the weight tensor has to also be
 decomposed. Using the tiling representation of weight tensors, ifmap based
 decomposition halves the size of tiles being processed by the architecture. 
 
-
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.25]{fig/ifmap_decomposition.pdf}
@@ -66,11 +65,20 @@ directly by HERO.
 \end{figure}
 
 Decomposition primarily affects PE utilization since it may limit available
-concurrency when processing channels and filters. In some cases it may cause a
-significant reduction of PE utilization. In cases of low utilization due to
-layer decomposition other forms of concurrency may need to be supported beyond
-the filter/ channel/ kernel concurrency chosen by HERO. An exploration of other
-forms of concurrency is left as part of future work. 
+concurrency when processing channels and filters. A layer with a large IFmap for
+example may have to be decomposed into two sub-layers were each has a lower
+overall channel count that would fail to saturate available PEs dedicated for
+channel concurrency. The same logic applies in layers with OFmaps that have high
+channel counts failing to saturate available PEs for filter concurrency. This
+type of PE under-utilization is orthogonal to under-utilization due to overall
+IFmap/OFmap channel sizes being larger than the size of one IFmap L3/ OFmap
+bank. This forces some of the available banks to be idle since they cannot
+output their partial feature maps to available PEs until the appropriate time in
+the accelerators computation lifecycle. Scenarios of low utilization cause by
+layer decomposition and/or insufficient individual bank sizes can be mitigated
+by supporting other forms of concurrency beyond the filter/ channel/ kernel
+concurrency chosen by HERO. An exploration of other forms of concurrency within
+HERO is left as part of future work. 
 
 \section{Layer Scheduling}
 \label{chap:net_compile:layer_scheduling}
