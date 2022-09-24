@@ -101,18 +101,21 @@ The interaction between SAMs and DRAM are left as part of future work.
 The configuration for the simulated architecture is given in
 \autoref{tab:hero_config} based on the dimensions discovered in
 \autoref{chap:dataflow_dse:exploring:results} and the sizing conclusions from
-\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. Note that sizes for on-chip
+\autoref{chap:dataflow_dse:memory_hierarchy_sizing}. Note that other larger HERO
+variants could have been chosen for this work, however, to minimize simulation
+time and to explore a variant of HERO fit for more constrained embedded
+enviornments the configuration in \autoref{tab:hero_config} were chosen.   
+Note that sizes for on-chip
 storage are given in the aggregate. The number of banks for IFmap L3 and OFmap
-storage scales with the chosen $F_{unroll}$ and $C_{unroll}$ factors chosen. As
-a result, the size of individual IFmap L3 and OFmap bank is proportional with
-the overall size of IFmap L3 and OFmap on-chip storage but inversely
-proportional with the chosen unroll factors. The CPU baseline used in this work
-is an AMD 5950X processor. Thankfully since most networks in the TIMM library
-have very similair layer configurations, the total number of both convolution
-and linears layers to simulate on HERO are reduced from 182773 to 6048. As a
-result, the total simulation time for all 695 Networks was around ~1.5 hours.
-The layers simulated (convolution and linear) represent a substantial portion of
-total network computation as show in \autoref{fig:percent_of_compute}. 
+storage scales with the chosen $F_{unroll}$ and $C_{unroll}$ factors. As a
+result, the size of individual IFmap L3 and OFmap bank is proportional with the
+overall size of IFmap L3 and OFmap on-chip storage but inversely proportional
+with the chosen unroll factors. The CPU baseline used in this work is an AMD
+5950X processor. To minimize simulation time the frontend takes advantage of the
+similarity between layer configurations accross networks in the timm library.
+The total number of both convolution and linears layers post layer configuration
+deduplication is reduced from 182773 to 6048. This enables a simulation time of
+less than 1.5 hours for all 695 Networks.
 
 \begin{figure}[ht]
     \centering
@@ -121,11 +124,13 @@ total network computation as show in \autoref{fig:percent_of_compute}.
     \label{fig:percent_of_compute}
 \end{figure}
 
+The layers simulated (convolution and linear) represent a substantial portion of
+total network computation as show in \autoref{fig:percent_of_compute}. 
 To determine percentage of compute Pytorch can be used to estimate the
 total number of MAC operations used by natively supported layers. Unfortunately
 many networks use custom layers constructed with pytorch primitives. For
 each of these layers an analytical expression would need to be created to calculate
-the number of operations in these layers. In the interest of time the runtimes
+the number of operations in these layers. For simplicity the runtimes
 of these layers on a CPU were used to estimate computational demand. In
 \autoref{fig:percent_of_compute}, the horizontal access defines the average
 percentage of total network runtime taken up by supported layers. The vertical
@@ -188,7 +193,8 @@ $<1X$ over CPU baseline for that layer. One possible cause of low utilization,
 combined with high MAC OPs and low speedup could be a high layer memory
 footprint. To examine the effect of layer memory footprint as a cause for low
 utilization, a scatter plot of layer feature map size vs utilization is
-presented in \autoref{fig:scatter_plot_util_vs_fmap}. 
+presented in \autoref{fig:scatter_plot_util_vs_fmap} for layers where speedup
+was <1 compared to the CPU baselin. 
 
 
 \begin{figure}[ht]
@@ -198,31 +204,31 @@ presented in \autoref{fig:scatter_plot_util_vs_fmap}.
     \label{fig:utilization_macs_scaling}
 \end{figure}
 
-Maybe layer decomposition and on chip memory plays a role here
-Scatter plot of layers with speedup < 1 
-
-From \autoref{fig:scatter_plot_util_vs_fmap} memory footprint doesn't matter no
-clear trend 
-
-For layers with low utilization
-
-Layer type is a better predictor
-
-Depthwise/Grouped map poorly to the architecture
-
-Some non depthwise map poorly? Why?
-
-They don't have enough channels and filters, PEs are under utilized
-Individual channels and filters can be large though
-
-Like depthwise, other types of concurrency need to be exploited
+From \autoref{fig:scatter_plot_util_vs_fmap} it's clear that layer memory
+footprint does not correlate with low utilization. What does correlate low
+utilization is layer type. The majority of low utilization layers are depthwise
+convolution layers as in figure \autoref{fig:cause_of_low_util}.a. Depthwise
+layers were not considered during dataflow DSE in \autoref{chap:dda}. Since they
+weren't an optimization target the frontend decomposes depthwise layers into
+individual groups of convolutions and since depthwise layers are convolution
+layers where each IFmap channel is convolved with a kernel independently of the
+others, all PEs dedicated to concurrent channel processing are underutilized.
+From \autoref{fig:cause_of_low_util}.a there a few non grouped convolution
+layers with low low utilization and low speedup. These layers when examined more
+closely in \autoref{fig:cause_of_low_util}.b and they appear to have lower
+available channel/ filter concurrency as defined by the number of channels/
+filters in a layer relative to the available effective channel/ filter
+concurrency of the architecture. In both cases of depthwise/grouped convolutions
+and low channel/filter count non-grouped convolutions low utilization and low
+speedup can be remedied by exploiting other forms of concurrency in the
+architecture other that Filter/Channel/Kernel concurrency chosen by HERO. 
 
 \begin{figure}
     \centering
     \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/util_vs_ifmap.pdf}}
     \hspace{0.1cm} 
     \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/util_vs_ofmap.pdf}}
-    \caption{Average layer utilization distributions by a) Network, b)Layer}
+    \caption{Scatter plot of utilization vs layer a) IFmap size and b) OFmap size. The dotted blue line represents the on-chip memory allocated for both types of feature maps.}
     \label{fig:scatter_plot_util_vs_fmap}
 \end{figure}
 
@@ -231,82 +237,75 @@ Like depthwise, other types of concurrency need to be exploited
     \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/type_of_low_util.pdf}}
     \hspace{0.1cm} 
     \subfigure[]{\includegraphics[width=0.48\textwidth]{Plots/utilization/low_util_big_fmap.pdf}}
-    \caption{Average layer utilization distributions by a) Network, b)Layer}
-    \label{fig:scatter_plot_util_vs_fmap}
+    \caption{Illustration of the causes of low utilization due to A) Layer type and B) Layer dimensions}
+    \label{fig:cause_of_low_util}
 \end{figure}
 
-Some layers have high util, but low speedup
-Those layers generally have really high C/F vs Ceff vs Feff
-So we don't have resources for these layers
-
-For layers with high util, low speedup and sane C/Ceff and F/Feff ratios 
-are all lowered/lifted this increases their MACs which makes CPU competitve
-given it's allowance for more varied kernel sizes
+Paradoxically, \autoref{fig:scatter_plot_util_vs_fmap} shows a cluster with
+layers with both high utilization and low speedup relative to the CPU baseline.
+When examining the Channel and Filter counts for these layers in
+\autoref{fig:mac_ratios}.a it can be seen that they are generally multiple orders
+of magnitude greater than the available effective channel/ filter concurrency.
+In effect these layers suffer from the opposite problem of the previous layers.
+The resources allocation defined in \autoref{tab:hero_config} is too low to
+satisfy the available filter and channel concurrency in these high utilization
+but low speedup layer. 
+The impact of lowering and lifting on increasing the number of MAC operations of
+a layer cannot be understated. When comparing the CPU baseline vs HERO, the CPU
+baseline has the inherent advantage of a larger and more complex memory
+hierarchy that enables more complicated access patterns to occur. This advantage
+allows CPUs to support arbitrary layers without relying on lowering/ lifting
+data transformations which can dramatically increase the effective number of MAC
+operations in a layer as seen in \autoref{fig:mac_ratios}.b where the median MAC
+factor increase as a result of the balanced lowering/ lifting scheme chosen by
+HERO is ~3.8X over the original number of MACs present in the layer. In short
+HERO has to perform more operations for the same layers relative to CPU. To
+remedy this issue, more layers need to be supported directly by HERO.  
 
 \begin{figure}
     \centering
     \includegraphics[scale=0.48]{Plots/utilization/ratios.pdf}
     \hspace{0.1cm} 
     \includegraphics[scale=0.48]{Plots/utilization/macs.pdf}
-    \caption{Average layer utilization distributions by a) Network, b)Layer}
-    \label{fig:scatter_plot_util_vs_fmap}
+    \caption{A) Barplot of the ratios between layer channel/ filters vs effective available channel/ filter concurrency for layers with speedup $<$ 1 and utilization $>$ 95\% b) Barplot of the MAC factor increase due to lowering/lifting for layers with speedup $<$ 1 and utilization $>$ 95\%}
+    \label{fig:mac_ratios}
 \end{figure}
 
-\subsection{Latency and Speedup over CPU Baseline}
-\label{chap:hero:sim_platform:cigar_side}
+\subsection{Latency and speedup over CPU Baseline}
+\label{chap:hero:results:latency}
 
+The majority of the 695 Networks in the Timm library experience a speedup over
+CPU baseline on HERO with mean speedup being 6.8X over CPU baseline as show in
+\autoref{fig:speedup}.a. This network level speedup is limited by layers that do
+not benefit from running HERO due to poor mapping to the architecture as
+discussed in \autoref{chap:hero:results:utilization}. In fact close to 12\% of
+layers experience a $<$1X speed relative to CPU baseline as see in
+\autoref{fig:speedup}.b. Offloading these poorly supported layers to the CPU
+yields \autoref{fig:speedup}.c where the mean speedup over CPU baseline is ~30X.
+Note that these results are restricted to not only the simulated config in
+\autoref{tab:hero_config} but the AMD 5950X cpu used for comparison. The 5950X
+is a workstation CPU with a TDP greatly in excess of what's expected in the small
+embedded environments the simulated configuration in \autoref{tab:hero_config}
+of HERO is expected to run in.
 
-most networks/ layers benefit
-mean network speedup is over 
-
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/overview/percent.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \includegraphics[scale=0.46]{Plots/latency/net_speedup.pdf}
+    \hspace{0.1cm} 
+    \includegraphics[scale=0.46]{Plots/latency/layer_speedup.pdf}
+    \includegraphics[scale=0.46]{Plots/latency/net_speed_w_offload.pdf}
+    \hspace{0.1cm} 
+    \includegraphics[scale=0.46]{Plots/latency/fps.pdf}
+    \caption{A) Histogram of average network speedup over CPU baseline B) Barplot of }
+    \label{fig:speedup}
 \end{figure}
 
-Some networks don't benefit
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/net_speedup.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-12\% of layers don't benefit
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/layer_speedup.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-
-why? see utilization
-here's a boxplot of per layer speedup excluding layers with no speedup
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/speedup_gt_1_boxplot.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-estimated fps based on supported layers, note that this should be taken as upper
-bound because unsupported supported layers may take up more of the runtime than
-anticipated (references earlier figure)
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/latency/fps.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-
+\autoref{fig:speedup}.d  shows the FPS for layers supported by HERO. The median FPS
+of supported layers is ~91 FPS. Since HERO's support is restricted to
+convolution and linear operations these FPS results should serve only as an
+upperbound estimate for the actual FPS when running these networks on HERO. An
+exploration of CPU offloading of other layers such as activation and batchnorm
+is left as part of future work.  
 
 \subsection{DRAM Bandwidth}
 \label{chap:hero:sim_platform:cigar_side}
@@ -318,7 +317,7 @@ within ddr4 spec? cite here
     \centering
     \includegraphics[scale=0.58]{Plots/resources/net_bw.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \label{fig:dram_bw}
 \end{figure}
 
 
@@ -340,26 +339,21 @@ dram dominates
 
 network inferences/ j median is around 57
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/energy/inferences.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
-
-
 excluding dram number jumps to 20K
 there's room to reduce on-chip data movement by exploiting different kinds of
 concurrency
 
-\begin{figure}[ht]
+\begin{figure}
     \centering
-    \includegraphics[scale=0.58]{Plots/energy/inferences_wo_dram.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \includegraphics[scale=0.48]{Plots/energy/inferences.pdf}
+    \hspace{0.1cm} 
+    \includegraphics[scale=0.48]{Plots/energy/inferences_wo_dram.pdf}
+    \caption{A) Barplot of the ratios between layer channel/ filters vs effective available channel/ filter concurrency for layers with speedup $<$ 1 and utilization $>$ 95\% b) Barplot of the MAC factor increase due to lowering/lifting for layers with speedup $<$ 1 and utilization $>$ 95\%}
+    \label{fig:speedup}
 \end{figure}
 
 \subsection{Area}
+
 \label{chap:conv_gemm_equiv:overhead}
 
 area model as table
@@ -373,18 +367,18 @@ ofmap storage requires higher precision
     \label{fig:hw_taxonomy}
 \end{figure}
 
-\subsection{Descriptor program scaling}
-\label{chap:hero:sim_platform:cigar_side}
+% \subsection{Descriptor program scaling}
+% \label{chap:hero:sim_platform:cigar_side}
 
-median required storage for descriptors per address generator is around 100
-scaling can be improved with more complicated descriptors
+% median required storage for descriptors per address generator is around 100
+% scaling can be improved with more complicated descriptors
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.58]{Plots/resources/descriptors.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
-\end{figure}
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[scale=0.58]{Plots/resources/descriptors.pdf}
+%     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+%     \label{fig:hw_taxonomy}
+% \end{figure}
 
 \subsection{Per network results}
 \label{chap:hero:sim_platform:cigar_side}
