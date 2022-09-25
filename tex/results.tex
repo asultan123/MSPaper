@@ -148,7 +148,7 @@ layers represent the majority of network runtimes in the TIMM library.
     Weight Storage            & 16 B / PE (8 bit precision)  \\ \hline
     IFmap L3 Storage          & ~1 MB (8 bit precision)   \\ \hline
     IFmap L2 Storage          & 512 B (8 bit precision)   \\ \hline
-    OFmap Storage             & 1 MB (16 bit precision)   \\ \hline
+    OFmap Storage             & 2 MB (16 bit precision)   \\ \hline
     $C_{unroll}$              & 18   \\ \hline
     $f_{unroll}$              & 32   \\ \hline
     Directly Supported Kernels             & {(1, 1), (3, 3)}   \\ \hline
@@ -296,7 +296,7 @@ of HERO is expected to run in.
     \includegraphics[scale=0.46]{Plots/latency/net_speed_w_offload.pdf}
     \hspace{0.1cm} 
     \includegraphics[scale=0.46]{Plots/latency/fps.pdf}
-    \caption{A) Histogram of average network speedup over CPU baseline B) Barplot of }
+    \caption{a) Histogram of average network speedup over CPU baseline b) Histogram of layer speedup over CPU baseline c) Histogram of average network speedup with offloading of poorly mapped layers with low utilization and low speedup c) Histogram of FPS upperbounds for simulated networks}
     \label{fig:speedup}
 \end{figure}
 
@@ -308,10 +308,15 @@ exploration of CPU offloading of other layers such as activation and batchnorm
 is left as part of future work.  
 
 \subsection{DRAM Bandwidth}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:results:bw}
 
-network and layer bandwidth histograms
-within ddr4 spec? cite here
+\autoref{fig:dram_bw} show the histograms of the load/ store and combined
+load store DRAM bandwidth necessary to keep the simulated HERO instance from
+stalling. The median required combined DRAM bandwidth is reflected in
+\autoref{tab:median_dram_bw}. The maximum combined bandwidth for any network in
+the Timm library is 18.3 GiB/s (19.65 GB/s) which is within the ddr4 specification for
+PC4-21300 DDR4 SDRAM modules \cite{wiki:List_of_interface_bit_rates} capable of
+a 21.3 GB/s transfer rate. 
 
 \begin{figure}[ht]
     \centering
@@ -320,77 +325,169 @@ within ddr4 spec? cite here
     \label{fig:dram_bw}
 \end{figure}
 
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \toprule
+    Bandwidth Type. & Bandwidth in GiB/s    \\ 
+    \midrule
+    Load            & 3.466823  \\ \hline
+    Store          & 1.411312  \\ \hline
+    Combined          & 4.940233   \\ \hline
+\end{tabular}
+\caption{Median bandwidth requirements for simulated networks}
+\label{tab:median_dram_bw}
+\end{table}
 
 \subsection{Energy}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:results:energy}
 
-used energy model in cite energy model
-add energy model as table
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \toprule
+    Operation & Energy Calculation    \\ 
+    \midrule
+    DRAM Access                 & 160pJ/B  \\ \hline
+    On-Chip SRAM Access         & 50+0.022$\sqrt[2]{S}$  \\ \hline
+    MAC                         & 767uJ/op  \\ \hline
+\end{tabular}
+\caption{Energy model from \cite{area_model}}
+\label{tab:energy_model}
+\end{table}
+
+To estimate energy usage during HERO's operation the energy model from
+\cite{area_model} was used. The cost of  on-chip and off-chip communication is
+not considered as part of this work. A breakdown of the energy used by different
+operations from the energy model in \cite{area_model} is given in
+\autoref{tab:hero_config}. Note that while DRAM access and MAC operations are
+given as constants multiplied by number of accesses and number of operations,
+the access energy for On-Chip sram is a function of the square root of size of
+the on-chip SRAM in bits. From \autoref{fig:median_energy_per_network_plot} it's
+clear that DRAM energy dominates during an inference of most networks. The
+energy consumed by on-chip accesses
+of OFmap memory banks is predictably lower than accesses for IFmap banks given
+that there's more of them and they are each smaller memories in
+comparison to IFmap banks (see \autoref{tab:hero_config}). Reuse chain energy is largely negligible. MAC energy
+is non negligible and is similar to weight memory access energy.
+\autoref{tab:median_energy_per_network} shows a numerical breakdown of each of
+the different operations and the median energy they consumed during inferences
+passes of networks in the Timm library. 
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/energy/barplot.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \caption{Median network energy breakdown by operation type, note that the vertical axis uses a log scale}
+    \label{fig:median_energy_per_network_plot}
 \end{figure}
 
-mac is basically free
-dram dominates
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \toprule
+    Operation & Energy Calculation    \\ 
+    \midrule
+    DRAM access             &  1.725008e-02 J \\
+    IFmap SRAM access      &  3.461726e-05 J\\
+    OFmap SRAM access        &  1.316624e-05 J\\
+    Reuse Chain SRAM access &  7.892650e-07 J\\
+    Weight Register access     &  3.130283e-06 J\\
+    MAC operation              &  4.778069e-06 J\\
+    \bottomrule
+\end{tabular}
+\caption{Energy model from \cite{area_model}}
+\label{tab:median_energy_per_network}
+\end{table}
 
-network inferences/ j median is around 57
-
-excluding dram number jumps to 20K
-there's room to reduce on-chip data movement by exploiting different kinds of
-concurrency
+\autoref{fig:inferences_per_j} shows a histogram of the number of inferences/J of
+energy consumed. From \autoref{fig:inferences_per_j}.a and
+\autoref{fig:inferences_per_j}.b DRAM energy cost is, unsurprisingly, highly influential on
+inferences/J. The median inferences/J jumps from 57 Inference/J to 17094
+Inferences/J. It's clear that further reducing off-chip data movement by
+exploiting more types of concurrency is required. 
 
 \begin{figure}
     \centering
     \includegraphics[scale=0.48]{Plots/energy/inferences.pdf}
     \hspace{0.1cm} 
     \includegraphics[scale=0.48]{Plots/energy/inferences_wo_dram.pdf}
-    \caption{A) Barplot of the ratios between layer channel/ filters vs effective available channel/ filter concurrency for layers with speedup $<$ 1 and utilization $>$ 95\% b) Barplot of the MAC factor increase due to lowering/lifting for layers with speedup $<$ 1 and utilization $>$ 95\%}
-    \label{fig:speedup}
+    \caption{a) Inferences/J when factoring in DRAM access cost b) Inferences/J excluding DRAM access cost}
+    \label{fig:inferences_per_j}
 \end{figure}
 
 \subsection{Area}
+\label{chap:hero:results:area}
 
-\label{chap:conv_gemm_equiv:overhead}
+To estimate on-chip area for the configurations in
+\autoref{tab:hero_config} the area model from \cite{area_model} was used. The area
+model from \cite{area_model} is presented in \autoref{tab:area_model_table}.
+\autoref{fig:area_breakdown} shows the area model applied to the configuration
+in \autoref{fig:area_breakdown} where the vast majority of on-chip area is
+consumed by IFmap and OFmap SRAM banks. OFmap memory requires close to double
+the area for IFmap memory given the increase in precision required by
+accumulation.
 
-area model as table
-bulk goes to ofmap storage and ifmap storage
-ofmap storage requires higher precision
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|}
+    \toprule
+    Unit & On-Chip area    \\ 
+    \midrule
+    MAC             &  16 $um^2$ \\
+    SRAM bit      &  0.013 $um^2/bit$ \\
+    \bottomrule
+\end{tabular}
+\caption{Area model from \cite{area_model}}
+\label{tab:area_model_table}
+\end{table}
+
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/resources/area.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \caption{Area breakdown of HERO in the configuration specified in \autoref{tab:hero_config}}
+    \label{fig:area_breakdown}
 \end{figure}
 
-% \subsection{Descriptor program scaling}
-% \label{chap:hero:sim_platform:cigar_side}
-
-% median required storage for descriptors per address generator is around 100
-% scaling can be improved with more complicated descriptors
-
-% \begin{figure}[ht]
-%     \centering
-%     \includegraphics[scale=0.58]{Plots/resources/descriptors.pdf}
-%     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-%     \label{fig:hw_taxonomy}
-% \end{figure}
 
 \subsection{Per network results}
-\label{chap:hero:sim_platform:cigar_side}
+\label{chap:hero:results:network}
 
-networks chosen
-resnet50 (popular and backbone for alot of other networks)
-mobilenetv3 specific to edge devices and has depthwise layers
+In addition to the library results presented in the previous subsections this
+subsections shows the results of running two networks, Resnet50 and Mobilenetv3
+on HERO. Resnet50 is a popular image recognition model used as a backbone within
+many networks within the Timm library. MobilnetV3 is an image recognition
+library developed for low power edge devices. For each network a table is shown
+with each layer's configuration. Accompanying the layer breakdown tables are a
+series of figures illustrating each network layer's speedup, latency, pe utilization,
+energy, bandwidth requirements, and MAC factor increase (in situations were
+lowering is required). Note that since each run of HERO is deterministic, layers
+with identical configurations are only plotted once. This an important fact to
+consider when observing layers with underwhelming performance on HERO. If they
+appear infrequently their impact on overall network performance is limited. 
 
 \subsubsection{ResNet50}
 
-\clearpage
+From \autoref{tab:resnet50_layer_breakdown}, Resnet50 lacks depthwise layers.
+Hence when run on HERO the majority of layers fully utilize the available PEs as
+seen in \autoref{fig:resnet50_metrics}. The exception to
+this high utilization is conv\_0. Due to it's low channel count and unsupported
+kernel types conv\_0 is lowered which substantially increases the MAC count of
+the layer. Additionally, because of the large kernel size lowering inflates the
+IFmap size necessitating a layer decomposition step that causes PEs to be
+underutilized. This causes an overall reduction in layer speedup. The influence
+of lowering extends to energy consumption with a few key layers (conv\_6,
+conv\_12, conv\_18) consuming the bulk of on-chip energy because of IFmap tensor
+size increase. Thankfully these layers occur infrequently in the network and as
+a result the majority of layers do not require lowering. The overall estimated
+upperbound FPS for resnet50 is 62.7 FPS at 61 Inferences/J and the upperbound of
+dram bandwidth required to prevent HERO from stalling falls well below the
+PC4-21300 DDR4 SDRAM modules assumed in the energy model discussed in
+\autoref{chap:hero:results:energy}. 
+
+
 \begin{center}
+    \begin{table}[]
     \begin{tabular}{lrlrrlllll}
         \toprule
         {} &  Count & IFmap &     Cin &    Cout &       K &  Stride & Padding & Groups &   Bias \\
@@ -422,19 +519,38 @@ mobilenetv3 specific to edge devices and has depthwise layers
         linear\_0 & 1 &      (1, 1) &  2048.0 &  1000.0 &     N/A &     N/A &     N/A &    N/A &   True \\
         \bottomrule
         \end{tabular}
+        \caption{Resent50 layer breakdown}
+        \label{tab:resnet50_layer_breakdown}
+\end{table}
 \end{center}
 
-\subsubsection{MobilenetV3}
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.6]{Plots/networks/resnet50.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \caption{Resnet50 performance results on HERO with the configuration specified in \autoref{tab:hero_config}}
+    \label{fig:resnet50_metrics}
 \end{figure}
 
-\clearpage
-% \Rotatebox{90}{%
+\subsubsection{MobilenetV3}
+
+From \autoref{tab:mobilenetv3_layer_breakdown}, unlike Resnet50, Mobilenetv3 has
+depthwise layers (conv\_1, conv\_6, conv\_12, ...) that map poorly to HERO.
+Depthwise layers are supported by running each convolution group sequentially
+which greatly diminishes the concurency advantage of HERO. Depthwise layers
+suffer from PE underutilization and substantially reduced speedup over CPU
+baseline. Depthwise layers may also require lowering which further reduces their
+energy efficiency on HERO. In fact, the layers with the most on-chip energy
+consumption are all depthwise layers that have been lowered. Thankfully the
+impact of these poorly supported depthwise layers is limited given their
+relative infrequency. As a result the overall estimated upperbound FPS for
+MobilenetV3 is 928.9 FPS at 328.4 Inferences/J and the upperbound of dram bandwidth
+required to prevent HERO from stalling falls well below the PC4-21300 DDR4 SDRAM
+modules assumed in the energy model discussed in
+\autoref{chap:hero:results:energy}. 
+
+
 \begin{center}
+    \begin{table}[]
     \begin{tabular}{lrlrrlllll}
         \toprule
         {} &  Count &       IFmap &    Cin &    Cout &       K &  Stride & Padding & Groups &   Bias \\
@@ -482,6 +598,9 @@ mobilenetv3 specific to edge devices and has depthwise layers
         conv\_39 &      1 &      (1, 1) &  432.0 &  1024.0 &  (1, 1) &  (1, 1) &  (0, 0) &    1.0 &   True \\
         \bottomrule
         \end{tabular}
+        \caption{Mobilenetv3 layer breakdown}
+        \label{tab:mobilenetv3_layer_breakdown}
+    \end{table}
 \end{center}
 
 
@@ -489,5 +608,20 @@ mobilenetv3 specific to edge devices and has depthwise layers
     \centering
     \includegraphics[scale=0.6]{Plots/networks/mobilenetv3_small_075.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
-    \label{fig:hw_taxonomy}
+    \label{fig:mobilenetv3_metrics}
 \end{figure}
+
+
+
+% \subsection{Descriptor program scaling}
+% \label{chap:hero:sim_platform:cigar_side}
+
+% median required storage for descriptors per address generator is around 100
+% scaling can be improved with more complicated descriptors
+
+% \begin{figure}[ht]
+%     \centering
+%     \includegraphics[scale=0.58]{Plots/resources/descriptors.pdf}
+%     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+%     \label{fig:hw_taxonomy}
+% \end{figure}
