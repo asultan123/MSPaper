@@ -14,7 +14,7 @@ such they are being deployed on both cloud platforms and edge devices at scale.
 image/video recognition. The main computation layer of \ac{CNN}s that consumes
 most of the runtime of a network is the convolutional layer. A convolution layer
 operates on multi-demension tensors as part of a \ac{CNN}s feature extraction
-portion of the network. (Citation needed). Convolution layers exhibit a
+portion of the network. Convolution layers exhibit a
 significant amount of parallel behavior and data reuse. Additionally, the tight
 latency, throughout and energy constraints imposed on CNN's in various
 enviornments, particularly on edge devices has led to the proliferation of
@@ -25,7 +25,7 @@ accelerating convolution layers.
 \section{Convolution accelerators}
 \label{chap:intro:cnn_accelerator_design_approaches}
 
-Citation Needed Prior work on \ac{CNN} accelerators design can broadly be
+Prior work on \ac{CNN} accelerators design can broadly be
 classified based on 1) their target execution platform \ac{ASIC}/\ac{FPGA} 2)
 Their target for acceleration, either entire layers of the network or
 specifically convolution layers and finally 3) Their mathematical interpretation
@@ -63,12 +63,12 @@ compilation processes incorporate more than one \ac{CNN} network architectures
 into their architecture optimization process. 
 
 \ac{ASIC}-based architectures tackle network generality by introducing a wide
-variety of hardened layer accelerator primitives on-chip (CITE TPU).
+variety of hardened layer accelerator primitives on-chip \cite{tpu}.
 Additionally, they tackle convolution generality by either 1) Reinterpreting
-convolution layers as \ac{GEMM} operations (CITE TPU and GEMMINI) or 2) Creating a general
+convolution layers as \ac{GEMM} operations or 2) Creating a general
 enough \ac{Conv} \ac{ACC} capable of supporting a wide range of \ac{Conv} layer
-dimensions directly (CITE EYERISS). Given the pace of development in \ac{DNN}s,
-new layers like (CITE ATTENTION IS ALL YOU NEED)'s self attention layer can
+dimensions directly \cite{eyerissv2}. Given the pace of development in \ac{DNN}s,
+new layers like \cite{transformer_model}'s self attention layer can
 arise and become integral to improving \ac{DNN} model performance
 \cite{conv_and_transformers}. These new layers may not be fully compatabile with
 the chosen accelerator primitives in the \ac{ASIC}-based design approach and as
@@ -95,27 +95,42 @@ computationly intensive layers that currently exist in the literature and ones
 that may arise in the future 4) The configurability that enables the
 architectural template to be modified based on available compute resources and a
 target library of networks. To satisfy the afformentioned requirements, in this
-thesis, the following is proposed: 
+thesis, the following is presented: 
 \begin{enumerate}
-    \item A \ac{HERO-T}
-    \item \ac{SAM} a novel on-chip memory primitive capable of orchestrating
-    energy efficient on chip data movements within \ac{HERO-T}
-    \item (ConvolutIon statIstics GAthere) \ac{CIGAR} a tool that enables \ac{HERO-T}'s data driven design of \ac{HERO-T}
-    \item \ac{TEMPO} a tool that optimizes \ac{HERO-T} based on a target
-    \ac{CNN} library and available compute resources 
-    \item \ac{HERO-T-Sim} a cycle SystemC model of \ac{HERO-T} combined with a
-python evaluation frontend that assesses a concrete \ac{HERO-T} instance's
-performance and energy efficiency on a target \ac{CNN} library
+    \item (ConvolutIon statIstics GAthere) \ac{CIGAR} a tool that enables \ac{HERO}'s data driven design
+    \item A \ac{HERO} derived from a novel data driven design approach
+    \item TEMPO a tool that optimizes \ac{HERO} configurations based on a target \ac{DNN} library and available compute resources 
+    \item \ac{SAM} a novel descriptor driven on-chip memory primitive capable of orchestrating
+    energy efficient on chip data movements within \ac{HERO}
+    \item A HERO network compiler that compiles arbitrary networks written in
+    pytorch down to SAM descriptors for on-chip data orchestration
+    \item A cycle accurate simulation platform driven by a SystemC simulation
+    backend and a python evaluation frontend that can assess a HERO configuration's
+performance and energy efficiency on arbitrary models written in Pytorch
+    \item An analysis of a HERO configuration's performance and energy efficiency
+    when running all 695 Networks present in the PyTorch Image Models (TIMM) library of
+    networks \cite{timm}
+\end{enumerate}
 
-  \end{enumerate}
-  
-\begin{figure}[ht]
-    \centering
-    \includegraphics[scale=0.6]{fig/intro.pdf}
-    \caption{Visual illustration of this thesis's content}
-    \label{fig:intro}
-\end{figure}
 
 \section{Thesis Structure}
 \label{chap:intro:thesis_structure}
 
+This thesis's structure is illustrated in \autoref{fig:intro}.
+\autoref{chap:background:intro} discusses background and related work in the
+literature. \autoref{chap:dda} introduces \ac{CIGAR} and the data aware design
+approach from which \ac{HERO} is derived. \autoref{chap:arch_dimensioning}
+introduces \ac{TEMPO} from which several candidate configurations of HERO are
+found. \autoref{chap:data_orchestration} introduces the SAM primitive. 
+\autoref{chap:net_compile} discusses HERO's network compilation process
+and how SAM descriptor are generated from arbitrary models in Pytorch. Finally
+\autoref{chap:hero:sim_platform} discusses the HERO simulation platform as well
+as results from running a HERO configuration optimized by TEMPO on all 695
+networks in the TIMM library. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.6]{fig/intro.pdf}
+  \caption{Visual illustration of this thesis's content}
+  \label{fig:intro}
+\end{figure}

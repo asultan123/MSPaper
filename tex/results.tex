@@ -194,7 +194,7 @@ combined with high MAC OPs and low speedup could be a high layer memory
 footprint. To examine the effect of layer memory footprint as a cause for low
 utilization, a scatter plot of layer feature map size vs utilization is
 presented in \autoref{fig:scatter_plot_util_vs_fmap} for layers where speedup
-was <1 compared to the CPU baselin. 
+was <1 compared to the CPU baseline. 
 
 
 \begin{figure}[ht]
@@ -219,7 +219,7 @@ closely in \autoref{fig:cause_of_low_util}.b and they appear to have lower
 available channel/ filter concurrency as defined by the number of channels/
 filters in a layer relative to the available effective channel/ filter
 concurrency of the architecture. In both cases of depthwise/grouped convolutions
-and low channel/filter count non-grouped convolutions low utilization and low
+and low channel/filter count non-grouped convolutions, low utilization and low
 speedup can be remedied by exploiting other forms of concurrency in the
 architecture other that Filter/Channel/Kernel concurrency chosen by HERO. 
 
@@ -301,11 +301,11 @@ of HERO is expected to run in.
 \end{figure}
 
 \autoref{fig:speedup}.d  shows the FPS for layers supported by HERO. The median
-FPS of supported layers is ~91 FPS. Since HERO's support is restricted to
-convolution and linear operations these FPS results should serve only as an
-upperbound estimate for the actual FPS when running these networks on HERO. An
-exploration of including other unsupported layers into HERO is left as part of
-future work.  
+FPS of supported layers is ~91 FPS with a median speedup of 4.87X over CPU
+baseline. Since HERO's support is restricted to convolution and linear
+operations these FPS results should serve only as an upperbound estimate for the
+actual FPS when running these networks on HERO. An exploration of including
+other unsupported layers into HERO is left as part of future work.  
 
 \subsection{DRAM Bandwidth}
 \label{chap:hero:results:bw}
@@ -425,7 +425,9 @@ model from \cite{area_model} is presented in \autoref{tab:area_model_table}.
 in \autoref{fig:area_breakdown} where the vast majority of on-chip area is
 consumed by IFmap and OFmap SRAM banks. OFmap memory requires close to double
 the area for IFmap memory given the increase in precision required by
-accumulation.
+accumulation. The total estimated on-chip area required for this configuration
+of HERO is 0.34 $mm^2$ using the area model in \autoref{tab:area_model_table}
+adapted from \cite{area_model}.
 
 \begin{table}[]
     \center
@@ -437,7 +439,7 @@ accumulation.
     SRAM bit      &  0.013 $um^2/bit$ \\
     \bottomrule
 \end{tabular}
-\caption{Area model from \cite{area_model}}
+\caption{Area model from \cite{area_model} assuming a 14nm technology node}
 \label{tab:area_model_table}
 \end{table}
 
@@ -485,7 +487,6 @@ dram bandwidth required to prevent HERO from stalling falls well below the
 PC4-21300 DDR4 SDRAM modules assumed in the energy model discussed in
 \autoref{chap:hero:results:energy}. 
 
-
 \begin{center}
     \begin{table}[]
     \begin{tabular}{lrlrrlllll}
@@ -526,7 +527,7 @@ PC4-21300 DDR4 SDRAM modules assumed in the energy model discussed in
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.6]{Plots/networks/resnet50.pdf}
+    \includegraphics[scale=0.5]{Plots/networks/resnet50.pdf}
     \caption{Resnet50 performance results on HERO with the configuration specified in \autoref{tab:hero_config}}
     \label{fig:resnet50_metrics}
 \end{figure}
@@ -606,7 +607,7 @@ modules assumed in the energy model discussed in
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.6]{Plots/networks/mobilenetv3_small_075.pdf}
+    \includegraphics[scale=0.5]{Plots/networks/mobilenetv3_small_075.pdf}
     \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
     \label{fig:mobilenetv3_metrics}
 \end{figure}

@@ -1,33 +1,46 @@
 \chapter{Conclusion}
 \label{chap:conclude}
 
-Arch works great for some networks but not for others due to poor mapping/ insufficient resources
-repeat overall metrics
-need to exploit other forms of concurrency using loop construct and handle layers that poorly map like depthwise
-need to define interaction between SAMs and Dram and handle data transformations on the fly
-Incorporate more layers like activation and batch norm on-chip
+In this thesis a Hybrid GEMM and Direct Convolution Accelerator (HERO) was
+introduced. HERO is a neural network accelerator that maintains computation
+generality by supporting matrix multiplication while retaining computational
+efficicency when running the common case configurations of the convolution
+operation. The design of HERO was derived from data aware design process. To
+direct that process a (ConvolutIon statIstics GAtherer) \ac{CIGAR} tool was used
+to find the common case of the convolution operation that needed to be support
+by HERO directly. To find optimal configurations of HERO, a HERO accelerator
+TEMPlate Optimizer (TEMPO) was introduced. TEMPO was driven by an analytical
+model used to maximize on-chip PE utilization. Additionally, a novel descriptor
+driven on-chip memory primitive capable of orchestrating energy efficient on
+chip data movements within \ac{HERO} was presented. To compile arbitrary pytorch
+models down to SAM descriptors a HERO layer compiler was discussed. To estimate
+the performance and energy efficiency of arbitrary HERO configurations a cycle
+accurate simulation platform driven by a SystemC simulation backend and a python
+evaluation frontend was developed. Finally, an analysis of an optimal HERO
+configuration when running 695 networks in the TIMM library was discussed.
 
+HERO was found to perform well on a wide variety of network configurations. It
+achieved a median FPS of ~91 FPS with a median speedup of 4.87X over CPU
+baseline. The estimated bandwidth required for the configuration of HERO studied
+was 19.65GiB which is within the PC4-21300 DDR4 specification. With that
+configuration of DRAM the median inferences/J is 57. The total on-chip area is
+estimated at 0.34 $mm^2$. 
 
-The inclusion of on-chip memory constraints in TEMPO's analytical model
-are left as part of future work.  
+In terms of utilization, the optimal configuration found by TEMPO enables some
+networks to benefit substantiatlly from HERO while others less so. Instances of
+poor layer mapping to HERO include depthwise and group convolution layers that
+were not considered when developing HERO as well as lowered layers that required more
+compute resources than what was available in the configuration studied. 
 
-The latencies associated with lowering and
-lifting can be eliminated if these operations are incoporated into the processor
-however, that is left as part of future work. 
-
-Note that convolution layers with
-non (1, 1) strides are executed under indirect mode. Supporting convolution layers
-with non (1, 1) strides directly is left as part of future work.
-
-Optimizating descriptors to
-reduce code size is left as part of future work.
-
-The simulator also enables a study of the HERO
-architecture by allowing different configurations of HERO to be passed in during
-simulation. This study is left as part of future work.
-
-The interaction between SAMs and DRAM are left as part of future work. 
-
-An
-exploration of including other unsupported layers into HERO is left as part of
-future work.  
+To further the development of HERO explicit support of depthwise and grouped
+convolution layers is necessary along with an exploration of alternative forms
+of concurrency within HERO. Additionally, more convolution layer configurations
+need to be supported directly in HERO, specifically convolution layers with a
+stride size greater than 1. Along with increasing convolution support, support
+for other layer types like Batch normalization layers and activation layers
+needs to be included in HERO to minimize data movement between the CPU and HERO.
+Similarly, lowering and lifting transformation required to extend support to
+arbitrary convolution layers needs to be incorporated into HERO to minimize
+off-chip datamovement. Finally a larger scale exploration of different HERO
+architectures using the developed simulation platform is required to validate
+and refine TEMPO's analytical model.
