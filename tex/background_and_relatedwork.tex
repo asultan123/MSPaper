@@ -53,8 +53,7 @@ kernel present in the layer. The number of kernels in a layer is called the
 number of filters. This multiply and accumulate operate occurs accross the all
 three dimensions of the IFmap tensor. In addition to the mathematical
 description in \autoref{math:conv_equation_1fp} a visual representation of the
-convolution operation is given in \autoref{fig:conv_explained}. 
-
+convolution operation is given in \autoref{fig:conv_explained}.
 
 \begin{align}
     \begin{split}
@@ -70,7 +69,6 @@ convolution operation is given in \autoref{fig:conv_explained}.
     \label{math:conv_equation_1fp}
 \end{align}
 
-
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.6]{fig/ConvExplained.pdf}
@@ -79,11 +77,21 @@ convolution operation is given in \autoref{fig:conv_explained}.
 \end{figure}
 
 \section{Computing the convolution operation}
-\label{chap:background:cnns_and_conv}
+\label{chap:background:computing_conv}
 
-Direct naive implementation of \autoref{math:conv_equation} with tensors
-\autoref{math:default_tensor_def} as a series of loops is given below
-\autoref{lst:conv_loop}
+To compute the convolution operation in software we can implement the expression
+in \autoref{math:conv_equation_1fp} as a series of nested for loops as in
+\autoref{lst:conv_loop}. This represents a direct approach to computing
+convolution layers. However, this may not be an efficient way to compution
+convolutions given the irregular access patterns inferred by the nested loops.
+Irregular access patters may result in reduced performance due to inefficiencies
+in a processors memory hierarchy. To mitigate this irregularity a transformation
+can be applied to the inputs and ouputs of a convolution layer to convert the
+overall operation into a general matrix multiplication which has a more regular
+access pattern. In the literature
+\cite{cafe_con_troll} there
+are several different techniques used to perform this data transformation on the
+inputs and outputs of a convolution layer.
 
 \begin{minipage}{\linewidth}
     \begin{lstlisting}[language=C, caption=Convolution implemented as nested loops, label={lst:conv_loop}]
@@ -97,35 +105,57 @@ for(int f = 0; f < F; f++) // Filter loop
     \end{lstlisting}
 \end{minipage}
 
-\newpage
+The first of the transformation techniques used in computing convolution
+operations as general matrix multiplication discussed in \cite{cafe_con_troll}
+is the Im2Col transformation or as \cite{cafe_con_troll} referes to it
+"Expensive lowering/lifting". The lowering/ lifting nomenclature arises from
+reduction of the IFmap and Weight tensor dimentionalities from 3D to 2D and vice
+versa for the OFmap. The expensive descriptor arises from the substantial
+increase in memory allocation required from lowering the IFmap input into two
+dimensions as a result of data duplication. 
 
-\section{Convolution as general matrix multiplication}
-\label{chap:intro:conv_operation}
+Expensive lowering and lifting "flattens" the IFmap by positioning a
+hypothetical stencil where the real stencil would be positioned in the
+convolution operation and collects all the IFmap elements present in that
+stencil into one row of an IFmap matrix. This collection processes is repeated
+for every real stencil position present in the original convolution operation.
+Since stencil positions are usually very close to each other (depending on the
+stride size of the layer) a substantial amount of IFmap elements are reused
+between stencil positions. The act of lowering the contents of each stencil
+position into one row results in the duplication of IFmap elemnents between
+consecutive rows in the IFmap matrix.  
+The weight kernels for each filter are flattened vertically into a weight
+matrix. The OFmap matrix is then produced by matrix multiplcation between the
+IFmap and weight matricies. To recover the OFmap tensor a "lifting" operation is
+performed by reshaping the output OFmap matrix into a 3D tensor.  
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.6]{fig/Im2Col.pdf}
-    \caption{Im2Col Illustrated}
+    \caption{Im2Col (Expensive lowering/ lifting) Illustrated}
     \label{fig:im2col}
 \end{figure}
 
-Convolution can be converted into a \ac{GEMM}
+An alternative approach to expensive lowering/ lifting is balanced lowering and
+lifting. Balanaced lowering and lifting is a less visually intuitive data
+transformation strategy. Therefore, analytical expressions adapted from
+\cite{cafe_con_troll} are given in \eqref{math:balanced_lowering_ifmap} -
+\eqref{math:balanced_lifting_ofmap} with the inclusion of lowering in
+the presence of multiple filters to describe these data transformation
+operations. In addition, to supplement the analytical expressions balanced
+lowering presented \autoref{fig:balanced_lowering_lifting} is used to clarify
+the available expressions further.  
 
-Popular techniques like im2col (illustrated in \autoref{fig:im2col}) can be used
-to convert any convolution operation into \ac{GEMM} (listed as expensive
-lowering \cite{cafe_con_troll}) but there are others techniques that don't
-produce such massive input feature maps
-
-
-If willing to increase complexity of lowering of ifmap and weight tensors after
-GEMM we can reduce bloat in ifmap with balanced lifting/ loading in
-\cite{cafe_con_troll}. Analytical expressions adapted from \cite{cafe_con_troll}
-are given below with the inclusion of lowering in the presence of multiple
-filters.
-
-
-\clearpage
-
+In balanced lowering, we first lower the ifmap and weights using expression
+\eqref{math:balanced_lowering_ifmap} and \eqref{math:balanced_lowering_weight}.
+Then a matrix multiplication is performed in \eqref{math:balanced_lowering_gemm}
+followed by a lifting operation. Unlike the lifting operation in the expensive
+lowering/ lifting transformation, lifting in the balanced transformation
+involves a series vector operation in addition to a reshape of the output OFmap
+matrix. Balanced lowering has the advantage of reduced data duplication in the
+IFmap and trades that off with increasing the number of FLOPs for lifting the
+OFmap. 
+ 
 \begin{align}
     \begin{gathered}
         IFmap \in R^{C\times n\times n} \xrightarrow[]{Balanced Lowering} \hat{IFmap} \in R^{nm\times KC} \\
@@ -143,8 +173,6 @@ filters.
     \end{gathered}
     \label{math:balanced_lowering_weight}
 \end{align}
-In balanced lowering, we first lower the ifmap and weights using expression 
-\eqref{math:balanced_lowering_ifmap} and \eqref{math:balanced_lowering_weight}.
 
 \begin{align}
     \begin{gathered}
@@ -152,8 +180,6 @@ In balanced lowering, we first lower the ifmap and weights using expression
     \end{gathered}
     \label{math:balanced_lowering_gemm}
 \end{align}
-Then a \ac{GEMM} is performed \eqref{math:balanced_lowering_gemm}
-
 
 \begin{align}
     \begin{gathered}
@@ -164,21 +190,6 @@ Then a \ac{GEMM} is performed \eqref{math:balanced_lowering_gemm}
     \label{math:balanced_lifting_ofmap}
 \end{align}
 
-Followed by a lift operation on the output $\hat{OFmap}$ matrix using \eqref{math:balanced_lifting_ofmap}
-
-Illustration of this data transformation is presented in \autoref{fig:balanced_lowering_lifting}
-
-Pros of lowering/ lifting
-
-Conv as GEMM Offers the most flexibility because it’s insensitive to changes in
-convolution parameters
-
-It also allows leaves us with a GEMM accelerator which is useful for many other
-NN layers e.g Linear/ Self attention/ LSTM
-
-Con is that it still causes bloat in ifmap and additionaly complexity/ latency of 
-lifting/ lowering. Which in the balanced case is $m^{2}K$ \cite{cafe_con_troll}
-
 \begin{figure}[!ht]
     \centering
     \includegraphics[scale=0.6]{fig/BalancedLoweringLifting.pdf}
@@ -186,13 +197,38 @@ lifting/ lowering. Which in the balanced case is $m^{2}K$ \cite{cafe_con_troll}
     \label{fig:balanced_lowering_lifting}
 \end{figure}
 
+The third (lowering/ expensive lifting) strategy further trades off the
+the size of the lowered matricies by increasing the complexity of lifting.
+However, this strategy diminished the gains from converting convolution layers
+to general matrix multiplication and therefore are not elaborated on in this
+thesis. \autoref{Table:lowering_lifting_breakdown} breakdown the
+dimentionalities and complexities of the three strategies discussed in
+\cite{cafe_con_troll} using the dimentions of the IFmap, OFmap, and Weight
+tesnors defined in \autoref{math:default_tensor_def}.     
 
+
+\begin{table}[]
+    \begin{tabular}{ll|l|l|l|}
+    \cline{3-5}
+                                                                                                      &                     & \begin{tabular}[c]{@{}l@{}}Expensive \\ Lowering/ Lifting\end{tabular}   & \begin{tabular}[c]{@{}l@{}}Balanced \\ Lowering \\ and Lifting\end{tabular} & \begin{tabular}[c]{@{}l@{}}Lowering/ \\ Expensive Lifting\end{tabular} \\ \hline
+\multicolumn{1}{|l|}{\multirow{2}{*}{Lowering}}                                                   & Lowered Data Size   & ($k^2$C, $m^2$)                                                              & (kC, mn)                                                                    & (C, $n^2$)                                              \\ \cline{2-5} 
+    \multicolumn{1}{|l|}{}                                                                            & Lowered Kernel Size & (F, $k^2$C)                                                              & (Fk, kC)                                                                    & (F$k^2$, C)                                             \\ \hline
+\multicolumn{1}{|l|}{\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Matrix \\ Multiply\end{tabular}}} & Input Size          & (F, $k^2$C)x($k^2$C, $m^2$) & (Fk, kC)x(kC, mn)                              & (F$k^2$, C)x(C, $n^2$)                   \\ \cline{2-5} 
+    \multicolumn{1}{|l|}{}                                                                            & \# FLOPS            & 2F$k^2$C$m^2$                                                            & 2F$k^2$Cmn                                                   & 2F$k^2$C$n^2$                            \\ \cline{2-5} 
+    \multicolumn{1}{|l|}{}                                                                            & Output Size         & (F, $m^2$)                                                               & (Fk, mn)                                                                    & (F$k^2$, $n^2$)                          \\ \hline
+    \multicolumn{1}{|l|}{\multirow{2}{*}{Lifting}}                                                    & \# FLOPS            & 0                                                                        & $m^2$kF                                                      & $m^2$$k^2$F                              \\ \cline{2-5} 
+    \multicolumn{1}{|l|}{}                                                                            & \# Ram Read         & F$m^2$                                                                   & Fkmn                                                                        & F$k^2$$n^2$                              \\ \hline
+    \end{tabular}
+    \label{Table:lowering_lifting_breakdown}
+    \caption{Breakdown of the dimensionalities and complexity (in FLOPs and Ram Reads) of the different available lowering and lifting strategies adapted from \cite{cafe_con_troll}}
+\end{table}
+    
 \section{Implementing convolutions in hardware}
 \subsection{The dataflow taxonomy}
 
 In the dataflow design space, from \cite{dnn_df_overrated} 
 dataflows can be represented using the direct convolution
-nested loop structure combined with unroll pragmas. Listing \ref{lst:W_S_Generic_Loop} shows a generic
+nested loop structure combined with unroll pragmas. Listing \ref{lst:conv_loop} shows a generic
 implementation of a single convolution layer as a loop structure under a weight
 stationary dataflow configuration. What defines that dataflow is 1) loop unroll
 targets 2) loop order 3) the unroll factors of the unrolled loops. Weight elements within a
@@ -200,7 +236,7 @@ kernel remain stationary throughout the computation of an output feature map
 until a new tile of channels C\_T is loaded into the accelerator. Once the
 weights within a particular channel and filter group are used to produce an
 output feature map they are discarded and are only loaded again when computing
-the same layer for a new input image. From listing \ref{lst:W_S_Generic_Loop} we
+the same layer for a new input image. From listing \ref{lst:conv_loop} we
 can see that from the loop unroll targets and loop unroll factors there are many
 other possible dataflow configurations available to us outside of weight
 stationary. Additionally, since accelerators are generally limited to two
@@ -211,15 +247,8 @@ can influence the effective unroll factors when performing different
 convolutions of different kernel sizes other than KY\_T/KX\_T. The choice of
 which loops are mapped to which spatial axis is an additional design dimension
 alongside loop unrolling. To summarize, from the loop representation of
-convolution accelerator dataflows we have three design space dimensions, 1) Loop
-unroll targets 2) Loop unroll factors 3) Loop spatial mapping. Given the size of
-this dataflow design space we will use CIGAR and Tempo to derive the common
-case for convolution layers and limit the scope of the dataflow design space.
-
-CNN layer loops + loop ordering + Loop tilings can express different
-accelerators dataflows like row stationary, weight stationary, etc
-
-
+convolution accelerator dataflows we have three design space dimensions, 1. Loop
+unroll targets 2. Loop unroll factors 3. Loop spatial mapping. 
 
 \begin{minipage}{\linewidth}
     \begin{lstlisting}[language=C, caption=Convolution implemented as nested loops, label={lst:conv_loop}]
@@ -239,6 +268,7 @@ for(int f = 0; f < F; f+=F_T) // Filter loop
     \end{lstlisting}
 \end{minipage}
 
+\subsection{The Hardware Implementation taxonomy}
 
 \begin{figure}
     \centering
@@ -253,19 +283,6 @@ for(int f = 0; f < F; f+=F_T) // Filter loop
     \label{fig:unroll_illustration}
 \end{figure}
 
-
-From dataflow we can derive hw implementation based on communication pattern and
-reuse behavior of the individual data elements accessed in the convolution
-layer.
-
-\subsection{The Hardware Implementation taxonomy}
-
-Figures in \autoref{fig:unroll_illustration} show different reduction/ multicast
-schemes based on reuse behavior of data elements (IFmap, OFmap, Weights)
-apparent in the dataflow. The space of available schemes is not limited to those
-presented in \autoref{fig:unroll_illustration} though. In \cite{maestro} a
-hardware taxonomy illustrated in figure \autoref{fig:hw_taxonpmy}.
-
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hw_taxonomy.pdf}
@@ -274,142 +291,100 @@ hardware taxonomy illustrated in figure \autoref{fig:hw_taxonpmy}.
 \end{figure}
 
 
-Depending on the dataflow described using the dataflow taxonomy (1) loop
-ordering (2) unroll targets (2) loop unroll factors. The implementation options
-are derived based on the type of reuse present in the dataflow. Following the
+Depending on the dataflow selected using the dataflow taxonomy (1) loop ordering
+(2) unroll targets (2) loop unroll factors. The implementation options are
+derived based on the type of reuse present in the dataflow. Following the
 hardware implementation taxonomy presented in in \cite{maestro}, we can classify
 the available hardware implementation options based on the the type of reuse is
-spatial (reuse distance = 0) or temporal (reuse distance > 0) that exists for a
-given data element accessed in the dataflow. Within a reuse type, depending on
-the nature of the reuse, if it is read or read modify write, there are several
-options for supporting the communication inferred from the reuse. To deduce the
-type of reuse and overall communicaiton behavior for each data element in any
-dataflow we can use the polyhedral model to detect temporal reuse. Spatial reuse
-detection can be inferred directly from the loops.
+spatial where a data element is read and used in the same cycle or temporal
+where a data element is read in one cycle and reused after several cycles.
+Depending on the nature of the reuse, if it is read or read modify write, there
+are several options for supporting the communication inferred from that reuse
+type. To deduce the type of reuse and overall communicaiton behavior for each
+data element in any dataflow we can use the polyhedral model to detect temporal
+reuse. Spatial reuse detection can be inferred directly from the loops. The
+application of the polyhedral to infer temporal reuse behavior as well as the
+inference of spatial reuse directly from the convolution loops is discussed in
+\autoref{chap:dda}.
 
+Figures in \autoref{fig:unroll_illustration} show different reduction/ multicast
+schemes based on reuse behavior of data elements (IFmap, OFmap, Weights)
+apparent in the dataflow. The space of available schemes is not limited to those
+presented in \autoref{fig:unroll_illustration} though. In \cite{maestro} a
+hardware taxonomy illustrated in figure \autoref{fig:hw_taxonomy}.
 
 \section{Related work}
 \label{chap:related_work}
 
-\subsection{Convolution accelerator architectures}
- 
-TPU -> Pure GEMM
-Eyeriss -> Emphasis on sparsity, no support for linear operations
-Maeri -> Flexible mapping but we rely on optimizer rather than do it at runtime
+To contrast this work with other works in the literature a brief discussion of
+competing accelerator designs is presented in this section. Note that the
+related works discussion is limited to competing accelerator designs meant for
+ASIC based implementations. Convolution accelerator generators targeting FPGAs
+are not discussed here.
 
+\subsection{Eyeriss V1 and V2}
+\label{chap:related_work:eyeriss}
 
-\subsubsection{Eyeriss V1 and V2}
+Eyeriss \cite{isscc_2016_chen_eyeriss} is an accelerator for state-of-the-art
+deep convolutional neural networks (CNNs). It attempts to optimize for the
+energy efficiency of the entire system by minimizing data movement between the
+accelerator and DRAM thus reducing data movement energy. Eyeriss achieves these
+goals by using a the row stationary (RS) dataflow on a spatial architecture with
+168 processing elements. 
 
-Eyeriss
+EyerissV2 \cite{eyerissv2} improve on EyerissV1 by proposing an architecture
+optimized for sparse and compact DNNs. To account for the substantial variation
+between different CNN layer it introduces a highly flexible on-chip network,
+called hierarchical mesh, that can adapt to the different amounts of data reuse
+and bandwidth requirements of different data types. THe goal of the mesh is to
+improve the utilization of the computation resources.
 
-Eyeriss is an accelerator for state-of-the-art deep
-convolutional neural networks (CNNs). It optimizes for the energy
-efficiency of the entire system, including the accelerator chip
-and off-chip DRAM, for various CNN shapes by reconfiguring
-the architecture. CNNs are widely used in modern AI systems
-but also bring challenges on throughput and energy efficiency
-to the underlying hardware. This is because its computation
-requires a large amount of data, creating significant data
-movement from on-chip and off-chip that is more energyconsuming than computation. Minimizing data movement energy
-cost for any CNN shape, therefore, is the key to high throughput
-and energy efficiency. Eyeriss achieves these goals by using a
-proposed processing dataflow, called row stationary (RS), on a
-spatial architecture with 168 processing elements. RS dataflow
-reconfigures the computation mapping of a given shape, which
-optimizes energy efficiency by maximally reusing data locally
-to reduce expensive data movement, such as DRAM accesses.
-Compression and data gating are also applied to further improve
-energy efficiency. Eyeriss processes the convolutional layers
-at 35 frames/s and 0.0029 DRAM access/multiply and accumulation (MAC) for AlexNet at 278 mW (batch size N = 4), and
-0.7 frames/s and 0.0035 DRAM access/MAC for VGG-16
-at 236 mW (N = 3).
-Index Terms— Con
-
-EyerissV2
-Abstract—A recent trend in deep neural network (DNN)
-development is to extend the reach of deep learning applications
-to platforms that are more resource and energy constrained, e.g.,
-mobile devices. These endeavors aim to reduce the DNN model
-size and improve the hardware processing efficiency, and have
-resulted in DNNs that are much more compact in their structures
-and/or have high data sparsity. These compact or sparse models
-are different from the traditional large ones in that there is
-much more variation in their layer shapes and sizes, and often
-require specialized hardware to exploit sparsity for performance
-improvement. Therefore, many DNN accelerators designed for
-large DNNs do not perform well on these models. In this work,
-we present Eyeriss v2, a DNN accelerator architecture designed
-for running compact and sparse DNNs. To deal with the widely
-varying layer shapes and sizes, it introduces a highly flexible
-on-chip network, called hierarchical mesh, that can adapt to the
-different amounts of data reuse and bandwidth requirements
-of different data types, which improves the utilization of the
-computation resources. Furthermore, Eyeriss v2 can process
-sparse data directly in the compressed domain for both weights
-and activations, and therefore is able to improve both processing
-speed and energy efficiency with sparse models. Overall, with
-sparse MobileNet, Eyeriss v2 in a 65nm CMOS process achieves
-a throughput of 1470.6 inferences/sec and 2560.3 inferences/J at
-a batch size of 1, which is 12.6× faster and 2.5× more energy
-efficient than the original Eyeriss running MobileNet.
-
-\subsubsection{Maeri}
-
-Maeri 
- 
-Deep neural networks (DNN) have demonstrated highly
-promising results across computer vision and speech recognition, and are becoming foundational for ubiquitous AI. The
-computational complexity of these algorithms and a need for
-high energy-efficiency has led to a surge in research on hardware accelerators. To reduce the latency and energy costs
-of accessing DRAM, most DNN accelerators are spatial in
-nature, with hundreds of processing elements (PE) operating
-in parallel and communicating with each other directly.
-DNNs are evolving at a rapid rate, and it is common to
-have convolution, recurrent, pooling, and fully-connected
-layers with varying input and filter sizes in the most recent
-topologies. They may be dense or sparse. They can also be
-partitioned in myriad ways (within and across layers) to
-exploit data reuse (weights and intermediate outputs). All of
-the above can lead to different dataflow patterns within the
-accelerator substrate.
-Unfortunately, most DNN accelerators support only fixed
-dataflow patterns internally as they perform a careful codesign of the PEs and the network-on-chip (NoC). In fact,
-the majority of them are only optimized for traffic within
-a convolutional layer. This makes it challenging to map arbitrary dataflows on the fabric efficiently, and can lead to
-underutilization of the available compute resources.
-DNN accelerators need to be programmable to enable
-mass deployment. For them to be programmable, they need
-to be configurable internally to support the various dataflow
-patterns that could be mapped over them. To address this
-need, we present Maeri, which is a DNN accelerator built
-with a set of modular and configurable building blocks that
-can easily support myriad DNN partitions and mappings
-by appropriately configuring tiny switches. Maeri provides
-
-8-459% better utilization across multiple dataflow mappings
-over baselines with rigid NoC fabrics
-
+EyerissV1 and EyerissV2 do not optimize for linear layers. Linear layers may not
+represent a substantial portion of a CNN network runtime, however, some models
+use linear layers exclusively. These models are underepresented in vision based
+tasks however, they are present in NLP based tasks. An examples of these
+models includes the Transformer model \cite{transformer_model}. This limits how general the
+Eyeriss architecture is when used for models outside of the vision domain. This
+work aims to build an accelerator that accounts for the importance of linear
+layers in those models. 
 
 \subsubsection{Tensor processing unit}
+\label{chap:related_work:tpu  }
 
-TPU 
+At the heart of a TPU is a 65,536 8-bit MAC matrix multiply unit that offers a
+peak throughput of 92 TeraOps/second (TOPS) and a large (28 MiB)
+software-managed on-chip memory \cite{tpu}. The TPU emphasizes efficiency in
+computing matrix multiplcation above all other operations. With the
+afformentioned transformations used to convert convolution layers to general
+matrix multiplication the TPU is able to accelerate a wide variety of
+computation workloads given the generality of the operation it's hardware
+accelerates. This generality comes at the cost of efficiency in computing
+convolution layers given the overheads of the transformations discussed in the
+prior sections. This works aims to mitigate this inefficiency while maintaing
+support for a wide variety of computation workloads. 
 
-Many architects believe that major improvements in cost-energy-performance must now come from domain-specific
-hardware. This paper evaluates a custom ASIC—called a Tensor Processing Unit (TPU)— deployed in datacenters
-since 2015 that accelerates the inference phase of neural networks (NN). The heart of the TPU is a 65,536 8-bit MAC
-matrix multiply unit that offers a peak throughput of 92 TeraOps/second (TOPS) and a large (28 MiB)
-software-managed on-chip memory. The TPU’s deterministic execution model is a better match to the 99th-percentile
-response-time requirement of our NN applications than are the time-varying optimizations of CPUs and GPUs
-(caches, out-of-order execution, multithreading, multiprocessing, prefetching, …) that help average throughput more
-than guaranteed latency. The lack of such features helps explain why, despite having myriad MACs and a big
-memory, the TPU is relatively small and low power. We compare the TPU to a server-class Intel Haswell CPU and an
-Nvidia K80 GPU, which are contemporaries deployed in the same datacenters. Our workload, written in the high-level
-TensorFlow framework, uses production NN applications (MLPs, CNNs, and LSTMs) that represent 95% of our
-datacenters’ NN inference demand. Despite low utilization for some applications, the TPU is on average about 15X -
-30X faster than its contemporary GPU or CPU, with TOPS/Watt about 30X - 80X higher. Moreover, using the GPU’s
-GDDR5 memory in the TPU would triple achieved TOPS and raise TOPS/Watt to nearly 70X the GPU and 200X the
-CPU.
 
+\subsection{Maeri}
+\label{chap:related_work:maeri}
+
+Since most DNN accelerators support only fixed dataflow patterns internally
+mapping arbitrary layer dataflows to these fabric efficiently is challenging.
+Mapping inefficiencies can lead to underutilization of the available compute
+resources. DNN accelerators need to be configurable internally to support the
+various dataflow patterns that could be mapped over them. To address this
+\cite{maeri} introduces MAERI, a DNN accelerator built with a set of modular and
+configurable building blocks backed by a flexible on-chip network capable of
+supporting a myriad of DNN partitions and mappings. 
+
+MAERI aims to support a wide variety of DNN layers and mappings by moving the
+complexity of data orchestration to runtime configuration of a flexible on-chip
+NOC. The drawback of this approach is the complexity of the NOC as well as the
+area it occupies on-chip. This work aims to combine the runtime flexibility of
+data orchestration on-chip through the use of a novel data orchestration
+primitive called self addressable memory (SAMs) discussed in
+\autoref{chap:data_orchestration} with the small area footprint of a fixed
+on-chip fabric optimized through a novel optimizer presented in
+\autoref{chap:arch_dimensioning}. 
 
 
 % \section{Analysis of data reuse with the polyhedral model}

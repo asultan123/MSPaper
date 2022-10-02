@@ -6,3 +6,28 @@ repeat overall metrics
 need to exploit other forms of concurrency using loop construct and handle layers that poorly map like depthwise
 need to define interaction between SAMs and Dram and handle data transformations on the fly
 Incorporate more layers like activation and batch norm on-chip
+
+
+The inclusion of on-chip memory constraints in TEMPO's analytical model
+are left as part of future work.  
+
+The latencies associated with lowering and
+lifting can be eliminated if these operations are incoporated into the processor
+however, that is left as part of future work. 
+
+Note that convolution layers with
+non (1, 1) strides are executed under indirect mode. Supporting convolution layers
+with non (1, 1) strides directly is left as part of future work.
+
+Optimizating descriptors to
+reduce code size is left as part of future work.
+
+The simulator also enables a study of the HERO
+architecture by allowing different configurations of HERO to be passed in during
+simulation. This study is left as part of future work.
+
+The interaction between SAMs and DRAM are left as part of future work. 
+
+An
+exploration of including other unsupported layers into HERO is left as part of
+future work.  

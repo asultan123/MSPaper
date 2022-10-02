@@ -134,9 +134,10 @@ memories scale with tempalate paramaters is given in
 In this work ASAP scheduling is always assumed given the relatively poor scaling
 of ofmap memory with architecture template paramaters. This poor scaling is due
 to the necessity of storing ofmap elements using higher precision values to
-prevent numeric overflow. Note that in allowing different tile schedules may
-sometimes negate the need for layer decomposition. The interaction between layer
-decomposition and layer scheduling is left as part of future work.  
+prevent numeric overflow. 
+% Note that in allowing different tile schedules may
+% sometimes negate the need for layer decomposition. The interaction between layer
+% decomposition and layer scheduling is left as part of future work.  
 
 % While a weight stationary offers limited flexibility with regards to loop
 % reoredering it does offer some degree of flexibiltiy with regards to ordering
@@ -199,8 +200,7 @@ descriptor programs required for both of these modes to take place independently
 the other. Note that indirect mode is just a data transformation operation
 followed by a (1, 1) convolution operation as discuseed in
 \autoref{chap:dda:dataflow_dse:indirect_mode}. Indirect mode data
-transformations (lowering/ lifting) are assumed to be performed off chip. Moving
-these transformations on-chip is left as part of future work. This leaves us
+transformations (lowering/ lifting) are assumed to be performed off chip. This leaves us
 with effectively two operations we need to generate descriptors for, (1, 1) and (3, 3)
 convolutions. For each operation, descriptor based programs need to be generated
 to perform the necessary data transfer operations between on-chip memories and
