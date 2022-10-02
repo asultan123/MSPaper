@@ -37,7 +37,7 @@ the different layers that can be present in a CNN is presented in
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.4]{fig/cnn.pdf}
-    \caption0{Example of the different layers in a convolution neural networks}
+    \caption{Example of the different layers in a convolution neural networks}
     \label{fig:cnn_network}
 \end{figure}
 
@@ -279,7 +279,9 @@ for(int f = 0; f < F; f+=F_T) // Filter loop
     \subfigure[]{\includegraphics[width=0.32\textwidth]{fig/unroll_c.pdf}} 
     \hspace{0.1cm} 
     \subfigure[]{\includegraphics[width=0.3\textwidth]{fig/buffer_description.pdf}}
-    \caption{Illustration of different dataflow implementations adapted from \cite{dnn_df_overrated} (a) blah (b) blah (c) blah (d) blah}
+    \caption{Illustration of different dataflow implementations (adapted
+    from\cite{dnn_df_overrated}) arising from (a) Unrolling F and C loops (b)
+    unrolling Ky and Y loops (c) unrolling C loops}
     \label{fig:unroll_illustration}
 \end{figure}
 

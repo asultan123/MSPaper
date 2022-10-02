@@ -44,7 +44,7 @@ decomposition halves the size of tiles being processed by the architecture.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.4]{fig/ifmap_decomposition_tiling_repr.pdf}
-    \caption{Illustration of layer decomposition's effect on weight tiling}
+    \caption{Illustration of channel based layer decomposition's effect on weight tiling}
     \label{fig:ifmap_decomposition:weight_tiling}
 \end{figure}
 
@@ -60,7 +60,7 @@ directly by HERO.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.4]{fig/ofmap_decomposition_tiling_repr.pdf}
-    \caption{Illustration of layer decomposition's effect on weight tiling}
+    \caption{Illustration of filter based layer decomposition's effect on weight tiling}
     \label{fig:ofmap_decomposition:weight_tiling}
 \end{figure}
 
@@ -384,6 +384,6 @@ descriptrs.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.495]{fig/3x3conv_sched.pdf}
-    \caption{Illustration of (1, 1) convolution scheduling}
+    \caption{Illustration of (3, 3) convolution scheduling}
     \label{fig:3x3conv_sched}
 \end{figure}
