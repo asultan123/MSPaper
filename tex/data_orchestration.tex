@@ -10,7 +10,7 @@ primitive that can execute descriptor based programs. Depending on the
 composition of these descriptor based programs, timed reads and writes can be
 made by on-chip SAMs to and from processing engines. Additionally, with sufficient
 connectivity between SAMs as well as implicit coordination between different SAM
-programs we can orchestrate timed data transfers between SAMS. In this chapter
+programs we can orchestrate timed data transfers between SAMs. In this chapter
 we first discuss the structure of a SAM in \autoref{chap:data_orchestration:sams:structure}
 followed by the functional behavior of a SAMs address generator controller in
 \autoref{chap:data_orchestration:sams:controller}. Finally we introduce descriptor based programs in
@@ -34,7 +34,7 @@ of memory transactions possible using coordinating descriptor based programs in
     \label{fig:sam_structure}
 \end{figure}
 
-In \autoref{fig:sam_structure}.a SAMS are composed of an address generator and a
+In \autoref{fig:sam_structure}.a SAMs are composed of an address generator and a
 data sram. Address generators are attached to ports of an SRAM. They control the
 address and enable ports for each SRAM port. The port behavior (read or write)
 is set by a memory mapped register attached to the write enable pins of each
@@ -103,7 +103,7 @@ to occur between SAMs.
 % and all descriptor retirements after that need sort of allow eager execution.
 % e.g generate to generate keeps en=1 and addr jumps to start of next
 % descriptor. I've completely forgotten how the SystemC model does it and there
-% are definite descripencies between that and the Verilog implementation. 
+% are definite discrepancies between that and the Verilog implementation. 
 
 Before discussing descriptor based programs we must first discuss the properties
 of individual descriptors. Each descriptor can be represented as a struct as

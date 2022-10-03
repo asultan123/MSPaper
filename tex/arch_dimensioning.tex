@@ -7,7 +7,7 @@
 \begin{figure}[]
     \centering
     \includegraphics[scale=0.4]{fig/axis_mapping.pdf}
-    \caption{\ac{GEMM} and (1, 1) Convolution Equivelence}
+    \caption{\ac{GEMM} and (1, 1) Convolution Equivalence}
     \label{fig:axis_mapping}
 \end{figure}
 
@@ -16,14 +16,14 @@ unroll targets, and KY and KX loops should be unrolled assuming that (1, 1) and 
 kernels are supported directly. What remains of the dataflow design space is the unroll factors for F
 and C loops as well as the accelerator spatial axis mapping for all unrolled
 loops F, C, KY, KX. From this point these parameters will be referred to as
-HERO template paremeters from which a concrete accelerator instance can
+HERO template parameters from which a concrete accelerator instance can
 be defined. These accelerator template parameters define the number of
 processing engines allocated to process channels, filters, and kernels
 concurrently in the a HERO instance. An illustration of this \ac{PE}
 allocation is present in \autoref{fig:axis_mapping}. The space of possible
-unroll factors is as large as the space of possible loop upperbounds for the
-afformentioned unrolled loops. However, as discussed earlier, some combinations
-of loop upperbounds are unlikely in real networks. Additionally, spatial axis
+unroll factors is as large as the space of possible loop upper bounds for the
+aforementioned unrolled loops. However, as discussed earlier, some combinations
+of loop upper bounds are unlikely in real networks. Additionally, spatial axis
 mapping affects the effective unroll factors when executing different
 convolution layers than the ones assumed when unrolling said loops. This further
 expands the design space of a possible template parameters. To
@@ -60,11 +60,11 @@ constraint specified.
 In algorithm \ref{alg:tempo_algo} TEMPO effectively runs an exhaustive search
 using an objective function $obj\_fn$ and a set of layers from a model library.
 The objective function is a function that evaluates an architectures score when
-executing layers in the model library $model^{stats}_{dict}$. An architcture
+executing layers in the model library $model^{stats}_{dict}$. An architecture
 score is based on any of the metrics that will be discussed in
 \autoref{chap:dataflow_dse:exploring:tempo_model}. Prior to the search being
 performed algorithm \ref{alg:tempo_algo} converts all layer not supported
-directly in the model to (1, 1) equivelent layers based on the equivelence method
+directly in the model to (1, 1) equivalent layers based on the equivalence method
 that discussed in \autoref{chap:dda:dataflow_dse:indirect_mode}.
 
 \begin{equation}
@@ -117,31 +117,31 @@ existence of 4 channels in the ifmap tensor. If there are many PE's dedicated to
 processing channels concurrently then PE utilization will suffer due to the
 single channel restriction mentioned earlier. If constraints for on-chip memory
 are required then an additional layer decomposition step is necessary in order
-to properly evalute all metrics that can be calculated using TEMPO's analytical
+to properly evaluate all metrics that can be calculated using TEMPO's analytical
 model. The inclusion of on-chip memory constraints in TEMPO's analytical model
 are left as part of future work.  
 
 
-% \subsection{Layer equivelence}
+% \subsection{Layer equivalence}
 % \label{chap:dataflow_dse:exploring:tempo_model:layer_equivelence}
 
 % In TEMPO's analytical model, an automatic layer conversion step is performed to
 % change the dimensionality of the IFmap and Weight tensors on the basis of
 % whether a layer's kernel size is supported directly or not. This conversion will
 % be outlined in more detail in \autoref{chap:net_compile} which is used to extend
-% support to unsupported convolution layers. Layer equivelence affects the
-% dimentionality of the layers being executed on HERO and as a result it affects
-% the anticipated utilization of the HERO architecture's PEs. Layer equivelence
+% support to unsupported convolution layers. Layer equivalence affects the
+% dimensionality of the layers being executed on HERO and as a result it affects
+% the anticipated utilization of the HERO architecture's PEs. Layer equivalence
 % assumes a lowering/lifting step is performed for kernel sizes that are not (1,
 % 1) and (3, 3). As discussed earlier in \autoref{chap:background:intro}, there
 % are several lowering techniques available that increase the size of the ifmap
-% and ofmap tensors. Of the techniques discussed is balanced lowering that aims to
-% strike a balance between the memory ineficciency of lower and
+% and OFmap tensors. Of the techniques discussed is balanced lowering that aims to
+% strike a balance between the memory inefficiency of lower and
 % computational complexity of lowering an lifting. Balanced lowering/lifting is assumed to
 % have been performed on the layers that are not directly supported by HERO.
 % Lowering and lifting affect the kernel unroll factors assumed by HERO where
 % unsupported layers with non (1, 1) and (3, 3) kernels are assumed to have (1, 1)
-% kernl sizes  
+% kernel sizes  
 
 
 \subsection{Utilization}
@@ -150,7 +150,7 @@ are left as part of future work.
 \begin{figure}[]
     \centering
     \includegraphics[scale=0.45]{fig/Lasso_ilus.pdf}
-    \caption{\ac{GEMM} and (1, 1) asd Equivelence}
+    \caption{\ac{GEMM} and (1, 1) asd Equivalence}
     \label{fig:tempo_model}
 \end{figure}
 
@@ -164,7 +164,7 @@ parameters $C_{unroll}=8$, $F_{unroll}=4$, $K_{unroll}=2$ and axis mapping
 $K_{axis} = horizontal$. Based on these template parameters the effective filter
 and channel unroll factors are $F_{eff} = 4$, $C_{eff}=2$. These unroll factors
 create $\lceil \frac{\hat{C}}{C_{eff}} \rceil = 2$ horizontal tiles and $\lceil
-\frac{\hat{F}}{F_{eff}} \rceil = 2$ verticle tiles assuming padding has been
+\frac{\hat{F}}{F_{eff}} \rceil = 2$ vertical tiles assuming padding has been
 applied. The weight tensor in \autoref{fig:tempo_model} is then reshaped into a
 2D matrix of dimensionality $R^{8\times 16}$ with additional padding. The total
 number of tiles is then reflected in \autoref{math:total_tiles}. 
@@ -180,9 +180,9 @@ Since HERO processes the weight tensor in tiles, utilization is calculated on a
 per-tile basis. There are two different types of tiles, padded and unpadded,
 each with their own utilization calculation. Layer utilization is then an
 average of the utilizations of each tile type weighted by their frequency of
-occurence in the layer as reflect in \autoref{math:layer_utilization}. For
+occurrence in the layer as reflect in \autoref{math:layer_utilization}. For
 brevity each of the utilization equations are multiplied by their frequency of
-occurence in the same equation. 
+occurrence in the same equation. 
 
 \begin{align}
     \begin{gathered}
@@ -194,7 +194,7 @@ occurence in the same equation.
 The first tile type is the unpadded tile illustrated in
 \autoref{fig:tempo_model} as the green tile. Utilization is calculated using
 \autoref{math:tile_utilization_unpadded}. In this tile utilization is assumed to
-be 1 and it's frequency of occurence depends on the number of unpadded tiles in
+be 1 and it's frequency of occurrence depends on the number of unpadded tiles in
 the layer $\lfloor \frac{\hat{F}}{F_{eff}} \rfloor \lfloor
 \frac{\hat{C}}{C_{eff}}\rfloor$. 
 
@@ -207,7 +207,7 @@ the layer $\lfloor \frac{\hat{F}}{F_{eff}} \rfloor \lfloor
 
 The second tile type is the padded tile of which there are three variations
 depending on the reason for padding the tile. The utilization for all
-padded tiles weighted by their frequencies of occurence is given in
+padded tiles weighted by their frequencies of occurrence is given in
 \autoref{math:unpadded_tiles_weighted_average}. 
 
 \begin{equation}
@@ -219,7 +219,7 @@ padded tiles weighted by their frequencies of occurence is given in
     \label{math:unpadded_tiles_weighted_average}
 \end{equation}
   
-If the allocation of PEs for channel loops exceeds avaliable channels to be
+If the allocation of PEs for channel loops exceeds available channels to be
 processed in the tile, then that tile will be padded. The padding in that tile results
 in reduced PE utilization. An illustration of that padded tile variation is
 present in \autoref{fig:tempo_model} as the orange tile.  The calculation for
@@ -229,7 +229,7 @@ exists or not we can check if $\hat{C} \bmod C_{eff} > 0$ is true. If that
 condition is true, padded channel tiles exist in the layer and their weighted
 $utilization^{Padded}_{ChannelTiles}$ is then a function of how many PEs are
 active in the tile $\frac{(\hat{C} \bmod C_{eff}) F_{eff}
-K_{unroll}^2}{Count_{pe}}$ multipled by the frequency of occurence. $\lfloor
+K_{unroll}^2}{Count_{pe}}$ multiples by the frequency of occurrence. $\lfloor
 \frac{\hat{F}}{F_{eff}} \rfloor$. If $\hat{C} \bmod C_{eff} = 0$ then there are
 no padded channel tiles so $utilization^{Padded}_{ChannelTiles} = 0$.
 
@@ -242,7 +242,7 @@ no padded channel tiles so $utilization^{Padded}_{ChannelTiles} = 0$.
     \label{math:tile_utilization_padded_channel}
 \end{align}
 
-If the allocation of PEs for filter loops exceeds avaliable filters to be
+If the allocation of PEs for filter loops exceeds available filters to be
 processed in the tile, then that tile will be padded. This another variation of
 a padded tile and the weighted utilization for that tile variation is calculated
 using \autoref{math:tile_utilization_padded_filter} and is illustrated in
@@ -277,18 +277,18 @@ variation is given in \autoref{math:tile_utilization_padded_both}.
 \label{chap:dataflow_dse:exploring:tempo_model:latency}
 
 Estimating latency follows the same tiling model discussed the previous
-section. The latency of executing a layer based on the template paremeters
+section. The latency of executing a layer based on the template parameters
 chosen is given in \autoref{math:latency}. Latency is a function of the number of
 tiles present in the layer multiplied by the number of cycles spent processing a
-single IFmap channel $\hat{Z}$ plus the additional latency incured due to
+single IFmap channel $\hat{Z}$ plus the additional latency incurred due to
 lowering lifting depending on the support for the layer's kernel size. Latency
 for lowering and lifting is given in \autoref{math:latency_lowering_lifting}. If
 the kernel is supported directly, no additional lowering and lifting penalties
 are incurred, otherwise penalties are calculated based on the number of
-operations necssary to lower the IFmap and Weight tensors plus the number of
+operations necessary to lower the IFmap and Weight tensors plus the number of
 operations to lift the OFmap. Lowering and lifting are assumed to be performed
 by a software based co-processor. The latencies associated with lowering and
-lifting can be eliminated if these operations are incoporated into the processor
+lifting can be eliminated if these operations are incorporated into the processor
 however, that is left as part of future work. 
 
 \begin{align}
@@ -309,9 +309,9 @@ however, that is left as part of future work.
 \label{chap:dataflow_dse:exploring:tempo_model:access_counts}
 
 Following the tiling model discussed earlier, memory access counts are
-calculated based on how the template paremeters tile the layer's weight tensor.
+calculated based on how the template parameters tile the layer's weight tensor.
 Access counts for IFmaps are given in \autoref{math:memory_access_ifmap}, OFmap
-access counts are giving in \autoref{math:memory_access_ofmap} and finally
+access counts are giving in \autoref{math:memory_access_OFmap} and finally
 weight access counts are given in \autoref{math:memory_access_weights}.
 
 \begin{equation}
@@ -325,7 +325,7 @@ weight access counts are given in \autoref{math:memory_access_weights}.
     \begin{aligned}
         OFmap^{AccessCount} = 2*\hat{Z} (\lfloor\frac{\hat{F}}{F_{eff}}\rfloor F_{eff}+\hat{F}\bmod F_{eff}) \lceil\frac{\hat{C}}{C_{eff}}\rceil \\
     \end{aligned}
-    \label{math:memory_access_ofmap}
+    \label{math:memory_access_OFmap}
 \end{equation}
 
 \begin{equation}
@@ -378,7 +378,7 @@ accurate model of HERO.
 
 To determine the necessary sizes of on-chip memories we need to first look at
 the sizing behavior of the different data elements in a convolution operation
-(ifmaps, ofmaps and weights). Note that all discussions of storage requirements
+(IFmaps, OFmaps and weights). Note that all discussions of storage requirements
 are precision agnostic. All storage requirement results are given in number of
 elements. \autoref{fig:storage:no_lowering} is a boxplot of the sizes (in number
 of elements) for the storage requirements of different data element types
@@ -387,10 +387,10 @@ storage requirements for all elements is given in \autoref{tab:median_storage}.
 From both figure and table, note the similarity in storage requirements of all
 data elements. Lowering and lifting operations required under indirect mode only
 increase median storage requirements by a factor of 1.01X and 1.02X for ifmap
-and ofmap respectively. To support as much as 85\% of convolution layers in TIMM
+and OFmap respectively. To support as much as 85\% of convolution layers in TIMM
 without requiring layer decomposition (to be discussed in
 \autoref{chap:net_compile}) we only need to allocate 1 MB of storage for IFmap
-memory (L3) and Ofmap memory in either of the HERO architectures presented in
+memory (L3) and OFmap memory in either of the HERO architectures presented in
 \autoref{chap:dda:hw_dse:final}. Additionally since L2 storage in the ifmap
 hierarchy scales with the width of ifmap tensors, it's assumed that the maximum
 ifmap tensor width will not exceed 512 elements. Note that there are no storage
@@ -407,7 +407,7 @@ storage in number of elements assumed by this work.
     IFmap             & $2^{16.614}$   \\ \hline
     OFmap             & $2^{16.192}$   \\ \hline
     \end{tabular}
-    \caption{Table of median storage requriements for data elements in convolution layers of networks in the TIMM Library}
+    \caption{Table of median storage requirements for data elements in convolution layers of networks in the TIMM Library}
     \label{tab:median_storage}
 \end{table}
 

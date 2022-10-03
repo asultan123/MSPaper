@@ -2,20 +2,20 @@
 \label{chap:results}
 
 To assess the performance of the HERO architecture a cycle accurate simulation
-enviornment was implemented using SystemC and python. The enviornment was used
+environment was implemented using SystemC and python. The environment was used
 to a single configurations of the HERO architecture on real networks implemented
 in pytorch from the TIMM library. The simulator also enables a study of the HERO
 architecture by allowing different configurations of HERO to be passed in during
 simulation. This study is left as part of future work. The simulator is composed
-of two parts. 1) A python based frontend that can analyse the performance
+of two parts. 1) A python based frontend that can analyze the performance
 results of any pytorch network on a configuration of HERO. 2) A SystemC based
 backend for cycle accurate simulations of HERO running convolution/linear layers. In
-this chapter we will first discuss the simulation enviornment and it's
+this chapter we will first discuss the simulation environment and it's
 components in \autoref{chap:hero:sim_platform}. The results from simulating all
 695 networks from TIMM using a small HERO instance are given
 \autoref{chap:hero:results}.
 
-\section{Simulation Enviornment}
+\section{Simulation Environment}
 \label{chap:hero:sim_platform}
 
 \subsection{Python Frontend}
@@ -29,8 +29,8 @@ line size in any IFmap tensor.  The output of the
 frontend is a pandas dataframe containing the results from the backend
 simulation of the network(s) on the specified hero instance.  
 After the frontend
-recieves the list of pytorch models, CIGAR extracts the dimensions of all
-supported layers (Conv2D and Linear). Afterwhich two layer transformation
+receives the list of pytorch models, CIGAR extracts the dimensions of all
+supported layers (Conv2D and Linear). After which two layer transformation
 operations are performed. The first converts convolution layers that are
 unsupported directly into equivalent (1, 1) convolutions as described in
 \autoref{chap:dda:dataflow_dse:indirect_mode}. Additionally, linear layers are
@@ -38,7 +38,7 @@ reinterpreted as (1, 1) convolutions based on the proof derived from
 \autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}. 
 The HERO arch. config being
 evaluated is used to determine what layers are supported directly
-After all layers have been converted to equivelent layers
+After all layers have been converted to equivalent layers
 that are supported by HERO, a layer decomposition step is performed to
 decompose layers that have featuremaps that are two large to fit in the
 HERO's on-chip memory. 
@@ -49,9 +49,9 @@ on HERO.
 After the testcase queue is generated it gets passed off to several
 worker threads that manage independent backend instances that simulate the different
 layers of the input network(s) concurrently. Note that since we're only
-concerned with the architecutre metrics produced by the simulation the layers being
+concerned with the architecture metrics produced by the simulation the layers being
 simulated don't use real weights and featuremaps from a forward inference pass
-of the original network. Instead equivelent layer weights and featuremaps are
+of the original network. Instead equivalent layer weights and featuremaps are
 instantiated in the backend to avoid unnecessary transfer of data between the
 front and backend.      
 
@@ -59,7 +59,7 @@ front and backend.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-sim-frontend.pdf}
-    \caption{Illustration of the simulation enviornment's python frontend}
+    \caption{Illustration of the simulation environment's python frontend}
     \label{fig:frontend}
 \end{figure}
 
@@ -71,8 +71,8 @@ The SystemC backend depicted in \autoref{fig:backend}, expects all inputs to be 
 arguments. The main inputs are 1) architecture configuration and 2) layer
 configuration needed for simulation by the frontend. Sim results are generated
 and sent back to the frontend using protobufs. The backend first instantiates a
-HERO instance using the architecute configuration passed as input. Then it
-generates an equivelent layer based on the input layer configuration. Finally
+HERO instance using the architecture configuration passed as input. Then it
+generates an equivalent layer based on the input layer configuration. Finally
 using both layer and architecture configuration it generates the SAM descriptors
 required to perform all data movement operations on-chip. A dram load is then
 simulated in zero time to transfer the layer data and descriptors to the on-chip
@@ -81,7 +81,7 @@ instance is ready, the cycle accurate simulation starts and continues until all
 SAMs reach a suspend descriptor. Then a dram load operation is again performed
 in zero time to transfer the results from the HERO instance for validation.
 After the simulated dram load, a protobuf is constructed, then populated with
-the result of ouput validation and simulation results (assuming validation
+the result of output validation and simulation results (assuming validation
 success) and sent back to the frontend for further analysis and aggregation. 
 
 The backend simulates interactions between the architecture and DRAM
@@ -91,7 +91,7 @@ The interaction between SAMs and DRAM are left as part of future work.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.5]{fig/hero-sim-backend.pdf}
-    \caption{Illustration of the simulation enviornment's SystemC backend}
+    \caption{Illustration of the simulation environment's SystemC backend}
     \label{fig:backend}
 \end{figure}
 
@@ -104,7 +104,7 @@ The configuration for the simulated architecture is given in
 \autoref{chap:dataflow_dse:memory_hierarchy_sizing}. Note that other larger HERO
 variants could have been chosen for this work, however, to minimize simulation
 time and to explore a variant of HERO fit for more constrained embedded
-enviornments the configuration in \autoref{tab:hero_config} were chosen.   
+environments the configuration in \autoref{tab:hero_config} were chosen.   
 Note that sizes for on-chip
 storage are given in the aggregate. The number of banks for IFmap L3 and OFmap
 storage scales with the chosen $F_{unroll}$ and $C_{unroll}$ factors. As a
@@ -112,8 +112,8 @@ result, the size of individual IFmap L3 and OFmap bank is proportional with the
 overall size of IFmap L3 and OFmap on-chip storage but inversely proportional
 with the chosen unroll factors. The CPU baseline used in this work is an AMD
 5950X processor. To minimize simulation time the frontend takes advantage of the
-similarity between layer configurations accross networks in the timm library.
-The total number of both convolution and linears layers post layer configuration
+similarity between layer configurations across networks in the timm library.
+The total number of both convolution and linear layers post layer configuration
 deduplication is reduced from 182773 to 6048. This enables a simulation time of
 less than 1.5 hours for all 695 Networks.
 
@@ -130,14 +130,14 @@ To determine percentage of compute Pytorch can be used to estimate the
 total number of MAC operations used by natively supported layers. Unfortunately
 many networks use custom layers constructed with pytorch primitives. For
 each of these layers an analytical expression would need to be created to calculate
-the number of operations in these layers. For simplicity the runtimes
+the number of operations in these layers. For simplicity the runtime
 of these layers on a CPU were used to estimate computational demand. In
 \autoref{fig:percent_of_compute}, the horizontal access defines the average
 percentage of total network runtime taken up by supported layers. The vertical
 axis defines the number of networks where convolution and linear layers take up
 x\% of the computation where x is defined on the horizontal axis. From
 \autoref{fig:percent_of_compute} it can be seen that the convolution and linear
-layers represent the majority of network runtimes in the TIMM library. 
+layers represent the majority of network runtime in the TIMM library. 
 
 \begin{table}[]
     \center
@@ -296,14 +296,14 @@ of HERO is expected to run in.
     \includegraphics[scale=0.46]{Plots/latency/net_speed_w_offload.pdf}
     \hspace{0.1cm} 
     \includegraphics[scale=0.46]{Plots/latency/fps.pdf}
-    \caption{a) Histogram of average network speedup over CPU baseline b) Histogram of layer speedup over CPU baseline c) Histogram of average network speedup with offloading of poorly mapped layers with low utilization and low speedup c) Histogram of FPS upperbounds for simulated networks}
+    \caption{a) Histogram of average network speedup over CPU baseline b) Histogram of layer speedup over CPU baseline c) Histogram of average network speedup with offloading of poorly mapped layers with low utilization and low speedup c) Histogram of FPS upper bounds for simulated networks}
     \label{fig:speedup}
 \end{figure}
 
 \autoref{fig:speedup}.d  shows the FPS for layers supported by HERO. The median
 FPS of supported layers is ~91 FPS with a median speedup of 4.87X over CPU
 baseline. Since HERO's support is restricted to convolution and linear
-operations these FPS results should serve only as an upperbound estimate for the
+operations these FPS results should serve only as an upper bound estimate for the
 actual FPS when running these networks on HERO. An exploration of including
 other unsupported layers into HERO is left as part of future work.  
 
@@ -482,7 +482,7 @@ of lowering extends to energy consumption with a few key layers (conv\_6,
 conv\_12, conv\_18) consuming the bulk of on-chip energy because of IFmap tensor
 size increase. Thankfully these layers occur infrequently in the network and as
 a result the majority of layers do not require lowering. The overall estimated
-upperbound FPS for resnet50 is 62.7 FPS at 61 Inferences/J and the upperbound of
+upper bound FPS for resnet50 is 62.7 FPS at 61 Inferences/J and the upper bound of
 dram bandwidth required to prevent HERO from stalling falls well below the
 PC4-21300 DDR4 SDRAM modules assumed in the energy model discussed in
 \autoref{chap:hero:results:energy}. 
@@ -537,14 +537,14 @@ PC4-21300 DDR4 SDRAM modules assumed in the energy model discussed in
 From \autoref{tab:mobilenetv3_layer_breakdown}, unlike Resnet50, Mobilenetv3 has
 depthwise layers (conv\_1, conv\_6, conv\_12, ...) that map poorly to HERO.
 Depthwise layers are supported by running each convolution group sequentially
-which greatly diminishes the concurency advantage of HERO. Depthwise layers
-suffer from PE underutilization and substantially reduced speedup over CPU
+which greatly diminishes the concurrency advantage of HERO. Depthwise layers
+suffer from PE under utilization and substantially reduced speedup over CPU
 baseline. Depthwise layers may also require lowering which further reduces their
 energy efficiency on HERO. In fact, the layers with the most on-chip energy
 consumption are all depthwise layers that have been lowered. Thankfully the
 impact of these poorly supported depthwise layers is limited given their
-relative infrequency. As a result the overall estimated upperbound FPS for
-MobilenetV3 is 928.9 FPS at 328.4 Inferences/J and the upperbound of dram bandwidth
+relative infrequency. As a result the overall estimated upper bound FPS for
+MobilenetV3 is 928.9 FPS at 328.4 Inferences/J and the upper bound of dram bandwidth
 required to prevent HERO from stalling falls well below the PC4-21300 DDR4 SDRAM
 modules assumed in the energy model discussed in
 \autoref{chap:hero:results:energy}. 

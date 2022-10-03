@@ -4,7 +4,7 @@
 In this thesis a Hybrid GEMM and Direct Convolution Accelerator (HERO) was
 introduced. HERO is a neural network accelerator that maintains computation
 generality by supporting matrix multiplication while retaining computational
-efficicency when running the common case configurations of the convolution
+efficiency when running the common case configurations of the convolution
 operation. The design of HERO was derived from data aware design process. To
 direct that process a (ConvolutIon statIstics GAtherer) \ac{CIGAR} tool was used
 to find the common case of the convolution operation that needed to be support
@@ -27,7 +27,7 @@ configuration of DRAM the median inferences/J is 57. The total on-chip area is
 estimated at 0.34 $mm^2$. 
 
 In terms of utilization, the optimal configuration found by TEMPO enables some
-networks to benefit substantiatlly from HERO while others less so. Instances of
+networks to benefit substantially from HERO while others less so. Instances of
 poor layer mapping to HERO include depthwise and group convolution layers that
 were not considered when developing HERO as well as lowered layers that required more
 compute resources than what was available in the configuration studied. 
@@ -41,6 +41,6 @@ for other layer types like Batch normalization layers and activation layers
 needs to be included in HERO to minimize data movement between the CPU and HERO.
 Similarly, lowering and lifting transformation required to extend support to
 arbitrary convolution layers needs to be incorporated into HERO to minimize
-off-chip datamovement. Finally a larger scale exploration of different HERO
+off-chip data movement. Finally a larger scale exploration of different HERO
 architectures using the developed simulation platform is required to validate
 and refine TEMPO's analytical model.
