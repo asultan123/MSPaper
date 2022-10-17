@@ -1,7 +1,24 @@
 \chapter{Network Compilation}
 \label{chap:net_compile}
 
-\section{Layer Decomposition}
+Network compilation is driven by \ac{EMPIRE}. \ac{EMPIRE} compiles arbitrary
+pytorch models into descriptors for SAMs in HERO. \ac{EMPIRE} has two phase. The
+first phase applies
+layer transformation phase that converts unsupported network layers into
+layers supported by HERO. Phase one uses uses the layer equivalence approach discussed in
+\autoref{math:layer_equivelence} combined with a layer decomposition technique
+discussed in this chapter. Phase two is the descriptor generation phase where
+layers are converted into descriptors for on-chip SAMs. Based on the conclusions
+from \autoref{chap:dda} the operations that we need to compile descriptors for
+are 1x1 and 3x3 convolutions. As such, phase two's discussion of descriptor
+generation is constrained to generating descriptors for these two operations.
+Phase one is discussed in \autoref{chap:net_compile:layer_transformation}, and
+phase two is discussed in \autoref{chap:net_compile:descriptor_generation}.
+
+\section{Phase one: Layer Transformation}
+\label{chap:net_compile:layer_transformation}
+
+\subsection{Layer Decomposition}
 \label{chap:net_compile:layer_decomposition}
 
 Given that chip area may be restricted, a hero instance may have
@@ -10,7 +27,7 @@ during layer processing. To minimize excessive reloads from DRAM we need a way t
 larger layer into sub-layers that can fit in the accelerator's on-chip memory.
 Decomposition can occur due to either large ifmap or large OFmaps or in some cases
 both. In this work it's assumed that decomposition occurs across channel and
-filter axis for input and output feature maps. Decomposition can occur by
+filters for input and output feature maps. Decomposition can occur by
 decomposing large featuremaps along the width and height dimensions however that
 complicates the process of aggregating sub layers. This is due to the potential overlaps
 of kernel windows across decomposition boundaries. This issue arises
@@ -80,61 +97,6 @@ by supporting other forms of concurrency beyond the filter/ channel/ kernel
 concurrency chosen by HERO. An exploration of other forms of concurrency within
 HERO is left as part of future work. 
 
-\section{Layer Scheduling}
-\label{chap:net_compile:layer_scheduling}
-
-On-chip storage requirements for IFmaps and OFmaps are influenced by the
-ordering of tiles in the tiling representation of weights discussed in
-\autoref{chap:dda}. The order of processing weight tiles is equivalent to the
-ordering of the F, and C loops in the loop based representation of the
-convolution operation discussed in \autoref{chap:dda}. Processing tiles in F, C
-order (ASAP) results in retiring output featuremaps as soon as possible while retaining
-input featuremaps for as long as possible. Conversely, processing tiles in C, F
-order (ALAP) retains output featuremaps for as long as possible while retiring IFmaps
-as soon as possible. An illustration of ASAP and ALAP tile schedules in
-available in \autoref{fig:tile_scheduling}. 
-% In the final template there are 4 template parameters that are customizable
-% depending on the target performance/area/energy efficiency requirements of the
-% accelerator. The first and the second are the unroll factors for filters
-% ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
-% supported kernels. Finally the fourth is the spatial axis mapping of the kernel
-% loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
-% required for the different memories accessed.
-
-\begin{figure}
-    \centering
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
-    \hspace{0.1cm} 
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
-    \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
-    \label{fig:tile_scheduling}
-\end{figure}
-
-An illustration of this architectural tradeoff is present
-in \autoref{fig:Fmap_scaling}.c. Note that depending on the tile scheduling
-chosen, different HERO configuration parameters affect the scaling of different
-on-chip memories. For example, under ASAP, input featuremap memory requirements
-remain unchanged with any configuration parameters, however, OFmap memory scales
-with the architecture's filter unroll factor. Under ALAP OFmap memory remains
-unaffected by any of HERO's configuration parameters, however, ifmap memory scales
-with the architecture's channel unroll factor. An illustration of how both
-memories scale with configuration parameters is given in
-\autoref{fig:Fmap_scaling}.a \& \autoref{fig:Fmap_scaling}.b. 
-
-\begin{figure}
-    \centering
-    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
-    \hspace{0.1cm} 
-    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
-    \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
-    \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator configuration parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) architectural illustration}
-    \label{fig:Fmap_scaling}
-\end{figure}
-
-In this work ASAP scheduling is always assumed given the relatively poor scaling
-of OFmap memory with architecture configuration parameters. This poor scaling is due
-to the necessity of storing OFmap elements using higher precision values to
-prevent numeric overflow. 
 % Note that in allowing different tile schedules may
 % sometimes negate the need for layer decomposition. The interaction between layer
 % decomposition and layer scheduling is left as part of future work.  
@@ -185,8 +147,8 @@ prevent numeric overflow.
 
 \clearpage
 
-\section{Descriptor Program Generation}
-\label{chap:sams:acc_scheduling}
+\section{Phase Two: Descriptor Program Generation}
+\label{chap:net_compile:descriptor_generation}
 
 We can generate descriptor programs for the SAMs present in
 in the final architecture configuration for HERO discussed in \autoref{chap:dda:hw_dse:final}.

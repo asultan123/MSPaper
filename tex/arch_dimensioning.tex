@@ -1,6 +1,30 @@
 \chapter{Architecture Dimensioning}
 \label{chap:arch_dimensioning}
 
+From the previous chapter, portions of the dataflow design space remain
+undefined. Additionally, sizing of different memory banks in HERO's memory
+hierarchy remain undefined. To explores what remains of the dataflow design
+space this chapter introduces TEMPO. TEMPO is an optimizer for HERO templates
+takes the following as an input 
+\begin{itemize}
+    \item A a library of networks written in pytorch
+    \item A processing engine budget
+    \item An objective function defined using a mixture of analytical models
+    developed for estimating latency, utilization and memory access counts
+\end{itemize}
+From the inputs TEMPO returns the optimal PE allocation for the different
+dimensions of HERO. To determine the appropriate sizes for HERO's on chip memory
+(given a concrete PE allocation) CIGAR's model dim collector is used to collect
+statistics on the number of elements in the different input/ output tensors of
+convolution layers.  
+A discussion of TEMPO's algorithm is presented in
+\autoref{chap:dataflow_dse:exploring:algorithm}. The various analytical models
+used to estimate power and performance metrics when running supported layers in
+the TIMM library are presented in
+\autoref{chap:dataflow_dse:exploring:tempo_model}. Results for different
+utilization optimal configurations of HERO under various PE constraints are
+presented in \autoref{chap:dataflow_dse:exploring:results}.  
+
 \section{Exploring what remains of the dataflow design space with TEMPO}
 \label{chap:dataflow_dse:exploring}
 
@@ -13,7 +37,7 @@
 
 From the previous section we have concluded that loops F, C, KY and KX are all
 unroll targets, and KY and KX loops should be unrolled assuming that (1, 1) and (3, 3)
-kernels are supported directly. What remains of the dataflow design space is the unroll factors for F
+kernels are supported directly. What remains of the dataflow design space are the unroll factors for F
 and C loops as well as the accelerator spatial axis mapping for all unrolled
 loops F, C, KY, KX. From this point these parameters will be referred to as
 HERO template parameters from which a concrete accelerator instance can
@@ -418,3 +442,56 @@ storage in number of elements assumed by this work.
     \label{fig:storage:no_lowering}
 \end{figure}
 
+
+On-chip storage requirements for IFmaps and OFmaps are influenced by the
+ordering of tiles in the tiling representation of weights discussed in
+\autoref{chap:dda}. The order of processing weight tiles is equivalent to the
+ordering of the F, and C loops in the loop based representation of the
+convolution operation discussed in \autoref{chap:dda}. Processing tiles in F, C
+order (ASAP) results in retiring output featuremaps as soon as possible while retaining
+input featuremaps for as long as possible. Conversely, processing tiles in C, F
+order (ALAP) retains output featuremaps for as long as possible while retiring IFmaps
+as soon as possible. An illustration of ASAP and ALAP tile schedules in
+available in \autoref{fig:tile_scheduling}. 
+% In the final template there are 4 template parameters that are customizable
+% depending on the target performance/area/energy efficiency requirements of the
+% accelerator. The first and the second are the unroll factors for filters
+% ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
+% supported kernels. Finally the fourth is the spatial axis mapping of the kernel
+% loops ($K_{axis}$). Each of these parameters has an effect on on-chip storage
+% required for the different memories accessed.
+
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/asap_tiling.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/alap_tiling.pdf}}
+    \caption{Illustration of different tiling schedules (a) ASAP scheduling (F, C)  (b) ALAP scheduling (C, F)}
+    \label{fig:tile_scheduling}
+\end{figure}
+
+An illustration of this architectural tradeoff is present
+in \autoref{fig:Fmap_scaling}.c. Note that depending on the tile scheduling
+chosen, different HERO configuration parameters affect the scaling of different
+on-chip memories. For example, under ASAP, input featuremap memory requirements
+remain unchanged with any configuration parameters, however, OFmap memory scales
+with the architecture's filter unroll factor. Under ALAP OFmap memory remains
+unaffected by any of HERO's configuration parameters, however, ifmap memory scales
+with the architecture's channel unroll factor. An illustration of how both
+memories scale with configuration parameters is given in
+\autoref{fig:Fmap_scaling}.a \& \autoref{fig:Fmap_scaling}.b. 
+
+\begin{figure}
+    \centering
+    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/ifmap_Storage.pdf}}
+    \hspace{0.1cm} 
+    \subfigure[]{\includegraphics[width=0.45\textwidth]{Plots/PSUM_Storage.pdf}}
+    \subfigure[]{\includegraphics[width=1\textwidth]{fig/psum_ifmap_mem_scaling.pdf}}
+    \caption{Illustration of storage tradeoff between OFmaps and IFmaps depending on tile scheduling (loop ordering) and accelerator configuration parameters (loop unroll factors) (a) IFmap storage (b) OFmap storage (c) architectural illustration}
+    \label{fig:Fmap_scaling}
+\end{figure}
+
+In this work ASAP scheduling is always assumed given the relatively poor scaling
+of OFmap memory with architecture configuration parameters. This poor scaling is due
+to the necessity of storing OFmap elements using higher precision values to
+prevent numeric overflow. 

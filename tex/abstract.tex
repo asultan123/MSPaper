@@ -14,18 +14,18 @@ generality by supporting matrix multiplication while retaining computational
 efficiency when running the common case configurations of the convolution
 operation. A utilization optimal configurations of HERO was founding the HERO
 accelerator TEMPlate Optimizer (TEMPO). To orchestrated data movements a novel
-descriptor driven on-chip memory primitive is presented along with a network
-compilation tool capable To compile arbitrary pytorch models down to SAM
-descriptors a HERO layer compiler was developed. Finally To estimate the
-performance and energy efficiency of arbitrary HERO configurations a cycle
-accurate simulation platform driven by a SystemC simulation backend and a python
-evaluation frontend was developed. An analysis of an optimal HERO configuration
-when running 695 networks in the TIMM library was performed. The HERO
-configuration analyzed was found to perform well on a wide variety of network
-configurations. It achieved a median FPS of ~91 FPS with a median speedup of
-4.87X over CPU baseline. The estimated bandwidth required for the configuration
-of HERO studied was 19.65GiB/s which is within the PC4-21300 DDR4 specification.
-With that configuration of DRAM the median inferences/J is 57. The total on-chip
-area is estimated at 0.34 $mm^2$. 
+descriptor driven on-chip memory primitive called self addressable memory (SAM)
+is presented. To compile arbitrary pytorch models down to SAM descriptors a HERO
+layer compiler was developed. Finally To estimate the performance and energy
+efficiency of arbitrary HERO configurations a cycle accurate simulation platform
+driven by a SystemC simulation backend and a python evaluation frontend was
+developed. An analysis of an optimal HERO configuration when running 695
+networks in the TIMM library was performed. The HERO configuration analyzed was
+found to perform well on a wide variety of network configurations. It achieved a
+median FPS of ~91 FPS with a median speedup of 4.87X over CPU baseline. The
+estimated bandwidth required for the configuration of HERO studied was
+19.65GiB/s which is within the PC4-21300 DDR4 specification. With that
+configuration of DRAM the median inferences/J is 57. The total on-chip area is
+estimated at 0.34 $mm^2$. 
 
 \end{abstract}
