@@ -27,15 +27,15 @@ for F, C, the list of kernels sizes supported in direct mode, and the on-chip
 storage dedicated for input and output feature map reuse, as well as the maximum
 line size in any IFmap tensor.  The output of the
 frontend is a pandas dataframe containing the results from the backend
-simulation of the network(s) on the specified hero instance.  
+simulation wof the network(s) on the specified hero instance.  
 After the frontend
 receives the list of pytorch models, CIGAR extracts the dimensions of all
 supported layers (Conv2D and Linear). After which two layer transformation
 operations are performed. The first converts convolution layers that are
 unsupported directly into equivalent (1, 1) convolutions as described in
-\autoref{chap:dda:dataflow_dse:indirect_mode}. Additionally, linear layers are
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. Additionally, linear layers are
 reinterpreted as (1, 1) convolutions based on the proof derived from
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}. 
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}. 
 The HERO arch. config being
 evaluated is used to determine what layers are supported directly
 After all layers have been converted to equivalent layers

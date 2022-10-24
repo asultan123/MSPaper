@@ -157,11 +157,11 @@ for the convolution operation to take place in the final architectural configura
 It's assumed that all on-chip SRAMs present in the HERO architecture are SAMs
 capable of being programmed with descriptor based programs.   
 Since we have two operational modes based on the findings of
-\autoref{chap:dda} (direct and Indirect mode) we will discuss the
+\autoref{chap:dda} (direct and GEMM mode) we will discuss the
 descriptor programs required for both of these modes to take place independently of
-the other. Note that indirect mode is just a data transformation operation
+the other. Note that GEMM mode is just a data transformation operation
 followed by a (1, 1) convolution operation as discussed in
-\autoref{chap:dda:dataflow_dse:indirect_mode}. Indirect mode data
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. GEMM mode data
 transformations (lowering/ lifting) are assumed to be performed off chip. This leaves us
 with effectively two operations we need to generate descriptors for, (1, 1) and (3, 3)
 convolutions. For each operation, descriptor based programs need to be generated

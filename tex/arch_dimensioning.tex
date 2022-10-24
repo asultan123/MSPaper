@@ -89,7 +89,7 @@ score is based on any of the metrics that will be discussed in
 \autoref{chap:dataflow_dse:exploring:tempo_model}. Prior to the search being
 performed algorithm \ref{alg:tempo_algo} converts all layer not supported
 directly in the model to (1, 1) equivalent layers based on the equivalence method
-that discussed in \autoref{chap:dda:dataflow_dse:indirect_mode}.
+that discussed in \autoref{chap:dda:dataflow_dse:GEMM_mode}.
 
 \begin{equation}
     \begin{aligned}
@@ -409,7 +409,7 @@ of elements) for the storage requirements of different data element types
 present in the convolution layers of the TIMM library networks. The median
 storage requirements for all elements is given in \autoref{tab:median_storage}.
 From both figure and table, note the similarity in storage requirements of all
-data elements. Lowering and lifting operations required under indirect mode only
+data elements. Lowering and lifting operations required under GEMM mode only
 increase median storage requirements by a factor of 1.01X and 1.02X for ifmap
 and OFmap respectively. To support as much as 85\% of convolution layers in TIMM
 without requiring layer decomposition (to be discussed in

@@ -128,7 +128,7 @@ layers in transformer networks \cite{transformer_model} as well as fully
 connected layers in many CNNs like Resnet \cite{resnet}. Extending support to
 GEMM should not detract from the primary goal of accelerating convolutions since
 they represent a larger portion of most network's runtime.  
-HERO is derived from a data aware design process. HERO is optimized for the
+HERO is derived from a data aware design process. It is optimized for the
 common case of convolutions in the literature by supporting these convolution
 configurations directly without the need to convert them into GEMM using data
 transformation techniques like Im2Col. To find the common case of convolutions,

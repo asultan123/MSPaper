@@ -226,7 +226,7 @@ networks expected to run on the accelerator. The most flexible dataflow in this
 case is a weight stationary dataflow in which the F, C, KY and KX loops are the
 unroll targets. This is due to the overlap between weight stationary under (1, 1)
 convolutions and GEMM discussed in
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}, the choice
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}, the choice
 of a weight stationary dataflow lends itself well to \ac{GEMM} given the
 similarities in the loop structure with regards to F and C loops for both
 applications. Furthermore, a weight stationary based dataflow allows support for
@@ -235,12 +235,12 @@ networks as seen in \autoref{fig:cigar_library_overview}.b. Given the
 flexibility of weight stationary, F, C, KY and KX loops will be the loop unroll
 targets. This choice of dataflow effectively creates two operational modes. A
 direct mode where convolution operations with kernels that are supported
-directly are executed on the accelerator and an indirect mode where kernels that
+directly are executed on the accelerator and an GEMM mode where kernels that
 are not supported directly are supported by lowering/ lifting followed by
 conversion of the proceeding GEMM operation into a (1, 1) convolution. A full
-explanation of indirect mode is given in
-\autoref{chap:dda:dataflow_dse:indirect_mode}. Note that convolution layers with
-non (1, 1) strides are executed under indirect mode. Supporting convolution layers
+explanation of GEMM mode is given in
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. Note that convolution layers with
+non (1, 1) strides are executed under GEMM mode. Supporting convolution layers
 with non (1, 1) strides directly is left as part of future work. From
 \autoref{fig:kernel_stats:strides} (1, 1) strides are represent ~95\% of
 convolution layers so the implications of indirect support of non (1, 1) strides
@@ -384,10 +384,10 @@ discussed in \autoref{chap:net_compile}.
 
 \clearpage 
 
-\section{Enabling Indirect mode through layer equivalence}
-\label{chap:dda:dataflow_dse:indirect_mode}
+\section{Enabling GEMM mode through layer equivalence}
+\label{chap:dda:dataflow_dse:GEMM_mode}
 
-Indirect mode extends support to convolution layers with kernel sizes that are
+GEMM mode extends support to convolution layers with kernel sizes that are
 not directly supported by an convolution accelerator. It does this by
 establishing a layer equivalence relationship between unsupported layers and
 supported layers. Convolution operations can be converted into general matrix
@@ -403,19 +403,19 @@ overhead of repurposing existing convolution hardware to support GEMM. Once this
 relationship between GEMM and (1, 1) Convolutions is defined, layers that are
 unsupported directly can be converted into equivalent layers that are supported
 directly. In
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}, a proof for
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}, a proof for
 the equivalence between GEMM and (1, 1) Convolutions is given. Additionally, in
-\autoref{chap:dda:dataflow_dse:indirect_mode:layer_equivelence} the
+\autoref{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence} the
 aforementioned proof will be used in tandem with the approach in
 \cite{cafe_con_troll} to provide support for arbitrary convolution operations.
 Finally, a discussion of layer dimensionality for unsupported layers that have
 been converted to equivalent supported layers is given in
-\autoref{chap:dda:dataflow_dse:indirect_mode:layer_dimentionality}.  
+\autoref{chap:dda:dataflow_dse:GEMM_mode:layer_dimentionality}.  
 
 \clearpage
 
 \subsection{Functional equivalence between GEMM and (1, 1) Convolutions}
-\label{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof}
+\label{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}
 
 We can establish the functional equivalence between GEMM and (1, 1) convolutions with
 the following proof. An illustration of this proof is given in
@@ -488,14 +488,14 @@ last dimension and then transpose it.
 
 
 \subsection{Layer Equivalence}
-\label{chap:dda:dataflow_dse:indirect_mode:layer_equivelence}
+\label{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence}
 
 We can support previously unsupported kernel sizes by combining the GEMM to (1, 1)
 Conv conversion in
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof} with any
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof} with any
 tensor lowering/lifting approach in \cite{cafe_con_troll}. Lowering converts a
 convolution into a GEMM operation, and the approach in
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof} reinterprets
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof} reinterprets
 that operation as another (1, 1) Convolution. This approach allows any convolution
 accelerator that can support (1, 1) convolution operations with asymmetric IFmaps
 to support any arbitrary convolution operation. A visual illustration for this
@@ -564,7 +564,7 @@ final OFmap in \autoref{math:conv2gemm2conv:lift}.
 \end{figure}
 
 \subsection{Layer Dimensionality}
-\label{chap:dda:dataflow_dse:indirect_mode:layer_dimentionality}
+\label{chap:dda:dataflow_dse:GEMM_mode:layer_dimentionality}
 
 Whether or not a convolution layer's kernel size is supported directly has an effect on the assumed
 dimensionalities of the IFmap and Weight tensors as well as the kernel loops
@@ -577,7 +577,7 @@ kernel size of the layer in accordance with the conclusions drawn from
 a convolutions layer's kernel size is not supported directly, the layer's kernel
 size is converted to (1, 1) as seen in \autoref{math:K_unroll_factor} and lowering
 is assumed to have been performed on IFmap and Weight tensors in accordance with
-the approach discussed in \autoref{chap:dda:dataflow_dse:indirect_mode:layer_equivelence}. For a convolution
+the approach discussed in \autoref{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence}. For a convolution
 layer with IFmap dimensionality $R^{C\times n\times n}$, Weight dimensionality
 $R^{F\times C\times K\times K}$ and OFmap dimensionality $R^{F\times m\times m}$
 the layer's new filter count $\hat{F}$, channel count $\hat{C}$, and IFmap
@@ -600,7 +600,7 @@ channel size $\hat{Z}$ values are reflected in \autoref{math:layer_equivelence}.
 \end{align}
 
 \subsection{Accelerator Spatial Axis mapping}
-\label{chap:dda:dataflow_dse:indirect_mode:axis_mapping}
+\label{chap:dda:dataflow_dse:GEMM_mode:axis_mapping}
 
 When determining axis mapping, F and C loops are assumed to be bound to an
 accelerator's vertical and horizontal spatial axis. Utilizing both axis results
@@ -640,7 +640,7 @@ $C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
 \end{align}
 
 \subsection{Overhead of lowering and lifting}
-\label{chap:dda:dataflow_dse:indirect_mode:overhead}
+\label{chap:dda:dataflow_dse:GEMM_mode:overhead}
 
 Lowering and lifting introduce additional overheads with regards to latency and
 tensor sizing. The latency for performing balanced lowering and lifting is
@@ -652,7 +652,7 @@ Lowering also introduces duplicate data elements in the IFmap tensor thus
 increasing it's overall size. 
 
 To enable GEMM operations using the approach in
-\autoref{chap:dda:dataflow_dse:indirect_mode:conv_gemm_equiv:proof} both input
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof} both input
 and output matrices are transposed and reshaped. All reshape operations
 discussed in this chapter add a dimension of size 1 to the data and they incur
 no data reorganization overhead. Additionally, all transpose operations are
@@ -668,7 +668,7 @@ work along with incorporating lowering and lifting into the accelerator.
 Based on the conclusions derived from \autoref{chap:dda:dataflow_dse:pruning},
 weight stationary is the most flexible dataflow choice given the overlap between
 1x1 convolutions and GEMM discussed in
-\autoref{chap:dda:dataflow_dse:indirect_mode}. This gives rise to a weight
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. This gives rise to a weight
 stationary dataflow based accelerator
 with two
 operational modes, direct Mode where a subset of possible kernel sizes are
