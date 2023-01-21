@@ -185,21 +185,22 @@ using data transformation techniques like Im2Col
 
 
 HERO is more than just a single architecture; it represents a configurable
-template with flexible allocation of on-chip compute resources for processing
-convolution layer channels and filters. This configurability allows for
-compile-time optimization of HERO by changing the number of PEs allocated to
-processing different channels and filters in a convolution layer. To determine
-the optimal configuration, this thesis introduces TEMPO, a tool that uses
-analytical models for estimating different architecture metrics like latency,
-utilization, and memory access counts when running different DNNs. TEMPO takes
-advantage of CIGAR's model dimension collection to extract configurations of
-convolution layers and applies the aforementioned analytical models to them.
-TEMPO provides the initial architecture dimensions for the HERO template in
-order to get the first estimates for other performance metrics. TEMPO only
-defines layer dimensions for channel and filter concurrency. A separate analysis
-of memory usage for different convolution elements is provided in this thesis.
-The networks  used by TEMPO is the entire TIMM library to find the most general
-architecture dimensions for HERO.
+template with flexible allocation of on-chip compute resources called processing
+engines (PEs) used in processing convolution layer channels and filters. This
+configurability allows for compile-time optimization of HERO by changing the
+number of PEs allocated to processing different channels and filters in a
+convolution layer. To determine the optimal configuration, this thesis
+introduces TEMPO, a tool that uses analytical models for estimating different
+architecture metrics like latency, utilization, and memory access counts when
+running different DNNs. TEMPO takes advantage of CIGAR's model dimension
+collection to extract configurations of convolution layers and applies the
+aforementioned analytical models to them. TEMPO provides the initial
+architecture dimensions for the HERO template in order to get the first
+estimates for other performance metrics. TEMPO only defines layer dimensions for
+channel and filter concurrency. A separate analysis of memory usage for
+different convolution elements is provided in this thesis. The networks  used by
+TEMPO is the entire TIMM library to find the most general architecture
+dimensions for HERO.
 
 
 This thesis introduces the Self-Addressable Memory (SAM), an on-chip

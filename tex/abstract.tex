@@ -15,24 +15,25 @@ common configurations of the convolution operation. Additionally, this thesis
 also introduces a toolchain that aids in the design, dimensioning, and
 programming of HERO. HERO's design is data-aware, optimized for the common case
 of convolutions by supporting common configurations directly without the need
-for conversion techniques like Im2Col. To identify the common case of
-convolutions, this thesis introduces CIGAR, a tool that can gather configuration
-statistics for convolution and linear layers in a library of DNNs written in
-PyTorch. Using the HERO accelerator TEMPlate Optimizer (TEMPO), this thesis
-finds utilization optimal configurations for HERO. Additionally, a novel
-descriptor-driven on-chip memory primitive called Self-Addressable Memory (SAM)
-is proposed to orchestrate data movements. Additionally, this thesis introduces
-a HERO network compiler called EMPIRE that converts arbitrary convolution and linear layers
-described in pytorch to SAM descriptors. Finally, this thesis presents a
-cycle-accurate simulation platform driven by a SystemC simulation backend and a
-Python evaluation frontend to estimate performance and energy efficiency of
-arbitrary HERO configurations on different DNN networks described in Pytorch. An
-analysis of a utilization optimal HERO configuration when running 695 networks
-in the TIMM library was performed, the configuration achieved a median FPS of
-~91 FPS across all 695 networks with a median speedup of 4.87X over CPU
-baseline. The estimated bandwidth required for the configuration of HERO studied
-was 19.65GiB/s, which is within the PC4-21300 DDR4 specification. With that
-configuration of DRAM, the median inferences/J was 57. The total on-chip area
-for the configuration was estimated at 0.34 $mm^2$.
+for conversion techniques like Im2Col \cite{cafe_con_troll}. To identify the
+common case of convolutions, this thesis introduces CIGAR, a tool that can
+gather configuration statistics for convolution and linear layers in a library
+of DNNs written in PyTorch. Using the HERO accelerator TEMPlate Optimizer
+(TEMPO), this thesis finds utilization optimal configurations for HERO.
+Additionally, a novel descriptor-driven on-chip memory primitive called
+Self-Addressable Memory (SAM) is proposed to orchestrate data movements.
+Additionally, this thesis introduces a HERO network compiler called EMPIRE that
+converts arbitrary convolution and linear layers described in pytorch to SAM
+descriptors. Finally, this thesis presents a cycle-accurate simulation platform
+driven by a SystemC simulation backend and a Python evaluation frontend to
+estimate performance and energy efficiency of arbitrary HERO configurations on
+different DNN networks described in Pytorch. An analysis of a utilization
+optimal HERO configuration when running 695 networks in the TIMM library was
+performed, the configuration achieved a median FPS of ~91 FPS across all 695
+networks with a median speedup of 4.87X over CPU baseline. The estimated
+bandwidth required for the configuration of HERO studied was 19.65GiB/s, which
+is within the PC4-21300 DDR4 specification. With that configuration of DRAM, the
+median inferences/J was 57. The total on-chip area for the configuration was
+estimated at 0.34 $mm^2$.
 
 \end{abstract}

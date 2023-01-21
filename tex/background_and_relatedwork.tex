@@ -1,56 +1,59 @@
 \chapter{Background}
 \label{chap:background:intro}
 
-In this chapter the following concepts will be introduced and explored to
-provide the necessary context for the remaining chapters in this thesis. First
-convolutional neural networks will be introduced along with a mathematical
-representation of the convolution operation. After that a brief discussion on
+This chapter introduces and explores  the following concepts to provide the
+necessary context for the remaining chapters in this thesis. Firstly,
+convolutional neural networks will be introduced, along with a mathematical
+representation of the convolution operation. After that, a brief discussion on
 reinterpreting convolutions as GEMM operations will be presented. Reinterpreting
 convolutions as GEMM is integral to HERO's support of arbitrary convolution
-layer configurations. However, not all convolution operation in HERO are
-supported through GEMM conversion. HERO is optimized for the common case of
-convolution and hence has to support a subset of the convolution operations that
-exist in the literature directly. This means that HERO needs to implement some
-configurations of the convolution operation as
-dataflow operations in hardware. Prior to exploring the dataflow design space of
-convolution accelerators we must first define it. 
-In this chapter a taxonomy of convolution accelerator dataflows
-is introduced from \cite{infamous_stanford}. An exploration of
-this design space, when combined with network configuration data provided by
-CIGAR, allows us to define HERO's dataflow for the common case of convolutions
-in the literature. After that the HW implementation
-taxonomy from \cite{maestro} is introduced. The HW implementation taxonomy
-defines the space of possible HW implementation options available when
-implementing a convolution accelerator in hardware. The available hardware
-implementation options depend on the communication and reuse behavior of
-different data elements defined by an accelerator's chosen dataflow. HERO's
-hardware implementation is hence driven by an analysis of it's chosen dataflow's
-data element communication and reuse behavior. This chapter
-concludes with a discussion of related work in the literature. 
+layer configurations. 
+
+GEMM conversion is not a requirement for to support all convolution layers. HERO
+is optimized for the common case of convolution and hence has to support a
+subset of the convolution operations that exist in the literature directly. This
+means that HERO needs to implement some configurations of the convolution
+operation as dataflow operations in hardware. Prior to exploring the dataflow
+design space of convolution accelerators, we must first define it. 
+
+In this chapter, a taxonomy of convolution accelerator dataflows is introduced
+from \cite{infamous_stanford}. An exploration of this design space, when
+combined with network configuration data provided by CIGAR, allows us to define
+HERO's dataflow for the common case of convolutions in the literature. 
+
+After that, the HW implementation taxonomy from \cite{maestro} is introduced.
+The HW implementation taxonomy defines the space of possible HW implementation
+options available when implementing a convolution accelerator in hardware. The
+available hardware implementation options depend on the communication and reuse
+behavior of different data elements defined by an accelerator's chosen dataflow.
+HERO's hardware implementation is hence driven by an analysis of its chosen
+dataflow's data element communication and reuse behavior. This chapter concludes
+with a discussion of related work in the literature.
 
 \clearpage
 
-\section{Convolutional neural networks and the convolution operation}
+\section{Convolutional Neural Networks And The Convolution Operation}
 \label{chap:background:cnns_and_conv}
 
-Neural networks are a class of machine learning models used for various tasks
-like image recognition and object detection. They can be trained to model
-complex mathematical functions. Neural networks are characterized by the
-different layers used in them to compute some expected output from an input.
-Convolution neural networks are then characterized by the emphasis on the use of
-the convolution layer in computing the networks output. In addition to
-convolution layers, CNNS commonly make use of other layer types like fully
-connected layers as well activation and batch normalization layers
-however the bulk of a networks runtime is spent computing these convolution
-layers \cite{most_of_the_runtime}. An illustration of a
-the different layers that can be present in a CNN is presented in
-\autoref{fig:cnn_network}
+Neural networks are a class of machine learning models that are used for various
+tasks such as image recognition and object detection. They can be trained to
+model complex mathematical functions by adjusting their internal parameters.
+These models are composed of multiple layers, each of which performs a specific
+computation on the input data in order to produce the desired output.
 
-% There are many different variants of the
-% convolution operation used in the convolution layer. Some convolution layer
-% variants use sparse weights. Others like grouped and depthwise convolution
-% layers change the input and output channel relationship to reduce the number of
-% multiply and accumulate operations required for the layer. 
+Convolutional Neural Networks (CNNs) are a subtype of neural networks that place
+a particular emphasis on the use of the convolution layer in computing the
+network's output. Convolution layers are responsible for detecting patterns and
+features in the input data by sliding a small filter over the image and
+computing the dot product between the filter and the image at every position.
+
+In addition to convolution layers, CNNs commonly make use of other layer types
+such as fully connected layers, activation functions and batch normalization
+layers. However, it is worth noting that the majority of a network's inference
+runtime is spent computing the convolution layers \cite{most_of_the_runtime}. An
+illustration of the different layers that can be present in a CNN is presented
+in figure \autoref{fig:cnn_network}
+
 
 \begin{figure}[ht]
     \centering
@@ -60,26 +63,29 @@ the different layers that can be present in a CNN is presented in
 \end{figure}
 
 
-Assuming the input feature map, output feature map and weight dimensionalities
-of a layer are defined in \autoref{math:default_tensor_def}. A mathematical
-representation of the convolution is given in \autoref{math:conv_equation_1fp}.
-\autoref{math:conv_equation_1fp} represents a stencil based operation were a
-sliding window called a kernel is moved across an input feature and at each
-position a multiply and accumulate operation is performed to compute an output
-element of the output feature map. This stencil operation is repeated for each
-kernel present in the layer. The number of kernels in a layer is called the
-number of filters. This multiply and accumulate operate occurs across the all
-three dimensions of the IFmap tensor. In addition to the mathematical
-description in \autoref{math:conv_equation_1fp} a visual representation of the
-convolution operation is given in
-\autoref{fig:conv_explained}.\autoref{fig:conv_explained} shows an IFmap tensor
-with 3 channels (red, green, blue) being convolved with 4 separate filters each
-with kernels of size 2x2. The contents of the kernels are called the weights of
-the layer. Each filter's kernels operate on separate IFmap
+Assuming the input feature map (IFmap), output feature map (OFmap) and weight
+dimensionalities of a layer are defined as in equation
+(\autoref{math:default_tensor_def}). A mathematical representation of the
+convolution operation is given in equation (\autoref{math:conv_equation_1fp}).
+This equation represents a stencil-based operation where a sliding window,
+called a kernel, is moved across an input feature and at each position, a
+multiply-and-accumulate operation is performed to compute an output element of
+the output feature map. This stencil operation is repeated for each kernel
+present in the layer. The number of kernels in a layer is referred to as the
+number of filters. This multiply-and-accumulate operation occurs across all
+three dimensions of the IFmap tensor.
+
+In addition to the mathematical description in equation
+(\autoref{math:conv_equation_1fp}), a visual representation of the convolution
+operation is provided in \autoref{fig:conv_explained}. This figure shows an
+IFmap tensor with 3 channels (red, green, blue) being convolved with 4 separate
+filters, each with kernels of size 2x2. The contents of the kernels are called
+the weights of the layer. Each filter's kernels operate on separate IFmap
 channels. Each kernel is convolved with each IFmap channel using a sliding
 window operation. The outputs across all IFmap channels are aggregated into one
 OFmap channel. The total number of OFmap channels equals the total number of
-Filters in the convolution layer. 
+filters in the convolution layer.
+
 
 \begin{align}
     \begin{split}
@@ -162,7 +168,7 @@ transformation techniques discussed in \cite{cafe_con_troll}.
     \multicolumn{1}{|l|}{}                                                                            & \# Ram Read         & F$m^2$                                                                   & Fkmn                                                                        & F$k^2$$n^2$                              \\ \hline
     \end{tabular}
 \label{Table:lowering_lifting_breakdown}
-    \caption{Breakdown of the dimensionalities and complexity (in FLOPs and Ram Reads) of the different available lowering and lifting strategies adapted from \cite{cafe_con_troll}}
+    \caption{Breakdown of the dimensionalities and complexity (in FLOPs and DRAM Reads) of the different available lowering and lifting strategies adapted from \cite{cafe_con_troll}}
 \end{table}
 
 The first of the transformation techniques used in computing convolution
@@ -284,7 +290,7 @@ The third (lowering/ expensive lifting) strategy further trades off the
 the size of the lowered matrices by increasing the complexity of lifting.
 However, this strategy diminished the gains from converting convolution layers
 to general matrix multiplication and therefore are not elaborated on in this
-thesis. \autoref{Table:lowering_lifting_breakdown} breakdown the
+thesis. In \autoref{Table:lowering_lifting_breakdown} presents the
 dimensionalities and complexities of the three strategies discussed in
 \cite{cafe_con_troll} using the dimensions of the IFmap, OFmap, and Weight
 tensors defined in \autoref{math:default_tensor_def}.
@@ -299,8 +305,8 @@ accelerator dataflow design space available to HERO we must first define the
 dataflow design space. This will be the focus of the next section.  
 
     
-\section{Implementing convolutions in hardware}
-\subsection{The dataflow taxonomy}
+\section{Implementing Convolutions In Hardware}
+\subsection{The Dataflow Taxonomy}
 
 
 From \cite{dnn_df_overrated} 
@@ -373,6 +379,14 @@ convolutions of different kernel sizes other than KY\_T/KX\_T. The choice of
 which loops are mapped to which spatial axis is an additional design dimension
 alongside loop unrolling. 
 
+The figures in \autoref{fig:unroll_illustration} demonstrate hardware
+implementations for different dataflow configurations that result from various
+loop unroll selections. However, it is important to note that the space of
+available hardware schemes is not limited to those presented in
+\autoref{fig:unroll_illustration}. A discussion on the space of possible
+hardware schemes that can be achieved given different dataflow configurations
+will be presented in the following section.
+
 With the dataflow design space defined by \cite{dnn_df_overrated} a data driven
 exploration of the dataflow design space becomes possible. Combining network
 configuration data provided by CIGAR with  \cite{dnn_df_overrated} dataflow
@@ -410,47 +424,67 @@ tandem with the dataflow taxonomy to define HERO's implementation in hardware.
 \end{figure}
 
 
-Depending on the dataflow selected using the dataflow taxonomy (1) loop ordering
-(2) unroll targets (2) loop unroll factors. The implementation options are
-derived based on the type of reuse present in the dataflow. Following the
-hardware implementation taxonomy presented in in \cite{maestro}, we can classify
-the available hardware implementation options based on the the type of reuse is
-spatial where a data element is read and used in the same cycle or temporal
-where a data element is read in one cycle and reused after several cycles.
-Depending on the nature of the reuse, if it is read or read modify write, there
-are several options for supporting the communication inferred from that reuse
-type. To deduce the type of reuse and overall communication behavior for each
-data element in any dataflow we can use the polyhedral model to detect temporal
-reuse. Spatial reuse detection can be inferred directly from the loops. The
-application of the polyhedral to infer temporal reuse behavior as well as the
-inference of spatial reuse directly from the convolution loops is discussed in
-\autoref{chap:dda}.
+The full hardware taxonomy from \cite{maestro} is illustrated in figure
+\autoref{fig:hw_taxonomy}. Depending on the dataflow selected using the dataflow
+taxonomy (1) loop ordering (2) unroll targets (2) loop unroll factors. The
+implementation options are derived based on the type of reuse present in the
+dataflow. Following the hardware implementation taxonomy presented in in
+\cite{maestro}, we can classify the available hardware implementation options
+based on the the type of reuse is spatial where a data element is read and used
+in the same cycle or temporal where a data element is read in one cycle and
+reused after several cycles. Depending on the nature of the reuse, if it is read
+or read modify write, there are several options for supporting the communication
+inferred from that reuse type. To deduce the type of reuse and overall
+communication behavior for each data element in any dataflow we can use the
+polyhedral model to detect temporal reuse. Spatial reuse detection can be
+inferred directly from the loops. The application of the polyhedral to infer
+temporal reuse behavior as well as the inference of spatial reuse directly from
+the convolution loops is discussed in \autoref{chap:dda}.
 
-Figures in \autoref{fig:unroll_illustration} show different reduction/ multicast
-schemes based on reuse behavior of data elements (IFmap, OFmap, Weights)
-apparent in the dataflow. The space of available schemes is not limited to those
-presented in \autoref{fig:unroll_illustration} though. The full hardware
-taxonomy from \cite{maestro} is illustrated in figure \autoref{fig:hw_taxonomy}.
-The hardware taxonomy presented in this section will be used in tandem with the
-dataflow taxonomy to define HERO's implementation in hardware. Note that the
-usage of this taxonomy will span both operational modes of HERO, direct
-convolution acceleration as well GEMM. What enables this taxonomy to be applied
-to GEMM is the overlap between GEMM and the depthwise convolution operation. A
-discussion of how these two operations overlap is presented in
-\autoref{chap:dda:dataflow_dse:GEMM_mode}. 
+The hardware taxonomy presented in this section will
+be used in tandem with the dataflow taxonomy to define HERO's implementation in
+hardware. Note that the usage of this taxonomy will span both operational modes
+of HERO, direct convolution acceleration as well GEMM. What enables this
+taxonomy to be applied to GEMM is the overlap between GEMM and the depthwise
+convolution operation. A discussion of how these two operations overlap is
+presented in \autoref{chap:dda:dataflow_dse:GEMM_mode}. 
 
 
 \section{Related work}
 \label{chap:related_work}
 
-To contrast this work with other works in the literature a brief discussion of
-competing accelerator designs is presented in this section. Note that the
-related works discussion is limited to competing accelerator designs meant for
-ASIC based implementations. Convolution accelerator generators targeting FPGAs
-are not discussed here.
+In this section, a comparison of HERO with other works in the literature
+is presented with emphasis on competing ASIC-based accelerator designs. It should be
+noted that the discussion is limited to ASIC-based implementations, as
+FPGA-based accelerators typically optimize the accelerator's structure for a
+specific network through compile-time optimizations. Since HERO is intended as a
+static architecture for synthesis as an ASIC, comparisons with related
+architectures in the literature are limited to other ASIC-based accelerators.
+
+Accelerator designs discussed in this section include 1)the Eyeriss V1 and V2
+accelerators \cite{isscc_2016_chen_eyeriss} which utilize a 2D array of
+processing elements (PEs) to support convolution operations. EyerissV1 employs a
+tiled architecture to support a wide range of convolutional layers and a
+specialized on-chip memory hierarchy to provide high memory bandwidth and low
+energy consumption. Eyeriss V2 which optimizes the Eyeriss V1 architecture for
+sparse and compact DNNs 2) the Tensor Processing Unit (TPU) \cite{tpu} developed
+by Google uses an array of PEs to accelerate neural network computations. It is
+specifically optimized for Google's neural network workloads and provides high
+performance and energy efficiency. 3) the MAERI accelerator \cite{maeri} which
+aims to support a wide variety of DNN layers and mappings by moving the
+complexity of data orchestration to runtime configuration of a flexible on-chip
+Network-on-Chip (NoC). It allows for efficient mapping of diverse layer types to
+the architecture and offers high performance and energy efficiency.
 
 \subsection{Eyeriss V1 and V2}
 \label{chap:related_work:eyeriss}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.3]{fig/eyeriss.png}
+    \caption{Illustration of Eyeriss V1 and Eyeriss v2's architecture from \cite{isscc_2016_chen_eyeriss}}
+    \label{fig:eyeriss_arch}
+\end{figure}
 
 Eyeriss \cite{isscc_2016_chen_eyeriss} is an accelerator for state-of-the-art
 deep convolutional neural networks (CNNs). It attempts to optimize for the
@@ -469,14 +503,21 @@ improve the utilization of the computation resources.
 EyerissV1 and EyerissV2 do not optimize for linear layers. Linear layers may not
 represent a substantial portion of a CNN network runtime, however, some models
 use linear layers exclusively. These models are underrepresented in vision based
-tasks however, they are present in NLP based tasks. An examples of these
-models includes the Transformer model \cite{transformer_model}. This limits how general the
-Eyeriss architecture is when used for models outside of the vision domain. This
-work aims to build an accelerator that accounts for the importance of linear
-layers in those models. 
+tasks however, they are present in NLP based tasks. An examples of these models
+includes the Transformer model \cite{transformer_model}. This limits how general
+the Eyeriss architecture is when used for models outside of the vision domain.
+This work aims to build an accelerator that accounts for the importance of
+linear layers in those models. 
 
-\subsection{Tensor processing unit}
+\subsection{Tensor Processing Unit}
 \label{chap:related_work:tpu}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.45]{fig/tpu.png}
+    \caption{Block diagram of the TPU architecture from \cite{tpu}}
+    \label{fig:tpu_arch}
+\end{figure}
 
 At the heart of a TPU is a 65,536 8-bit MAC matrix multiply unit that offers a
 peak throughput of 92 TeraOps/second (TOPS) and a large (28 MiB)
@@ -493,6 +534,13 @@ support for a wide variety of computation workloads.
 
 \subsection{Maeri}
 \label{chap:related_work:maeri}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.3]{fig/maeri.png}
+    \caption{An overview of Maeri's architecture \cite{maeri}}
+    \label{fig:maeri_arch}
+\end{figure}
 
 Since most DNN accelerators support only fixed dataflow patterns internally
 mapping arbitrary layer dataflows to these fabric efficiently is challenging.
@@ -512,16 +560,3 @@ primitive called self addressable memory (SAMs) discussed in
 \autoref{chap:data_orchestration} with the small area footprint of a fixed
 on-chip fabric optimized through a novel optimizer presented in
 \autoref{chap:arch_dimensioning}. 
-
-
-% \section{Analysis of data reuse with the polyhedral model}
-
-% \cite{meeus} used polyehdral model to analyse reuse within stencil based applications described
-% as nested loops. One important element in their approach is their program written in iscc that
-% can determine temporal reuse of data elements
-
-% There's the polyhedral extraction tool out there but unfortunately there's no
-% way to encode parallelism or loop unrolling in it without relying on compiler
-% pragmas. 
-
-% below is an example of this reuse applied to the gemm loops

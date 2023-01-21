@@ -14,8 +14,7 @@ The design space dimensions of dataflows is comprised of:
     \item Mapping of loops to an accelerators spatial axis of which there are 2
 \end{itemize}
 
-Ideally dataflow design space exploration should be hardware implementation
-agnostic. We can enumerate the size of the design space by examining the scope
+We can enumerate the size of the design space by examining the scope
 of the aforementioned design space dimensions. Beginning with the choice of loop
 unroll targets. One can choose to unroll only one loop or all loops with
 varying unroll factors. Unrolling loops exposes opportunities for parallelism
@@ -25,7 +24,7 @@ $\sum\limits_{l=1}^{6}\binom{6}{l}$ with a total of $6!$ possible orderings for
 said loops. The space of possible loop unroll axis mappings is $\binom{l}{\min(2,
 l)}$ depending on the chosen number of loops $l$ unrolled. The space of possible
 unroll factors is then dictated by the upper bounds of the indexes in the loop
-representation $max(F).max(C).max(Y).max(X).max(KY).max(KX)$ and the upper bound
+representation $\prod_{l}  max(l) \forall l \in \{F,C,Y,X,KY,KX\} $ and the upper bound
 of the available processing engines $Count_{pe}$. Some combination of upper
 bounds are very unlikely to occur in real networks which limits the size of the
 design space for loop unroll factors. However, when considering the
