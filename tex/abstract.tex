@@ -2,30 +2,32 @@
 
 \begin{abstract}
 
-\ac{DNN}s currently represent the state of the art in regression and
-classification problems in image recognition, sequence to sequence learning
-\cite{dnn_is_sota_seq2seq}, speech recognition \cite{dnn_is_sota_speech}. Given
-the substantial variety of neural networks, there exists a need to create a
-general enough architecture that can support a wide variety of networks without
-sacrificing efficiency when running the common case of network configurations.  
-In this thesis a Hybrid GEMM and Direct Convolution Accelerator (HERO) is
-introduced. HERO is a neural network accelerator that maintains computation
-generality by supporting matrix multiplication while retaining computational
-efficiency when running the common case configurations of the convolution
-operation. A utilization optimal configurations of HERO was founding the HERO
-accelerator TEMPlate Optimizer (TEMPO). To orchestrated data movements a novel
-descriptor driven on-chip memory primitive called self addressable memory (SAM)
-is presented. To compile arbitrary pytorch models down to SAM descriptors a HERO
-layer compiler was developed. Finally To estimate the performance and energy
-efficiency of arbitrary HERO configurations a cycle accurate simulation platform
-driven by a SystemC simulation backend and a python evaluation frontend was
-developed. An analysis of an optimal HERO configuration when running 695
-networks in the TIMM library was performed. The HERO configuration analyzed was
-found to perform well on a wide variety of network configurations. It achieved a
-median FPS of ~91 FPS with a median speedup of 4.87X over CPU baseline. The
-estimated bandwidth required for the configuration of HERO studied was
-19.65GiB/s which is within the PC4-21300 DDR4 specification. With that
-configuration of DRAM the median inferences/J is 57. The total on-chip area is
-estimated at 0.34 $mm^2$. 
+Deep Neural Networks (DNNs) currently dominate in regression and classification
+problems in image recognition, sequence to sequence learning
+\cite{dnn_is_sota_seq2seq}, and speech recognition \cite{dnn_is_sota_speech}.
+Given the substantial variety of neural networks, there is a need for a general
+architecture that can support a wide range of networks while maintaining
+efficiency when running common configurations of the convolution operation. This
+thesis introduces the Hybrid GEMM and Direct Convolution Accelerator (HERO), a
+neural network accelerator that preserves computation generality by supporting
+matrix multiplication and maintaining computational efficiency when running
+common configurations of the convolution operation. Additionally, this thesis
+also introduces a toolchain that aids in the design, dimensioning, and
+programming of HERO. Using the HERO accelerator TEMPlate Optimizer (TEMPO), this
+thesis finds utilization optimal configurations for HERO. Additionally, a novel
+descriptor-driven on-chip memory primitive called Self-Addressable Memory (SAM)
+is proposed to orchestrate data movements. Additionally, this thesis introduces
+a HERO layer compiler that converts arbitrary convolution and linear layers
+described in pytorch to SAM descriptors. Finally, this thesis presents a
+cycle-accurate simulation platform driven by a SystemC simulation backend and a
+Python evaluation frontend to estimate performance and energy efficiency of
+arbitrary HERO configurations on different DNN networks described in Pytorch. An
+analysis of a utilization optimal HERO configuration when running 695 networks
+in the TIMM library was performed, the configuration achieved a median FPS of
+~91 FPS across all 695 networks with a median speedup of 4.87X over CPU
+baseline. The estimated bandwidth required for the configuration of HERO studied
+was 19.65GiB/s, which is within the PC4-21300 DDR4 specification. With that
+configuration of DRAM, the median inferences/J was 57. The total on-chip area
+for the configuration was estimated at 0.34 $mm^2$.
 
 \end{abstract}
