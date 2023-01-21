@@ -13,11 +13,16 @@ neural network accelerator that preserves computation generality by supporting
 matrix multiplication and maintaining computational efficiency when running
 common configurations of the convolution operation. Additionally, this thesis
 also introduces a toolchain that aids in the design, dimensioning, and
-programming of HERO. Using the HERO accelerator TEMPlate Optimizer (TEMPO), this
-thesis finds utilization optimal configurations for HERO. Additionally, a novel
+programming of HERO. HERO's design is data-aware, optimized for the common case
+of convolutions by supporting common configurations directly without the need
+for conversion techniques like Im2Col. To identify the common case of
+convolutions, this thesis introduces CIGAR, a tool that can gather configuration
+statistics for convolution and linear layers in a library of DNNs written in
+PyTorch. Using the HERO accelerator TEMPlate Optimizer (TEMPO), this thesis
+finds utilization optimal configurations for HERO. Additionally, a novel
 descriptor-driven on-chip memory primitive called Self-Addressable Memory (SAM)
 is proposed to orchestrate data movements. Additionally, this thesis introduces
-a HERO layer compiler that converts arbitrary convolution and linear layers
+a HERO network compiler called EMPIRE that converts arbitrary convolution and linear layers
 described in pytorch to SAM descriptors. Finally, this thesis presents a
 cycle-accurate simulation platform driven by a SystemC simulation backend and a
 Python evaluation frontend to estimate performance and energy efficiency of
