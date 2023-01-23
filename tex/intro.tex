@@ -151,25 +151,6 @@ configurations directly without the need to convert them into GEMM using data
 transformation techniques like Im2Col.
 
 
-To find the common case of convolutions,
-this thesis introduces \ac{CIGAR}. CIGAR can gather configuration statistics for
-convolution and linear layers in a libray of DNNs networks written in PyTorch
-\cite{pytorch}. The heart of CIGAR is it's model dim collector that can collect
-convolution and linear layer configuration for any network written in pytorch.
-CIGAR can analyze a network or a library of networks and reveal the most common
-convolution layer configurations (e.g their kernel and stride sizes) across the
-entire library. The networks analyzed by CIGAR are all provided by the \ac{TIMM}
-python library of networks \cite{timm}, which has over 695 networks written in
-pytorch available for analysis. Convolution layer configurations that are not
-supported directly by the architecture are converted into equivalent GEMM
-operations using data transformation techniques like Im2Col
-\cite{cafe_con_troll}. 
-This thesis introduces the Hybrid GEMM and Direct Convolution Accelerator
-(HERO), a neural network accelerator that balances generality and efficiency in
-its design. HERO supports general matrix multiplication, the backbone of many
-computationally intensive layers in modern DNNs, without detracting from its
-primary goal of accelerating convolutions.
-
 HERO's design is data-aware, optimized for the common case of convolutions by
 supporting common configurations directly without the need for conversion
 techniques like Im2Col. To identify the common case of convolutions, this thesis
@@ -203,18 +184,18 @@ TEMPO is the entire TIMM library to find the most general architecture
 dimensions for HERO.
 
 
-This thesis introduces the Self-Addressable Memory (SAM), an on-chip
-programmable memory primitive, to manage data movement within the Hybrid GEMM
-and Direct Convolution Accelerator (HERO). SAMs are programmed using descriptors
-that define time-dependent address streams, which, in combination with
-sufficiently flexible on-chip communication, provide the necessary flexibility
-to map arbitrary network layers onto HERO. SAMs enable for more efficient data
-movement on-chip, with the aim of maximizing data reuse. To determine the reuse
-behavior in the convolution operation, this thesis applies the polyhedral model
-to different data elements in convolution layers, using techniques outlined in
-\cite{meeus}. Additionally, this thesis introduces a HERO network compiler
-called EMPIRE that aids in the mapping of arbitrary PyTorch models to SAM
-descriptors, which drive on-chip data movement.
+Additionally, to manage data movement within the Hybrid GEMM and Direct
+Convolution Accelerator (HERO). This thesis introduces the Self-Addressable
+Memory (SAM), an on-chip programmable memory primitive. SAMs are programmed
+using descriptors that define time-dependent address streams, which, in
+combination with sufficiently flexible on-chip communication, provide the
+necessary flexibility to map arbitrary network layers onto HERO. SAMs enable for
+more efficient data movement on-chip, with the aim of maximizing data reuse. To
+determine the reuse behavior in the convolution operation, this thesis applies
+the polyhedral model to different data elements in convolution layers, using
+techniques outlined in \cite{meeus}. Additionally, this thesis introduces a HERO
+network compiler called EMPIRE that aids in the mapping of arbitrary PyTorch
+models to SAM descriptors, which drive on-chip data movement.
 
 
 To evaluate the performance and energy efficiency of HERO, a cycle accurate
@@ -229,6 +210,7 @@ baseline. The estimated bandwidth required for the configuration of HERO studied
 was 19.65GiB/s which is within the PC4-21300 DDR4 specification. With that
 configuration of DRAM, the median inferences/J is 57. The total on-chip area is
 estimated at 0.34 $mm^2$.
+
 
 Overall, HERO provides a high-performance, energy-efficient solution for
 accelerating convolution layers in a wide range of DNNs. Its general

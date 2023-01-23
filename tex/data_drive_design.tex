@@ -2,11 +2,16 @@
 \label{chap:dda}
 
 As discussed in \autoref{chap:background:intro}, any convolution accelerator can
-be reduced into it's dataflow and hardware implementation choices. Based on the
-dataflow exploration approach in \cite{dnn_df_overrated_v1} dataflows are
-explorable through the nested loop structure that makes up a convolution
-layer introduced in \autoref{chap:background:intro}.
-The design space dimensions of dataflows is comprised of:
+be reduced into it's dataflow and hardware implementation choices. Dataflow in
+this chapter is defined as the order of operations used to perform a
+convolution. Hardware implementation is defined as the on-chip communication
+infrastructure and memory hierarchy that
+enables the chosen dataflow. Based on the dataflow exploration approach in
+\cite{dnn_df_overrated_v1} dataflows are explorable through the nested loop
+structure that makes up a convolution layer introduced in
+\autoref{chap:background:intro}. The design space dimensions of dataflows is
+comprised of:
+
 \begin{itemize}
     % \item Loop ordering of the nested loops structure
     \item Loop unroll targets (which loops are unrolled and which are not) 
@@ -41,26 +46,78 @@ spatial axis would be 36. After allocating those PEs, if we attempt to execute a
 different convolution layer with a different configuration, for example, a (1, 1)
 convolution layer with 32 channels, the allocated PEs would be underutilized because
 the effective channel unroll factor would be 36 instead of 4 in the original
-configuration.
+configuration. 
 
-In this chapter we will first prune the dataflow design space dimensions in
-\autoref{chap:dda:dataflow_dse:pruning} by determining the appropriate
-loop unroll targets and loop unroll factors using insights acquired from
-\ac{CIGAR} a convolutional network analysis tool discussed in
-\autoref{chap:dda:dataflow_dse:pruning:cigar}. Then, given the complexity of
-exploring loop unroll factors and loop axis mapping, an automated accelerator
-Template optimizer TEMPO introduced in \autoref{chap:dataflow_dse:exploring} is
-used to explore the the aforementioned design space dimensions to produce
-utilization optimized accelerator template configurations. 
+
+In this thesis, the problem of dataflow design space exploration is approached
+by dividing it into two distinct parts. The first part involves the
+identification of the loop unroll targets and loop unroll factors for HERO that
+are appropriate for the common case of convolutions. Finding the appropriate
+loop unroll targets is achieved through the use of a tool named CIGAR. CIGAR is
+a statistical analysis tool that examines various configurations of convolution
+layers across a wide range of neural networks in the literature, accessible
+through the TIMM library of networks, in order to identify the common
+characteristics of convolution layers. This allows for the inference of the
+utilization optimal loop unroll targets and factors for HERO for the common case of
+convolutions. Utilization optimality is defined as the loop unroll targets and
+loop unroll factors that would maximize the utilization of processing engines or
+PEs in HERO specifically for the common case of convolutions.  
+Note this part of the exploration limits the unroll factor
+exploration to only the kernel loops. The second part of the dataflow design
+space exploration, which includes the examination of the remaining space of loop
+unroll factors and the spatial axis mapping, is a complex task that requires
+knowledge of the actual hardware architecture. As such, it is addressed through
+the use of a tool named TEMPO in the subsequent chapter of this thesis.
+
+
+In addition to identifying an optimal dataflow for the common
+case of convolutions, the overlap between convolutions with a kernel size of
+(1,1) and general matrix multiplication will be examined as a means to enable
+the execution of arbitrary convolution layers. This will allow HERO to run any
+convolution layer, regardless of the set of convolution layer configurations it
+is optimized for.
+
+After identifying the optimal loop unroll targets and factors for the kernel
+loops, the next step is to analyze the reuse behavior of the data elements in
+the selected dataflow. This can be accomplished by applying the method described
+in \cite{meeus}. Once the reuse behavior has been determined, the hardware
+implementation taxonomy from \cite{maestro} can be employed to determine the
+most suitable hardware implementation for the specific reuse behavior found in
+the selected dataflow.
+
+
+This chapter is broken down as follows we will first prune the dataflow design
+space dimensions in \autoref{chap:dda:dataflow_dse:pruning} by determining the
+appropriate loop unroll targets and loop unroll factors using insights acquired
+from \ac{CIGAR} a convolutional network analysis tool discussed in
+\autoref{chap:dda:dataflow_dse:pruning:cigar} along with an overview of the TIMM
+library of networks. Then, given the complexity of exploring loop unroll factors
+and loop axis mapping, an automated accelerator Template optimizer TEMPO
+introduced in the next chapter \autoref{chap:dataflow_dse:exploring} is used to
+explore the the aforementioned design space dimensions to produce utilization
+optimized accelerator template configurations. An exploration of the overlap
+between (1, 1) convolutions and GEMM to extend support to arbitrary convolutions
+is discussed in \autoref{chap:dda:dataflow_dse:GEMM_mode}. Upon identifying the
+loop unroll targets and loop unroll factors for kernel loops this chapter
+explores the hardware implementation space based on the reuse behavior of the
+chosen dataflow in \autoref{chap:dda:hw_dse}. In \autoref{chap:dda:hw_dse:final}
+the final HERO architectural template is presented.
 
 \section{Pruning the dataflow design space with CIGAR}
 \label{chap:dda:dataflow_dse:pruning}
 
+\ac{CIGAR} is a tool that gathers configuration statistics for convolution and
+linear layers in a library of DNN networks written in PyTorch \cite{pytorch}.
+CIGAR's main component is its model dimension collector, which can collect the
+configuration of convolution and linear layers for any network written in
+PyTorch. By analyzing a network or a library of networks, CIGAR can reveal the
+most common convolution layer configurations, such as kernel and stride sizes,
+across the entire library. The networks analyzed by CIGAR are all provided by
+the \ac{TIMM} python library of networks \cite{timm}, which has over 695
+networks available for analysis.
+
 \subsection{CIGAR: The ConvolutIon statIstics GAtherer}
 \label{chap:dda:dataflow_dse:pruning:cigar}
-
-\subsubsection{Algorithm}
-\label{chap:dda:dataflow_dse:pruning:cigar:algo}
 
 Pseudocode for \ac{CIGAR}'s algorithm is presented in algorithm
 \ref{alg:cigar_algo}. In algorithm \ref{alg:cigar_algo}, \ac{CIGAR} begins by
@@ -139,7 +196,7 @@ function to the newly supported layer.
     \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Neural Network Library Explored}
+\subsection{Neural Network Library Explored}
 \label{chap:dda:dataflow_dse:pruning:cigar:library}
 
 A diverse range of networks were explored by CIGAR for dataflow design space
@@ -170,7 +227,7 @@ Models (timm) package in \cite{timm}.
 
 \clearpage
 
-\subsection{Applying CIGAR to prune the dataflow design space}
+\subsection{Pruning the Dataflow Design Space using CIGAR}
 \label{chap:dda:dataflow_dse:pruning:applying_it}
 
 \subsubsection{Loop Unroll Targets}
@@ -185,7 +242,9 @@ input featuremap elements are loaded and consumed to evaluate the relevant
 partial sums associated with the filter weights loaded. In this scenario, the
 stationarity of the weight elements exceeds that of the input featuremap and
 output featuremap elements.   
-We can determine determine what loop targets should be unrolled based on the
+
+
+We can determine what loop targets should be unrolled based on the
 stationarity of each date type present in the convolution operation. A data
 element that exhibits a high degree of stationarity should remain on chip for as
 long as possible in order to minimize excessive reloads from off chip memory. We
@@ -225,7 +284,9 @@ networks expected to run on the accelerator. The most flexible dataflow in this
 case is a weight stationary dataflow in which the F, C, KY and KX loops are the
 unroll targets. This is due to the overlap between weight stationary under (1, 1)
 convolutions and GEMM discussed in
-\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}, the choice
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}. 
+
+The choice
 of a weight stationary dataflow lends itself well to \ac{GEMM} given the
 similarities in the loop structure with regards to F and C loops for both
 applications. Furthermore, a weight stationary based dataflow allows support for
@@ -238,10 +299,12 @@ directly are executed on the accelerator and an GEMM mode where kernels that
 are not supported directly are supported by lowering/ lifting followed by
 conversion of the proceeding GEMM operation into a (1, 1) convolution. A full
 explanation of GEMM mode is given in
-\autoref{chap:dda:dataflow_dse:GEMM_mode}. Note that convolution layers with
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. 
+
+Note that convolution layers with
 non (1, 1) strides are executed under GEMM mode. Supporting convolution layers
 with non (1, 1) strides directly is left as part of future work. From
-\autoref{fig:kernel_stats:strides} (1, 1) strides are represent ~95\% of
+\autoref{fig:kernel_stats:strides} (1, 1) strides are present in ~95\% of
 convolution layers so the implications of indirect support of non (1, 1) strides
 will likely be negligible when assessing the overall performance and energy
 efficiency of an accelerator implementing the aforementioned operation modes.
@@ -304,8 +367,8 @@ kernels are assumed when unrolling KY and KX loops, hence they have to be
 supported directly. Other kernel sizes to support directly can be derived from
 \autoref{fig:kernel_stats:freq}. In \autoref{fig:kernel_stats:freq}.b many
 networks contain at least 1 convolution layer that is not (1, 1) or (3, 3). For
-example a 7x7 kernel exists in around ~20\% of networks. The reason for the
-prevalence of 7x7 convolutions originates from the historical use of resnet
+example a (7, 7) kernel exists in around ~20\% of networks. The reason for the
+prevalence of (7, 7) convolutions originates from the historical use of resnet
 \cite{resnet} as a feature extractor for a significant portion of networks
 analyzed by CIGAR.
 
@@ -381,34 +444,67 @@ discussed in \autoref{chap:net_compile}.
     \label{fig:tiling_connection_to_unroll_targets}
 \end{figure}
 
+In summary, we propose to take advantage of the high weight reuse observed in
+many networks by using a weight stationary approach. Weight stationary sets the
+loop unroll targets to the F, C, KY, and KC loops, with the assumption that the
+stride size is limited to (1, 1) due to its prevalence. By unrolling the F, C
+loops we can maximize weight reuse as well as parallelize layers that have been
+converted to GEMM. 
+
+Additionally, we also need to unroll the KY and KX loops to avoid having to
+store weights on-chip at a large scale, as it is an inefficient use of memory.
+Given the high frequency of (1, 1) kernel sizes, we need to unroll the KY, KX
+loops to this minimum value. Additionally, (1, 1) kernel sizes form the basis of
+GEMM mode which strengthens the argument for direct support (1, 1) kernels.
+Additionally, by considering the frequency of occurrence and the number of MACs,
+we also unroll the KY and KX loops to (3, 3).
+
+The unroll factor for F and C loops remains open, and will be further explored
+in a later chapter of this thesis using TEMPO. The act of unrolling these loops
+effectively tiles the weight tensor, allowing HERO to process a layer as a
+sequence of weight tiles. This raises the question of weight tile scheduling,
+which will be discussed in \autoref{chap:net_compile}.
+
 \clearpage 
 
-\section{Enabling GEMM mode through layer equivalence}
+\section{Increasing Generality of a Direct Convolution Accelerator}
 \label{chap:dda:dataflow_dse:GEMM_mode}
 
-GEMM mode extends support to convolution layers with kernel sizes that are
-not directly supported by an convolution accelerator. It does this by
-establishing a layer equivalence relationship between unsupported layers and
-supported layers. Convolution operations can be converted into general matrix
-multiplication through the use of lowering and lifting techniques like Im2col
-discussed in \cite{cafe_con_troll}. This approach to supporting arbitrary
-convolution operations would still require a matrix multiplication accelerator.
-To support matrix multiplication within a convolution accelerator we can either
-1) repurpose existing compute and memory hardware on chip to perform both GEMM
-and convolutions operations or 2) we can establish a mathematical equivalence
-between GEMM operations and Conv operations by reinterpret GEMM into a special
-case of convolution, namely convolutions with a (1, 1) kernel size. This avoids the
-overhead of repurposing existing convolution hardware to support GEMM. Once this
-relationship between GEMM and (1, 1) Convolutions is defined, layers that are
-unsupported directly can be converted into equivalent layers that are supported
-directly. In
-\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}, a proof for
-the equivalence between GEMM and (1, 1) Convolutions is given. Additionally, in
-\autoref{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence} the
-aforementioned proof will be used in tandem with the approach in
-\cite{cafe_con_troll} to provide support for arbitrary convolution operations.
-Finally, a discussion of layer dimensionality for unsupported layers that have
-been converted to equivalent supported layers is given in
+To allow HERO to run arbitrary convolution layers, the overlap between
+convolutions with a kernel size of (1,1) and general matrix multiplication will
+be examined in this section. This overlap enables HERO to support arbitrary
+convolution layers by first interpreting them as GEMM operations then
+reinterpreting them against as (1, 1) convolutions which, from the previous
+section, are one of the kernel sizes directly supported by HERO. This
+operational mode is called GEMM/ Indirect mode.  
+GEMM mode extends support to convolution layers with kernel sizes that are not
+directly supported by an convolution accelerator. It does this by establishing a
+layer equivalence relationship between unsupported layers and supported layers.
+Convolution operations can be converted into general matrix multiplication
+through the use of lowering and lifting techniques like Im2col discussed in
+\cite{cafe_con_troll} and in the \autoref{chap:background:intro}. This approach
+to supporting arbitrary convolution operations would still require a matrix
+multiplication accelerator. To support matrix multiplication within a
+convolution accelerator we can either:
+
+1) Repurpose existing compute and memory hardware on chip to perform both GEMM
+and convolutions operations 
+
+2) Establish a mathematical equivalence between GEMM operations and Conv
+operations by reinterpret GEMM into a special case of convolution, namely
+convolutions with a (1, 1) kernel size. 
+
+This avoids the overhead of repurposing existing convolution hardware to support
+GEMM. Once this relationship between GEMM and (1, 1) Convolutions is defined,
+layers that are unsupported directly can be converted into equivalent layers
+that are supported directly. In
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}, a proof for the
+equivalence between GEMM and (1, 1) Convolutions is given. Additionally, in
+\autoref{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence} the aforementioned
+proof will be used in tandem with the approach in \cite{cafe_con_troll} to
+provide support for arbitrary convolution operations. Finally, a discussion of
+layer dimensionality for unsupported layers that have been converted to
+equivalent supported layers is given in
 \autoref{chap:dda:dataflow_dse:GEMM_mode:layer_dimentionality}.  
 
 \clearpage
@@ -486,6 +582,11 @@ last dimension and then transpose it.
 \end{figure}
 
 
+
+
+
+
+
 \subsection{Layer Equivalence}
 \label{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence}
 
@@ -500,7 +601,7 @@ accelerator that can support (1, 1) convolution operations with asymmetric IFmap
 to support any arbitrary convolution operation. A visual illustration for this
 technique is presented in \autoref{fig:conv2gemm2conv}. To demonstrate this
 approach we begin by lowering both IFmap using
-\autoref{math:balanced_lowering_IFmap} and Weights using
+\autoref{math:balanced_lowering_ifmap} and Weights using
 \autoref{math:balanced_lowering_weight}. This results in two matrices IFmap and
 Weights in \autoref{math:conv2gemm2conv:lowering}. Lowering should be performed
 if the kernel size of the Weight tensor is unsupported $K' \notin
@@ -544,7 +645,7 @@ $\hat{Weight}$ tensors.
 
 Finally we can lift $\hat{OFmap_{prelift}}$ by first reshaping it into a 2D
 matrix by dropping the last dimension and then transposing it. After that, we
-can apply balanced lifting in \autoref{math:balanced_lifting_OFmap} to get the
+can apply balanced lifting in \autoref{math:balanced_lifting_ofmap} to get the
 final OFmap in \autoref{math:conv2gemm2conv:lift}.
 
 \begin{equation}
@@ -661,30 +762,29 @@ memory can mask the latency of transposing matrices is left as part of future
 work along with incorporating lowering and lifting into the accelerator. 
 
 
-\section{Exploring The Hardware Implementation Design Space}
+\section{Exploring the Hardware Implementation Design Space}
 \label{chap:dda:hw_dse}
 
 Based on the conclusions derived from \autoref{chap:dda:dataflow_dse:pruning},
 weight stationary is the most flexible dataflow choice given the overlap between
 1x1 convolutions and GEMM discussed in
 \autoref{chap:dda:dataflow_dse:GEMM_mode}. This gives rise to a weight
-stationary dataflow based accelerator
-with two
-operational modes, direct Mode where a subset of possible kernel sizes are
-supported and GEMM mode where all other kernel sizes and strides are supported
-in via lowering/ lifting based approach. In this section we will determine an
-appropriate hardware implementation for this accelerator using the hardware
-implementation taxonomy from \cite{maestro}. Based on the reuse and
-communication behavior of the different elements (IFmap, OFmap and weights) in a
-convolution operation using weight stationary we can infer the appropriate
-hardware implementation for on-chip communication and memory from
-\cite{maestro}. To perform this deduction we will use the polyhedral model to
-analyze temporal reuse in \autoref{chap:dda:hw_dse:temporal_analysis} and
-spatial reuse in \autoref{chap:dda:hw_dse:spatial_reuse_analysis} of data
-elements in a convolution operation. Based on the
-analyzed reuse behavior an initial hardware implementation for HERO will be
-given and further improved after applying a simplification of the on-chip memory
-hierarchy in \autoref{chap:dda:hw_dse:simplifying_hierarchy}. The final hardware
+stationary dataflow based accelerator with two operational modes, direct Mode
+where a subset of possible kernel sizes are supported and GEMM/ Indirect mode
+where all other kernel sizes and strides are supported via the lowering/ lifting
+based approach. 
+
+In this section we will determine an appropriate on chip communication
+infrastructure as well as the memory hierarchy for HERO using the hardware
+implementation taxonomy from \cite{maestro} in tandem with a reuse analysis of
+the different data elements in the weight stationary dataflow determined by the
+previous section. To perform this reuse analysis we will use the polyhedral
+model to analyze temporal reuse in \autoref{chap:dda:hw_dse:temporal_analysis}
+and spatial reuse in \autoref{chap:dda:hw_dse:spatial_reuse_analysis} of data
+elements in a convolution operation. Based on the analyzed reuse behavior an
+initial hardware implementation for HERO will be given and further improved
+after applying a simplification of the on-chip memory hierarchy in
+\autoref{chap:dda:hw_dse:simplifying_hierarchy}. The final hardware
 implementation for HERO will be given in \autoref{chap:dda:hw_dse:final}. Note
 that the implementation in \autoref{chap:dda:hw_dse:final} will serve as
 template to be further tuned based on a library of target networks in
@@ -769,7 +869,7 @@ offsets used in the memory access functions are passed as parameters based on
 the convention established in \autoref{lst:conv_loops_unrolled}. This mapping
 creates multiple temporal instances for each memory access in each \ac{MAC}
 statement instance.  For
-example, for example, the OFmap access that occurs at iteration vector [f = 2, c= 1, y = 0,
+example, the OFmap access that occurs at iteration vector [f = 2, c= 1, y = 0,
 x = 1] is a different temporal instance of the same OFmap access at [f = 1, c = 1,
 y = 0, x = 1]. 
 Two accesses that access the same index but at different
