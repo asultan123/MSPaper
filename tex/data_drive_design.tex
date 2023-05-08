@@ -442,36 +442,6 @@ the relative infrequency of non (1, 1) and (3, 3) layers.
 \end{figure}
 
 % % TODO: Introduce tiling discussion here using tiling figure
-% Depending on the chosen unroll factors, the architecture implementing the unroll
-% factors in effect tiles the weight tensor and processes it tile by tile in the
-% convolution operation. An
-% illustration of this concept is present in
-% \autoref{fig:tiling_connection_to_unroll_targets}. Loop unroll factors determine
-% PE allocation 
-% Tiling of a weight tensor arises from the processing of filters, channels and
-% kernels in batches whose size depend on the unroll factors. 
-% Padding of a weight tensors is performed wherever the chosen PE
-% binding for filter or channel loops exceeds the number of channels and filters
-% being processed in the tile. In
-% \autoref{fig:tiling_connection_to_unroll_targets} a weight tensor of dimension
-% $R^{6\times 3\times 2\times 2}$ is tiled with $F_{unroll} = 4$, $C_{unroll}=8$,
-% $K_{unroll}=2$ with kernel loops mapped to the horizontal axis alongside channel
-% loops. Additional padding in the horizontal and vertical axis is added given
-% excess allocation of PEs in both spatial axis in all tiles except the top left
-% one. With this representation, the accelerator processes the weight tensors as a
-% series of tiles to produce an output featuremap.    
-% This representation of the weight tensor as a series of tiles processed by
-% the architecture is useful when considering the scheduling of a convolution
-% operation in a network. Tiling of weights and their effect on scheduling is
-% discussed in \autoref{chap:net_compile}.
-
-% \begin{figure}[]
-%     \centering
-%     \includegraphics[scale=0.5]{fig/tiling.pdf}
-%     \caption{An illustration of weight tiling by loop unroll factors}
-%     \label{fig:tiling_connection_to_unroll_targets}
-% \end{figure}
-
 
 \subsection{A note on accelerator Spatial Axis mapping}
 \label{chap:dda:dataflow_dse:GEMM_mode:axis_mapping}

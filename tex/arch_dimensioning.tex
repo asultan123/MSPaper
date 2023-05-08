@@ -36,35 +36,71 @@ presented in \autoref{chap:dataflow_dse:exploring:results}.
 \end{figure}
 
 From the previous section we have concluded that loops F, C, KY and KX are all
-unroll targets, and KY and KX loops should be unrolled assuming that (1, 1) and (3, 3)
-kernels are supported directly. What remains of the dataflow design space are the unroll factors for F
-and C loops as well as the accelerator spatial axis mapping for all unrolled
-loops F, C, KY, KX. From this point these parameters will be referred to as
-HERO template parameters from which a concrete accelerator instance can
-be defined. These accelerator template parameters define the number of
-processing engines allocated to process channels, filters, and kernels
-concurrently in the a HERO instance. An illustration of this \ac{PE}
+unroll targets, and KY and KX loops should be unrolled assuming that (1, 1) and
+(3, 3) kernels are supported directly. What remains of the dataflow design space
+are the unroll factors for F and C loops as well as the accelerator spatial axis
+mapping for all unrolled loops F, C, KY, KX. From this point these parameters
+will be referred to as HERO architecture dimensions from which a concrete
+accelerator instance can be defined. These accelerator architecture dimensions
+define the number of processing engines allocated to process channels, filters,
+and kernels concurrently in the a HERO instance. An illustration of this \ac{PE}
 allocation is present in \autoref{fig:axis_mapping}. The space of possible
 unroll factors is as large as the space of possible loop upper bounds for the
 aforementioned unrolled loops. However, as discussed earlier, some combinations
 of loop upper bounds are unlikely in real networks. Additionally, spatial axis
 mapping affects the effective unroll factors when executing different
 convolution layers than the ones assumed when unrolling said loops. This further
-expands the design space of a possible template parameters. To
-effectively explore the space of loop unroll factors and accelerator spatial
-axis mapping we introduce \ac{TEMPO}, a dataflow exploration and analysis tool
-used to optimize an accelerator's weight stationary dataflow based on a target
-CNN library as well as an arbitrary objective function. A discussion of
-\ac{TEMPO}'s algorithm model is presented in
-\autoref{chap:dataflow_dse:exploring:algorithm} as well as it's analytical models
-for utilization, latency and access counts, in \autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results
-of running \ac{TEMPO} on TIMMS's library of networks is presented in
+expands the design space of a possible architecture dimensions. To effectively
+explore the space of loop unroll factors and accelerator spatial axis mapping we
+introduce \ac{TEMPO}, a dataflow exploration and analysis tool used to optimize
+an accelerator's weight stationary dataflow based on a target CNN library as
+well as an arbitrary objective function. To orient the reader to TEMPO's
+algorithm and analytical model first a connection is establish between loop
+unrolling and tiling of the input feature map, weight and output feature map
+tensors in a convolution layer in \autoref{chap:dataflow_dse:exploring:tiling}. 
+Then a discussion of \ac{TEMPO}'s algorithm
+model is presented in \autoref{chap:dataflow_dse:exploring:algorithm} as well as
+it's analytical models for utilization, latency and access counts, in
+\autoref{chap:dataflow_dse:exploring:tempo_model}. Additionally, results of
+running \ac{TEMPO} on TIMMS's library of networks is presented in
 \autoref{chap:dataflow_dse:exploring:results}. Finally a brief discussion on
 on-chip memory hierarchy sizing will be given in
 \autoref{chap:dataflow_dse:memory_hierarchy_sizing}. 
 
+
+\section{Loop unrolling as a form of tiling}
+\label{chap:dataflow_dse:exploring:tiling}
+
+Depending on the chosen unroll factors of HERO, the architecture in effect tiles
+the weight tensor and processes it tile by tile in the convolution operation. An
+illustration of this concept is present in
+\autoref{fig:tiling_connection_to_unroll_targets}. Loop unroll factors determine
+PE allocation Tiling of a weight tensor arises from the processing of filters,
+channels and kernels in batches whose size depend on the unroll factors. Padding
+of a weight tensors is performed wherever the chosen PE binding for filter or
+channel loops exceeds the number of channels and filters being processed in the
+tile. In \autoref{fig:tiling_connection_to_unroll_targets} a weight tensor of
+dimension $R^{6\times 3\times 2\times 2}$ is tiled with $F_{unroll} = 4$,
+$C_{unroll}=8$, $K_{unroll}=2$ with kernel loops mapped to the horizontal axis
+alongside channel loops. Additional padding in the horizontal and vertical axis
+is added given excess allocation of PEs in both spatial axis in all tiles except
+the top left one. With this representation, the accelerator processes the weight
+tensors as a series of tiles to produce an output featuremap.    
+This representation of the weight tensor as a series of tiles processed by the
+architecture is useful when considering the scheduling of a convolution
+operation in a network. Tiling of weights and their effect on scheduling is
+discussed in \autoref{chap:net_compile}.
+
+\begin{figure}[]
+    \centering
+    \includegraphics[scale=0.5]{fig/tiling.pdf}
+    \caption{An illustration of weight tiling by loop unroll factors}
+    \label{fig:tiling_connection_to_unroll_targets}
+\end{figure}
+
 \section{TEMPO Algorithm}
 \label{chap:dataflow_dse:exploring:algorithm}
+
 
 TEMPO's algorithm is presented in algorithm \ref{alg:tempo_algo}. TEMPO explores the
 space of possible filter and channel unroll factors as well as kernel axis
@@ -178,14 +214,14 @@ are left as part of future work.
     \label{fig:tempo_model}
 \end{figure}
 
-TEMPO models accelerator utilization based on how the template parameters (loop
+TEMPO models accelerator utilization based on how the architecture dimensions (loop
 unroll factors and loop axis mapping) tile and pad a convolution layer's
 stationary weight tensor.  Kernel axis mapping is assumed to be fixed in HERO. An illustration of TEMPO's
 utilization model in action is present in \autoref{fig:tempo_model}. In
 \autoref{fig:tempo_model} a layer with a weight tensor of dimensionality
 $R^{6\times 3\times 2\times 2}$ is tiled and padded based on the template
 parameters $C_{unroll}=8$, $F_{unroll}=4$, $K_{unroll}=2$ and axis mapping
-$K_{axis} = horizontal$. Based on these template parameters the effective filter
+$K_{axis} = horizontal$. Based on these architecture dimensions the effective filter
 and channel unroll factors are $F_{eff} = 4$, $C_{eff}=2$. These unroll factors
 create $\lceil \frac{\hat{C}}{C_{eff}} \rceil = 2$ horizontal tiles and $\lceil
 \frac{\hat{F}}{F_{eff}} \rceil = 2$ vertical tiles assuming padding has been
@@ -301,7 +337,7 @@ variation is given in \autoref{math:tile_utilization_padded_both}.
 \label{chap:dataflow_dse:exploring:tempo_model:latency}
 
 Estimating latency follows the same tiling model discussed the previous
-section. The latency of executing a layer based on the template parameters
+section. The latency of executing a layer based on the architecture dimensions
 chosen is given in \autoref{math:latency}. Latency is a function of the number of
 tiles present in the layer multiplied by the number of cycles spent processing a
 single IFmap channel $\hat{Z}$ plus the additional latency incurred due to
@@ -333,7 +369,7 @@ however, that is left as part of future work.
 \label{chap:dataflow_dse:exploring:tempo_model:access_counts}
 
 Following the tiling model discussed earlier, memory access counts are
-calculated based on how the template parameters tile the layer's weight tensor.
+calculated based on how the architecture dimensions tile the layer's weight tensor.
 Access counts for IFmaps are given in \autoref{math:memory_access_ifmap}, OFmap
 access counts are giving in \autoref{math:memory_access_OFmap} and finally
 weight access counts are given in \autoref{math:memory_access_weights}.
@@ -453,7 +489,7 @@ input featuremaps for as long as possible. Conversely, processing tiles in C, F
 order (ALAP) retains output featuremaps for as long as possible while retiring IFmaps
 as soon as possible. An illustration of ASAP and ALAP tile schedules in
 available in \autoref{fig:tile_scheduling}. 
-% In the final template there are 4 template parameters that are customizable
+% In the final template there are 4 architecture dimensions that are customizable
 % depending on the target performance/area/energy efficiency requirements of the
 % accelerator. The first and the second are the unroll factors for filters
 % ($F_{unroll}$) and channels ($C_{unroll}$). The third is the set of directly
