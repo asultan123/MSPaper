@@ -50,7 +50,9 @@ configuration.
 
 
 In this thesis, the problem of dataflow design space exploration is approached
-by dividing it into two distinct parts. The first part involves the
+by dividing it into two distinct parts. 
+
+The first part involves the
 identification of the loop unroll targets and loop unroll factors for HERO that
 are appropriate for the common case of convolutions. Finding the appropriate
 loop unroll targets is achieved through the use of a tool named CIGAR. CIGAR is
@@ -62,46 +64,53 @@ utilization optimal loop unroll targets and factors for HERO for the common case
 convolutions. Utilization optimality is defined as the loop unroll targets and
 loop unroll factors that would maximize the utilization of processing engines or
 PEs in HERO specifically for the common case of convolutions.  
-Note this part of the exploration limits the unroll factor
-exploration to only the kernel loops. The second part of the dataflow design
+Note this part of the exploration limits the exploration of unroll factor
+exploration to only the kernel loops. 
+
+The second part of the dataflow design
 space exploration, which includes the examination of the remaining space of loop
 unroll factors and the spatial axis mapping, is a complex task that requires
-knowledge of the actual hardware architecture. As such, it is addressed through
+knowledge of the actual hardware implementation of HERO. As such, it is addressed through
 the use of a tool named TEMPO in the subsequent chapter of this thesis.
 
 
-In addition to identifying an optimal dataflow for the common
+In addition to identifying a utilization optimal dataflow for the common
 case of convolutions, the overlap between convolutions with a kernel size of
 (1,1) and general matrix multiplication will be examined as a means to enable
 the execution of arbitrary convolution layers. This will allow HERO to run any
 convolution layer, regardless of the set of convolution layer configurations it
 is optimized for.
 
-After identifying the optimal loop unroll targets and factors for the kernel
-loops, the next step is to analyze the reuse behavior of the data elements in
-the selected dataflow. This can be accomplished by applying the method described
-in \cite{meeus}. Once the reuse behavior has been determined, the hardware
-implementation taxonomy from \cite{maestro} can be employed to determine the
+Despite the incomplete pruning of the dataflow design space present in this chapter, identifying loop
+unroll targets and loop unroll factors for kernel loops is sufficient for reuse
+analysis of the different data elements using the polyhedral approach in
+\cite{meeus}. Once the reuse behavior has been determined, the hardware
+implementation taxonomy from \cite{maestro} can be applied to identify the
 most suitable hardware implementation for the specific reuse behavior found in
 the selected dataflow.
 
-
-This chapter is broken down as follows we will first prune the dataflow design
-space dimensions in \autoref{chap:dda:dataflow_dse:pruning} by determining the
-appropriate loop unroll targets and loop unroll factors using insights acquired
-from \ac{CIGAR} a convolutional network analysis tool discussed in
+This chapter is organized as follows: First CIGAR, a convolutional network analysis tool is discussed in
 \autoref{chap:dda:dataflow_dse:pruning:cigar} along with an overview of the TIMM
-library of networks. Then, given the complexity of exploring loop unroll factors
-and loop axis mapping, an automated accelerator Template optimizer TEMPO
-introduced in the next chapter \autoref{chap:dataflow_dse:exploring} is used to
-explore the the aforementioned design space dimensions to produce utilization
-optimized accelerator template configurations. An exploration of the overlap
-between (1, 1) convolutions and GEMM to extend support to arbitrary convolutions
-is discussed in \autoref{chap:dda:dataflow_dse:GEMM_mode}. Upon identifying the
-loop unroll targets and loop unroll factors for kernel loops this chapter
-explores the hardware implementation space based on the reuse behavior of the
-chosen dataflow in \autoref{chap:dda:hw_dse}. In \autoref{chap:dda:hw_dse:final}
-the final HERO architectural template is presented.
+library of networks. Then the dataflow design
+space dimensions will be pruned by determining the
+appropriate loop unroll targets and loop unroll factors for kernel loops using insights acquired
+from \ac{CIGAR} in \autoref{chap:dda:dataflow_dse:pruning}.
+
+% As mentioned earlier, given the complexity of exploring loop unroll factors
+% and loop axis mapping, an automated accelerator Template optimizer TEMPO
+% introduced in the next chapter \autoref{chap:dataflow_dse:exploring} is used to
+% explore the the remaining dataflow design space dimensions to produce utilization
+% optimized accelerator template configurations.
+
+To extend support to arbitrary convolutions/ linear layers An exploration of the overlap
+between (1, 1) convolutions and GEMM to extend support is discussed in
+\autoref{chap:dda:dataflow_dse:GEMM_mode}. 
+
+Upon identifying the loop unroll targets of the convolution dataflow and loop
+unroll factors for kernel loops this chapter concludes with explores the
+hardware implementation space based on the reuse behavior of the chosen dataflow
+in \autoref{chap:dda:hw_dse}. The final HERO
+architectural template is presented in \autoref{chap:dda:hw_dse:final}.
 
 \section{Pruning the dataflow design space with CIGAR}
 \label{chap:dda:dataflow_dse:pruning}
@@ -230,11 +239,21 @@ Models (timm) package in \cite{timm}.
 \subsection{Pruning the Dataflow Design Space using CIGAR}
 \label{chap:dda:dataflow_dse:pruning:applying_it}
 
+Using CIGAR, the process of pruning the dataflow design space can begin. As
+mehtioned earlier from \cite{dnn_df_overrated}, the available dataflow design
+space dimensions of the convolution operation are (1) unroll targets (2) loop
+unroll factors (3) spatial axis mapping. We can prune the design space partially by
+identifying loop unroll targets as well as loop unroll factors for the kernel
+loops of the dataflow. This partial pruning will enable the reuse
+analysis presented in \autoref{chap:dda:dataf} necessary for the application of the hardware implementation taxonomy
+provided by \cite{maestro}.
+
 \subsubsection{Loop Unroll Targets}
 \label{chap:dda:dataflow_dse:pruning:applying_it:loop_unroll_targets}
 
 The choice of loop unroll targets affects the stationarity of the data elements
-in the convolution operation. For example, assuming a convolution layer with a
+in the convolution operation within compute elements of a Convolution
+accelerator. For example, assuming a convolution layer with a
 kernel size of (2, 2), if we unroll the F, C, KY, KX loops by a factor of 2,
 weight element batches of size 16 will be loaded on to the chip in order to
 compute the output feature map. These weight will remain stationary until all
@@ -280,34 +299,39 @@ more layers within an network. These findings indicate that all elements can
 benefit from stationarity depending on the network and even the layer position
 within a network. For an accelerator with a fixed dataflow the choice of
 dataflow and hence which loops to unroll is heavily influenced by the target
-networks expected to run on the accelerator. The most flexible dataflow in this
-case is a weight stationary dataflow in which the F, C, KY and KX loops are the
-unroll targets. This is due to the overlap between weight stationary under (1, 1)
-convolutions and GEMM discussed in
-\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}. 
+networks expected to run on the accelerator. The most appropriate dataflow in this
+case is weight stationary dataflow which takes advantage of the comparatively higher weight
+reuse in the earlier layers of most networks by keeping weights stationary
+within the compute elements of HERO. Weight stationary arises from choosing the F, C, KY and KX loops are the
+unroll targets. Additionally, the overlap between weight stationary under (1, 1)
+convolutions and GEMM (discussed in 
+\autoref{chap:dda:dataflow_dse:GEMM_mode:conv_gemm_equiv:proof}) enables support for arbitrary convolution and
+linear layers via transformation in \cite{cafe_con_troll}.
 
-The choice
-of a weight stationary dataflow lends itself well to \ac{GEMM} given the
-similarities in the loop structure with regards to F and C loops for both
-applications. Furthermore, a weight stationary based dataflow allows support for
-linear layers through this overlap which are quite prevalent in many modern
-networks as seen in \autoref{fig:cigar_library_overview}.b. Given the
-flexibility of weight stationary, F, C, KY and KX loops will be the loop unroll
-targets. This choice of dataflow effectively creates two operational modes. A
-direct mode where convolution operations with kernels that are supported
-directly are executed on the accelerator and an GEMM mode where kernels that
-are not supported directly are supported by lowering/ lifting followed by
-conversion of the proceeding GEMM operation into a (1, 1) convolution. A full
-explanation of GEMM mode is given in
+% The choice
+% of a weight stationary dataflow lends itself well to \ac{GEMM} given the
+% similarities in the loop structure with regards to F and C loops for both
+% applications. Furthermore, a weight stationary based dataflow allows support for
+% linear layers through this overlap which are quite prevalent in many modern
+% networks as seen in \autoref{fig:cigar_library_overview}.b. Given the
+% flexibility of weight stationary, F, C, KY and KX loops will be the loop unroll
+% targets. 
+
+This choice of dataflow effectively creates two operational modes. A direct mode
+where convolution operations with kernels that are supported directly are
+executed on the accelerator and a GEMM mode where kernels that are not supported
+directly are supported by a data transformation technique from
+\cite{cafe_con_troll} followed by conversion of the proceeding GEMM operation
+into a (1, 1) convolution. A full explanation of GEMM mode is given in
 \autoref{chap:dda:dataflow_dse:GEMM_mode}. 
 
-Note that convolution layers with
-non (1, 1) strides are executed under GEMM mode. Supporting convolution layers
-with non (1, 1) strides directly is left as part of future work. From
-\autoref{fig:kernel_stats:strides} (1, 1) strides are present in ~95\% of
-convolution layers so the implications of indirect support of non (1, 1) strides
-will likely be negligible when assessing the overall performance and energy
-efficiency of an accelerator implementing the aforementioned operation modes.
+Note that convolution layers with non (1, 1) strides are executed under GEMM
+mode. Supporting convolution layers with non (1, 1) strides directly is left as
+part of future work. From \autoref{fig:kernel_stats:strides} (1, 1) strides are
+present in ~95\% of convolution layers so the implications of indirect support
+of non (1, 1) strides via GEMM mode will likely be negligible when assessing the overall
+performance and energy efficiency of an accelerator implementing the
+aforementioned operation modes.
 
 % \clearpage
 \begin{figure}
@@ -351,7 +375,7 @@ the KY and KX loops more difficult to answer.
 From \autoref{fig:kernel_stats:freq}.a (1, 1) and (3, 3) kernel sizes dominate in
 comparison to all other kernel sizes. This renders the choice of keeping KY and
 KX loops folded impractical because if support is extended to an arbitrary K x K
-kernel while KY and KX loops are folded the onboard storage for weights would
+kernel while keeping KY and KX loops are folded, the onboard storage for weights would
 then need to be at least $K^2$ where $K$ is the upper bound of kernels supported
 directly to avoid excessive weight fetches from DRAM. Unfortunately, for ~80\% of
 the layers in the network, that additional storage area would be significantly
@@ -361,10 +385,9 @@ and KX loops need to be unrolled fully. However, this begs the question, what
 kernel sizes should be assumed when unrolling the KY and KX loops? Any kernel
 sizes assumed when unrolling KY and KX loops become kernel sizes that are
 supported directly. Kernel sizes that are not assumed when unrolling KY and KX
-loops can be supported indirectly through a lowering/lifting approach similar
-to the ones discussed in \autoref{chap:background:intro}. This means that (1, 1)
-kernels are assumed when unrolling KY and KX loops, hence they have to be
-supported directly. Other kernel sizes to support directly can be derived from
+loops can be supported via GEMM mode. This means that (1, 1)
+kernels are supported directly by necessity since they are what enable GEMM mode
+to begin with. Other kernel sizes to support directly can be derived from
 \autoref{fig:kernel_stats:freq}. In \autoref{fig:kernel_stats:freq}.b many
 networks contain at least 1 convolution layer that is not (1, 1) or (3, 3). For
 example a (7, 7) kernel exists in around ~20\% of networks. The reason for the
@@ -372,7 +395,6 @@ prevalence of (7, 7) convolutions originates from the historical use of resnet
 \cite{resnet} as a feature extractor for a significant portion of networks
 analyzed by CIGAR.
 
-\clearpage
 \begin{figure}
     \centering
     \subfigure[]{\includegraphics[width=0.495\textwidth]{Plots/kernel/freq.pdf}}
@@ -391,19 +413,25 @@ Adjusting for kernel frequency in \autoref{fig:kernel_vs_mac}.b, (1, 1) and (3, 
 kernels dominate all other kernel sizes in terms of number of MACs in most
 network layers. From \autoref{fig:kernel_vs_mac} it is clear that (1, 1) and (3, 3)
 kernels need to be supported directly while all other kernels need to be
-supported indirectly through a lifting/lowering approach like those discussed in
-\autoref{chap:background:intro}. This limits the space of possible unroll
-factors for the loop unroll targets and thus prunes the dataflow design space.
-Supporting kernels indirectly will lead to an expansion of the IFmap due to the
-duplication introduced by lowering, however that expansions is negligible given
-the relative infrequency of non (1, 1) and (3, 3) layers. What remains of the dataflow
-design space under weight stationary is 1) the unroll factors for F and C loops
-and 2) the axis mapping for F, C, KY and KX loops for the 2 spatial axis of a
-convolution accelerator. To explore the what remains of the dataflow design
-space an automated dataflow exploration tool will be introduced and discussed in
-\autoref{chap:arch_dimensioning}.   
+supported via GEMM mode. 
 
-\clearpage
+This limits the space of possible unroll
+factors for the loop unroll targets and thus prunes the dataflow design space.
+Supporting kernels via GEMM mode lead to an expansion of the IFmap due to the
+duplication introduced by lowering, however that expansions is negligible given
+the relative infrequency of non (1, 1) and (3, 3) layers. 
+
+% What remains of the dataflow
+% design space under weight stationary is 1) the unroll factors for F and C loops
+% and 2) the axis mapping for F, C, KY and KX loops for the 2 spatial axis of a
+% convolution accelerator. However, since the design space has been partially
+% pruned by selection the loop unroll targets and the loop unroll factors for the
+% kernel loops, an analysis of reuse is possible via the approach in \cite{meeus}. 
+
+% To explore the what remains of the dataflow design
+% space an automated dataflow exploration tool will be introduced and discussed in
+% \autoref{chap:arch_dimensioning}.   
+
 \begin{figure}
     % Todo: update figure titles to reflect origins of statistics
     \centering
@@ -413,76 +441,128 @@ space an automated dataflow exploration tool will be introduced and discussed in
     \label{fig:kernel_vs_mac}
 \end{figure}
 
-% TODO: Introduce tiling discussion here using tiling figure
-Depending on the chosen unroll factors, the architecture implementing the unroll
-factors in effect tiles the weight tensor and processes it tile by tile in the
-convolution operation. An
-illustration of this concept is present in
-\autoref{fig:tiling_connection_to_unroll_targets}. Loop unroll factors determine
-PE allocation 
-Tiling of a weight tensor arises from the processing of filters, channels and
-kernels in batches whose size depend on the unroll factors. 
-Padding of a weight tensors is performed wherever the chosen PE
-binding for filter or channel loops exceeds the number of channels and filters
-being processed in the tile. In
-\autoref{fig:tiling_connection_to_unroll_targets} a weight tensor of dimension
-$R^{6\times 3\times 2\times 2}$ is tiled with $F_{unroll} = 4$, $C_{unroll}=8$,
-$K_{unroll}=2$ with kernel loops mapped to the horizontal axis alongside channel
-loops. Additional padding in the horizontal and vertical axis is added given
-excess allocation of PEs in both spatial axis in all tiles except the top left
-one. With this representation, the accelerator processes the weight tensors as a
-series of tiles to produce an output featuremap.    
-This representation of the weight tensor as a series of tiles processed by
-the architecture is useful when considering the scheduling of a convolution
-operation in a network. Tiling of weights and their effect on scheduling is
-discussed in \autoref{chap:net_compile}.
+% % TODO: Introduce tiling discussion here using tiling figure
+% Depending on the chosen unroll factors, the architecture implementing the unroll
+% factors in effect tiles the weight tensor and processes it tile by tile in the
+% convolution operation. An
+% illustration of this concept is present in
+% \autoref{fig:tiling_connection_to_unroll_targets}. Loop unroll factors determine
+% PE allocation 
+% Tiling of a weight tensor arises from the processing of filters, channels and
+% kernels in batches whose size depend on the unroll factors. 
+% Padding of a weight tensors is performed wherever the chosen PE
+% binding for filter or channel loops exceeds the number of channels and filters
+% being processed in the tile. In
+% \autoref{fig:tiling_connection_to_unroll_targets} a weight tensor of dimension
+% $R^{6\times 3\times 2\times 2}$ is tiled with $F_{unroll} = 4$, $C_{unroll}=8$,
+% $K_{unroll}=2$ with kernel loops mapped to the horizontal axis alongside channel
+% loops. Additional padding in the horizontal and vertical axis is added given
+% excess allocation of PEs in both spatial axis in all tiles except the top left
+% one. With this representation, the accelerator processes the weight tensors as a
+% series of tiles to produce an output featuremap.    
+% This representation of the weight tensor as a series of tiles processed by
+% the architecture is useful when considering the scheduling of a convolution
+% operation in a network. Tiling of weights and their effect on scheduling is
+% discussed in \autoref{chap:net_compile}.
 
-\begin{figure}[]
-    \centering
-    \includegraphics[scale=0.5]{fig/tiling.pdf}
-    \caption{An illustration of weight tiling by loop unroll factors}
-    \label{fig:tiling_connection_to_unroll_targets}
-\end{figure}
+% \begin{figure}[]
+%     \centering
+%     \includegraphics[scale=0.5]{fig/tiling.pdf}
+%     \caption{An illustration of weight tiling by loop unroll factors}
+%     \label{fig:tiling_connection_to_unroll_targets}
+% \end{figure}
 
-In summary, we propose to take advantage of the high weight reuse observed in
-many networks by using a weight stationary approach. Weight stationary sets the
+
+\subsection{A note on accelerator Spatial Axis mapping}
+\label{chap:dda:dataflow_dse:GEMM_mode:axis_mapping}
+
+While determining spatial axis mapping is part of the second part of pruning of the
+dataflow design space, spatial axis mapping has implications regarding the
+effective unroll factors for the F and C loops when the share the same spatial
+axis as the unrolled kernel loops. These implications are discussed in this
+subsection. 
+
+When determining axis mapping, F and C loops are assumed to be bound to an
+accelerator's vertical and horizontal spatial axis. Utilizing both axis results
+in better overall on-chip area utilization assuming conventional 2 dimensional
+constraints for chip fabrication. Mapping all loops to the same axis can provide
+the most flexibility with regards to the allocation of PEs as a resource to
+process different filters, channels and kernels. However, this complicates on
+chip connectivity. KY and KX loops can then be
+bound to either the horizontal or vertical axis of an accelerator based on the
+variable $K_{axis}$.  Depending on which axis KY and KX loops are mapped, the
+effective unroll factors for F and C loops ($F_{eff}$ and $C_{eff}$) are
+changed. If the unrolled kernel loops share the same axis as the C loops, the
+effective $C_{unroll}$ factor for the C loops is then $\lfloor
+\frac{C_{unroll}}{K_{unroll}} \rfloor$ which means the effective C unroll factor
+decreases depending on the size of the kernel unroll factor. This decrease in
+effective unroll factor arises from the fact that, within the same axis as the C
+loops, compute resources are allocated to process a single $K^2_{unroll}$ kernel. This
+results in a decrease of compute resources available to process other channels
+concurrently. The same logic applies to F loops if the Kernel loops are mapped
+to the same axis vertical axis as they are. This idea is presented in
+\autoref{math:effective_unroll_factors_c} and
+\autoref{math:effective_unroll_factors_f}. In both equations $F_{unroll}$ and
+$C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
+
+
+\begin{align}
+    \begin{gathered}
+        C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Vertical\end{cases} \\
+        \end{gathered}
+    \label{math:effective_unroll_factors_c}
+\end{align}
+\begin{align}
+    \begin{gathered}
+        F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Vertical\\ F_{unroll} & K_{axis} = Horizontal\end{cases} \\
+        \end{gathered}
+    \label{math:effective_unroll_factors_f}
+\end{align}
+
+
+In summary, by selecting weight stationary as the chosen dataflow for HERO we
+can 1) take advantage of the high weight reuse observed in
+many networks and 2) extend support
+to arbitrary convolution/ linear layers via GEMM mode which arises by
+reinterpreting (1, 1) convolution as GEMM operations. Weight stationary sets the
 loop unroll targets to the F, C, KY, and KC loops, with the assumption that the
-stride size is limited to (1, 1) due to its prevalence. By unrolling the F, C
+stride size is limited to (1, 1) due to its substantial prevalence. By unrolling the F, C
 loops we can maximize weight reuse as well as parallelize layers that have been
-converted to GEMM. 
+converted to GEMM.
 
-Additionally, we also need to unroll the KY and KX loops to avoid having to
-store weights on-chip at a large scale, as it is an inefficient use of memory.
-Given the high frequency of (1, 1) kernel sizes, we need to unroll the KY, KX
-loops to this minimum value. Additionally, (1, 1) kernel sizes form the basis of
-GEMM mode which strengthens the argument for direct support (1, 1) kernels.
-Additionally, by considering the frequency of occurrence and the number of MACs,
-we also unroll the KY and KX loops to (3, 3).
+Keeping KY and KX loops folded is impractical with respect to efficient on-chip
+memory utilization because the vast majority of convolution layers have (1, 1)
+kernel sizes. By considering the frequency of occurrence and the number of MACs,
+we choose to unroll the KY and KX loops to (3, 3). Additionally, since (1, 1)
+kernel sizes form the basis of GEMM mode which strengthens the argument for
+direct support (1, 1) kernels.
 
-The unroll factor for F and C loops remains open, and will be further explored
-in a later chapter of this thesis using TEMPO. The act of unrolling these loops
-effectively tiles the weight tensor, allowing HERO to process a layer as a
-sequence of weight tiles. This raises the question of weight tile scheduling,
-which will be discussed in \autoref{chap:net_compile}.
+The next section examines the theoretical underpinnings of the overlap between
+(1, 1) convolutions and GEMM and how support can be extended to arbitrary
+convolutions through this overlap when used in tandem with data transformation
+approaches from \cite{cafe_con_troll}.
+
+% The unroll factor for F and C loops remains open, and will be further explored
+% in a later chapter of this thesis using TEMPO. The act of unrolling these loops
+% effectively tiles the weight tensor, allowing HERO to process a layer as a
+% sequence of weight tiles. This raises the question of weight tile scheduling,
+% which will be discussed in \autoref{chap:net_compile}.
 
 \clearpage 
 
 \section{Increasing Generality of a Direct Convolution Accelerator}
 \label{chap:dda:dataflow_dse:GEMM_mode}
 
-To allow HERO to run arbitrary convolution layers, the overlap between
-convolutions with a kernel size of (1,1) and general matrix multiplication will
-be examined in this section. This overlap enables HERO to support arbitrary
-convolution layers by first interpreting them as GEMM operations then
-reinterpreting them against as (1, 1) convolutions which, from the previous
-section, are one of the kernel sizes directly supported by HERO. This
-operational mode is called GEMM/ Indirect mode.  
-GEMM mode extends support to convolution layers with kernel sizes that are not
-directly supported by an convolution accelerator. It does this by establishing a
-layer equivalence relationship between unsupported layers and supported layers.
+GEMM mode allows HERO to support arbitrary convolution operations by first
+interpreting them as GEMM operations via one of the data transformation
+approaches outlined in \cite{cafe_con_troll} then reinterpreting them as (1, 1)
+convolutions which, from the previous section, are one of the kernel sizes
+directly supported by HERO. This section discussess the overlap between GEMM and
+(1, 1) convolutions which forms the bases of GEMM mode in HERO. 
+
 Convolution operations can be converted into general matrix multiplication
 through the use of lowering and lifting techniques like Im2col discussed in
-\cite{cafe_con_troll} and in the \autoref{chap:background:intro}. This approach
+\cite{cafe_con_troll}. This approach
 to supporting arbitrary convolution operations would still require a matrix
 multiplication accelerator. To support matrix multiplication within a
 convolution accelerator we can either:
@@ -582,11 +662,6 @@ last dimension and then transpose it.
 \end{figure}
 
 
-
-
-
-
-
 \subsection{Layer Equivalence}
 \label{chap:dda:dataflow_dse:GEMM_mode:layer_equivelence}
 
@@ -666,7 +741,8 @@ final OFmap in \autoref{math:conv2gemm2conv:lift}.
 \subsection{Layer Dimensionality}
 \label{chap:dda:dataflow_dse:GEMM_mode:layer_dimentionality}
 
-Whether or not a convolution layer's kernel size is supported directly has an effect on the assumed
+A convolution layer's kernel size being supported directly or
+through GEMM mode has an effect on the assumed
 dimensionalities of the IFmap and Weight tensors as well as the kernel loops
 unroll factor K. Kernels are assumed to be symmetric so both kernel KY and KX
 loops and share a single unroll factor $K_{unroll}$. If the convolution layer's
@@ -699,48 +775,8 @@ channel size $\hat{Z}$ values are reflected in \autoref{math:layer_equivelence}.
     \label{math:layer_equivelence}
 \end{align}
 
-\subsection{Accelerator Spatial Axis mapping}
-\label{chap:dda:dataflow_dse:GEMM_mode:axis_mapping}
-
-When determining axis mapping, F and C loops are assumed to be bound to an
-accelerator's vertical and horizontal spatial axis. Utilizing both axis results
-in better overall on-chip area utilization assuming conventional 2 dimensional
-constraints for chip fabrication. Mapping all loops to the same axis can provide
-the most flexibility with regards to the allocation of PEs as a resource to
-process different filters, channels and kernels. However, this complicates on
-chip connectivity. KY and KX loops can then be
-bound to either the horizontal or vertical axis of an accelerator based on the
-variable $K_{axis}$.  Depending on which axis KY and KX loops are mapped, the
-effective unroll factors for F and C loops ($F_{eff}$ and $C_{eff}$) are
-changed. If the unrolled kernel loops share the same axis as the C loops, the
-effective $C_{unroll}$ factor for the C loops is then $\lfloor
-\frac{C_{unroll}}{K_{unroll}} \rfloor$ which means the effective C unroll factor
-decreases depending on the size of the kernel unroll factor. This decrease in
-effective unroll factor arises from the fact that, within the same axis as the C
-loops, compute resources are allocated to process a single $K^2_{unroll}$ kernel. This
-results in a decrease of compute resources available to process other channels
-concurrently. The same logic applies to F loops if the Kernel loops are mapped
-to the same axis vertical axis as they are. This idea is presented in
-\autoref{math:effective_unroll_factors_c} and
-\autoref{math:effective_unroll_factors_f}. In both equations $F_{unroll}$ and
-$C_{unroll}$ are the unroll factors for F and C loops assuming $KY=KX=K=1$.
-
-
-\begin{align}
-    \begin{gathered}
-        C_{eff} = \begin{cases} \lfloor \frac{C_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = horizontal\\ C_{unroll} & K_{axis} = Vertical\end{cases} \\
-        \end{gathered}
-    \label{math:effective_unroll_factors_c}
-\end{align}
-\begin{align}
-    \begin{gathered}
-        F_{eff} = \begin{cases} \lfloor \frac{F_{unroll}}{K^{2}_{unroll}} \rfloor & K_{axis} = Vertical\\ F_{unroll} & K_{axis} = Horizontal\end{cases} \\
-        \end{gathered}
-    \label{math:effective_unroll_factors_f}
-\end{align}
-
-\subsection{Overhead of lowering and lifting}
-\label{chap:dda:dataflow_dse:GEMM_mode:overhead}
+% \subsection{Overhead of lowering and lifting}
+% \label{chap:dda:dataflow_dse:GEMM_mode:overhead}
 
 Lowering and lifting introduce additional overheads with regards to latency and
 tensor sizing. The latency for performing balanced lowering and lifting is
@@ -770,9 +806,9 @@ weight stationary is the most flexible dataflow choice given the overlap between
 1x1 convolutions and GEMM discussed in
 \autoref{chap:dda:dataflow_dse:GEMM_mode}. This gives rise to a weight
 stationary dataflow based accelerator with two operational modes, direct Mode
-where a subset of possible kernel sizes are supported and GEMM/ Indirect mode
-where all other kernel sizes and strides are supported via the lowering/ lifting
-based approach. 
+where a subset of possible kernel sizes are supported directly and GEMM mode where all
+other kernel sizes and strides are supported via the lowering/ lifting based
+approach. 
 
 In this section we will determine an appropriate on chip communication
 infrastructure as well as the memory hierarchy for HERO using the hardware
@@ -827,7 +863,7 @@ OFmaps and weights. For each of those memory access has a temporal index (it's l
 iteration domain vector $[f, c, y, x, ky, kx]$. A mapping exists between each
 iteration domain vector and MAC statement's memory accesses.  
 Temporal reuse analysis for each of the memory accesses in the MAC statements is performed on the loops in \autoref{lst:conv_loops_unrolled}. The different
-operational modes (Indirect/ Direct) are analyzed concurrently using the same loop
+operational modes (Direct/ GEMM) are analyzed concurrently using the same loop
 representation as they only differ based on whether we set the width loop
 upper bound to 1, and set the kernel loops upper bounds to 1. Since
 kernel loops are always unrolled fully this sets KY\_T and KX\_T to 1. We can
@@ -836,7 +872,9 @@ analyze temporal reuse in the dataflow represented in
 to the aforementioned dataflow iteration domain and access functions.
 Given iteration domain restrictions imposed by the polyhedral model,
 \autoref{lst:poly:analysis} assumes unroll factors F\_T =
-C\_T = 4. Setting F\_T and C\_T to concrete values does not overall reuse behavior during temporal reuse analysis.
+C\_T = 4. Setting F\_T and C\_T to concrete values does not change the reuse
+behavior during temporal reuse analysis and conclusions regarding temporal reuse
+that arise from setting F\_T = C\_T = 4 can still be generalized to other values.
 
 \clearpage
 \begin{lstlisting}[caption=Polyhedral analysis of reuse in iscc for convolution loops, label={lst:poly:analysis}]
@@ -954,13 +992,12 @@ same kernel. Proof of the existence of that temporal reuse is given in the polyh
     IFmap_XY_REUSE;
     [Y, X, KY, KX] -> { 
         S[y, x, ky, kx] -> S[y', x', ky' = (y - y') + ky, kx' = (x - x') + kx] : 
-            ... y' > y and (y + ky) -KY < y' <= (y + ky) and (x + kx) -KX < x' <= (x + kx) ...;
-    }
+            ... y' > y and (y + ky) -KY < y' <= (y + ky) and (x + kx) -KX < x' <= (x + kx) ...;}
 \end{lstlisting}
 
 \begin{figure}[]
     \centering
-    \includegraphics[scale=0.4]{fig/xy_reuse.pdf}
+    \includegraphics[scale=0.8]{fig/xy_reuse.pdf}
     \caption{IFmap Reuse Behavior w.r.t individual feature map channels}
     \label{fig:IFmap_xy_reuse}
 \end{figure}
@@ -1184,7 +1221,7 @@ the size of the kernel being processed in direct mode.
 Each data element streamed from the IFmap depends on an access function that
 also takes the same variables $i$ and $t$. Depending on the port index $i$ the
 access function for each port is composed of an initial offset in the IFmap and
-the current cycle count $t$. A total of $StreatSize$ elements are streamed the IFmap
+the current cycle count $t$. A total of $StreamSize$ elements are streamed the IFmap
 memory hierarchy. The stream size is a function of the IFmap dimensions
 and the kernel Size. 
 
@@ -1217,7 +1254,8 @@ function $F(i,t)$. These time shifts are represented in the new delayed access
 function $A_\Delta(i, t)$.
 
 \begin{gather}
-    A_\Delta(i,t) =  C_in^2+Y_in+(i - \lfloor \frac{i}{K} \rfloor K) + t- i\\
+    A_\Delta(i,t) =  C_in^2+Y_in+X_i + t- i\\
+    A_\Delta(i,t) =  \lfloor \frac{\lfloor \frac{i}{K} \rfloor}{K} \rfloor^2+(\lfloor \frac{i}{K} \rfloor ) \bmod K + \underbrace{(i - \lfloor \frac{i}{K} \rfloor K)}_{X'_i} + t - i\\
     A_\Delta(i,t) =  \lfloor \frac{\lfloor \frac{i}{K} \rfloor}{K} \rfloor^2+(\lfloor \frac{i}{K} \rfloor ) \bmod K + \underbrace{(- \lfloor \frac{i}{K} \rfloor K)}_{X'_i} + t\\
     % \hat{OFmap}(j) = \displaystyle\sum\limits_{i=0}^{ub(i)} A_\Delta(i, j+i)
 \end{gather}

@@ -130,7 +130,7 @@ energy efficiency of different configurations.
 
 \begin{figure}[!ht]
   \centering
-  \includegraphics[scale=1]{fig/intro.pdf}
+  \includegraphics[scale=0.8]{fig/intro_alt.pdf}
   \caption{Visual illustration of the solution overview}
   \label{fig:intro}
 \end{figure}
@@ -145,24 +145,31 @@ layers in transformer networks \cite{transformer_model} as well as fully
 connected layers in many CNNs like Resnet \cite{resnet}. Extending support to
 GEMM should not detract from the primary goal of accelerating convolutions since
 they represent a larger portion of most network's runtime.  
-HERO is derived from a data aware design process. It is optimized for the common
-case of convolutions in the literature by supporting these convolution
-configurations directly without the need to convert them into GEMM using data
-transformation techniques like Im2Col.
 
 
 HERO's design is data-aware, optimized for the common case of convolutions by
 supporting common configurations directly without the need for conversion
 techniques like Im2Col. To identify the common case of convolutions, this thesis
 introduces CIGAR, a tool that can gather configuration statistics for
-convolution and linear layers in a library of DNNs written in \cite{pytorch}. CIGAR can
-analyze a network or a library of networks and reveal the most common
+convolution and linear layers in a library of DNNs written in \cite{pytorch}.
+CIGAR can analyze a network or a library of networks and reveal the most common
 convolution layer configurations across the entire library. The networks
-analyzed by CIGAR are provided by the \cite{timm} python library of networks, which has
-over 695 networks written in PyTorch available for analysis. Any layer configurations
-not supported directly by HERO are converted into equivalent GEMM operations
-using data transformation techniques like Im2Col
+analyzed by CIGAR are provided by the \cite{timm} python library of networks,
+which has over 695 networks written in PyTorch available for analysis. Any layer
+configurations not supported directly by HERO are converted into equivalent GEMM
+operations using data transformation techniques like Im2Col
 \cite{cafe_con_troll}.
+
+To derive HERO's architecture this thesis leverages the work of
+\cite{dnn_df_overrated} to first define the dataflow design space of the
+convolution operation. Combining the insights gained from CIGAR with the
+dataflow design space from \cite{dnn_df_overrated} yields a pruned dataflow
+design space ready for reuse analysis via the polyhedral model as defined in
+\cite{meeus}. The approach in \cite{meeus} enables the identification of the
+reuse and communication behavior of all data elements present in the convolution
+operation. Understanding the reuse behavior allows us to apply the hardware
+implementation taxonomy from \cite{maestro} to arrive at the final HERO
+architectural template.
 
 
 HERO is more than just a single architecture; it represents a configurable

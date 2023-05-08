@@ -346,8 +346,8 @@ kernel remain stationary throughout the computation of an output feature map
 until a new tile of channels C\_T is loaded into the accelerator. Once the
 weights within a particular channel and filter group are used to produce an
 output feature map they are discarded and are only loaded again when computing
-the same layer for a new input image. The choice of loop unroll targets, factors
-and loop ordering in listing \ref{lst:conv_loop_ws} creates a common dataflow in
+the same layer for a new input image. The choice of loop unroll targets and factors
+in listing \ref{lst:conv_loop_ws} creates a common dataflow in
 the literature called weight stationary.
 
 \begin{minipage}{\linewidth}
@@ -426,13 +426,14 @@ tandem with the dataflow taxonomy to define HERO's implementation in hardware.
 
 The full hardware taxonomy from \cite{maestro} is illustrated in figure
 \autoref{fig:hw_taxonomy}. Depending on the dataflow selected using the dataflow
-taxonomy (1) loop ordering (2) unroll targets (2) loop unroll factors. The
-implementation options are derived based on the type of reuse present in the
+taxonomy (1) unroll targets (2) loop unroll factors (3)
+spatial axis mapping, the
+implementation options are then derivable based on the type of reuse present in the
 dataflow. Following the hardware implementation taxonomy presented in in
 \cite{maestro}, we can classify the available hardware implementation options
-based on the the type of reuse is spatial where a data element is read and used
-in the same cycle or temporal where a data element is read in one cycle and
-reused after several cycles. Depending on the nature of the reuse, if it is read
+based on whether the type of reuse is spatial, where a data element is read and used
+in the same cycle in multiple compute elements in the architecture, or temporal, where a data element is read in one cycle and
+reused after several cycles in the same compute element. Additionally, depending on the nature of the reuse, if it is read
 or read modify write, there are several options for supporting the communication
 inferred from that reuse type. To deduce the type of reuse and overall
 communication behavior for each data element in any dataflow we can use the
