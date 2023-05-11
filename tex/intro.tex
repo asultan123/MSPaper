@@ -30,8 +30,7 @@ set of advantages and trade-offs, and a careful analysis of the design space is
 necessary to decide on the optimal architecture for a specific use case.
 Additionally, optimizing the memory hierarchy and communication patterns between
 the accelerator and other system components is also crucial for achieving high
-performance. The use of specialized memory hierarchies, such as on-chip buffers,
-can be effective in reducing data movement and improving energy efficiency.
+performance as well as energy efficiency. 
 
 \section{Convolution accelerators}
 \label{chap:intro:cnn_accelerator_design_approaches}
@@ -114,12 +113,16 @@ providing crucial insights on how to configure the accelerator's memory
 hierarchy and on-chip network structure to optimize performance and energy
 efficiency. To cater to the wide variety of DNNs, the architecture must be
 configurable at compile-time to adapt to changing trends in network
-architectures. Additionally, flexible on-chip data movement is necessary to map
+architectures. 
+
+Additionally, flexible on-chip data movement is necessary to map
 diverse layers to the architecture. However, since a static communication and
 memory hierarchy structure will not enable that flexibility, the architecture
 should incorporate programmable on-chip data movement primitives that can be
 programmed using a network compiler, generating data movement instructions based
-on the layer configuration within the network. To evaluate the performance and
+on the layer configuration within the network. 
+
+To evaluate the performance and
 energy metrics of the accelerator, a cycle-accurate simulator should be
 developed, which will enable the assessment of different configurations of the
 architecture on a wide variety of networks and evaluate the performance and
@@ -151,9 +154,7 @@ configurations directly without the need to convert them into GEMM using data
 transformation techniques like Im2Col.
 
 
-HERO's design is data-aware, optimized for the common case of convolutions by
-supporting common configurations directly without the need for conversion
-techniques like Im2Col. To identify the common case of convolutions, this thesis
+To identify the common case of convolutions, this thesis
 introduces CIGAR, a tool that can gather configuration statistics for
 convolution and linear layers in a library of DNNs written in \cite{pytorch}. CIGAR can
 analyze a network or a library of networks and reveal the most common
@@ -177,7 +178,7 @@ running different DNNs. TEMPO takes advantage of CIGAR's model dimension
 collection to extract configurations of convolution layers and applies the
 aforementioned analytical models to them. TEMPO provides the initial
 architecture dimensions for the HERO template in order to get the first
-estimates for other performance metrics. TEMPO only defines layer dimensions for
+estimates for other performance metrics. TEMPO only defines architecture dimensions for
 channel and filter concurrency. A separate analysis of memory usage for
 different convolution elements is provided in this thesis. The networks  used by
 TEMPO is the entire TIMM library to find the most general architecture
@@ -199,7 +200,7 @@ models to SAM descriptors, which drive on-chip data movement.
 
 
 To evaluate the performance and energy efficiency of HERO, a cycle accurate
-simulation platform is developed. This simulation platform is driven by a
+simulation platform was developed. This simulation platform is driven by a
 SystemC simulation backend and a Python evaluation frontend. The simulation
 platform allows for the evaluation of different configurations of HERO on a wide
 variety of networks. An analysis of an optimal HERO configuration when running

@@ -10,7 +10,7 @@ architecture that can support a wide range of networks while maintaining
 efficiency when running common configurations of the convolution operation. This
 thesis introduces the Hybrid GEMM and Direct Convolution Accelerator (HERO), a
 neural network accelerator that preserves computation generality by supporting
-matrix multiplication and maintaining computational efficiency when running
+matrix multiplication while maintaining computational efficiency when running
 common configurations of the convolution operation. Additionally, this thesis
 also introduces a toolchain that aids in the design, dimensioning, and
 programming of HERO. HERO's design is data-aware, optimized for the common case
@@ -21,10 +21,9 @@ gather configuration statistics for convolution and linear layers in a library
 of DNNs written in PyTorch. Using the HERO accelerator TEMPlate Optimizer
 (TEMPO), this thesis finds utilization optimal configurations for HERO.
 Additionally, a novel descriptor-driven on-chip memory primitive called
-Self-Addressable Memory (SAM) is proposed to orchestrate data movements.
-Additionally, this thesis introduces a HERO network compiler called EMPIRE that
-converts arbitrary convolution and linear layers described in pytorch to SAM
-descriptors. Finally, this thesis presents a cycle-accurate simulation platform
+Self-Addressable Memory (SAM) is proposed to orchestrate data movements in tandem with EMPIRE, a network compiler for HERO that can convert arbitarary
+convolution and linear layers in networks developed in pytorch to SAM descriptors.
+Finally, this thesis presents a cycle-accurate simulation platform
 driven by a SystemC simulation backend and a Python evaluation frontend to
 estimate performance and energy efficiency of arbitrary HERO configurations on
 different DNN networks described in Pytorch. An analysis of a utilization
