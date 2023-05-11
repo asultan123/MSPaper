@@ -21,10 +21,9 @@ gather configuration statistics for convolution and linear layers in a library
 of DNNs written in PyTorch. Using the HERO accelerator TEMPlate Optimizer
 (TEMPO), this thesis finds utilization optimal configurations for HERO.
 Additionally, a novel descriptor-driven on-chip memory primitive called
-Self-Addressable Memory (SAM) is proposed to orchestrate data movements.
-Additionally, this thesis introduces a HERO network compiler called EMPIRE that
-converts arbitrary convolution and linear layers described in pytorch to SAM
-descriptors. Finally, this thesis presents a cycle-accurate simulation platform
+Self-Addressable Memory (SAM) is proposed to orchestrate data movements in tandem with EMPIRE, a network compiler for HERO that can convert arbitarary
+convolution and linear layers in networks developed in pytorch to SAM descriptors.
+Finally, this thesis presents a cycle-accurate simulation platform
 driven by a SystemC simulation backend and a Python evaluation frontend to
 estimate performance and energy efficiency of arbitrary HERO configurations on
 different DNN networks described in Pytorch. An analysis of a utilization
