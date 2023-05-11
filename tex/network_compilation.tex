@@ -225,7 +225,7 @@ processing the output of that weight. For example, tile highlighted in red needs
 channels C0-C8 streamed into the PEs storing those weights for processing. After
 the red tile is processed, the green tile is loaded into the PEs weight buffer
 (assuming ASAP scheduling as seen in
-\autoref{chap:net_compile:layer_scheduling}). Channels C9-C15 then needs to be
+\autoref{chap:dataflow_dse:memory_hierarchy_sizing}). Channels C9-C15 then needs to be
 streamed into the PEs holding the weights corresponding to those channels. This
 means that channel memories may need to hold multiple channels that are streamed
 out depending on the index of the tile being processed. An illustration of how

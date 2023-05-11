@@ -245,7 +245,7 @@ space dimensions of the convolution operation are (1) unroll targets (2) loop
 unroll factors (3) spatial axis mapping. We can prune the design space partially by
 identifying loop unroll targets as well as loop unroll factors for the kernel
 loops of the dataflow. This partial pruning will enable the reuse
-analysis presented in \autoref{chap:dda:dataf} necessary for the application of the hardware implementation taxonomy
+analysis presented in \autoref{chap:dda:hw_dse} necessary for the application of the hardware implementation taxonomy
 provided by \cite{maestro}.
 
 \subsubsection{Loop Unroll Targets}
@@ -340,6 +340,7 @@ aforementioned operation modes.
     \caption{Percentage of total layers in the TIMM library's networks that have a stride size (k, k)}
     \label{fig:kernel_stats:strides}
 \end{figure}
+
 
 % \clearpage
 % \begin{lstlisting}[language=C, caption=Weight stationary dataflow, label={lst:conv_loop}]
@@ -1181,7 +1182,7 @@ the size of the kernel being processed in direct mode.
     IFmap \in R^{C\times n \times n} \xrightarrow{Reshape} IFmap \in R^{1\times Cn^2} \\
     Weight \in R^{F\times C\times K \times K} \\
     F(i, t)=    \begin{cases}
-                    IFmap_{A(i, t)} & 0<=t < StreamSize \\
+                    IFmap[A(i, t)] & 0<=t < StreamSize \\
                     0 & else
                 \end{cases} \\
     StreamSize = n(n-K)+(n-K) \\
@@ -1209,7 +1210,7 @@ and a column offset $X_i$.
 
 \begin{gather}
     F_\Delta(i, t) = \begin{cases}
-    IFmap_{A_\Delta(i, t)} & \Delta_i<=t < \Delta_i+ StreamSize \\
+    IFmap[A_\Delta(i, t)] & \Delta_i<=t < \Delta_i+ StreamSize \\
     0 & else
     \end{cases} \\
     \Delta_i = i \\
@@ -1225,9 +1226,8 @@ function $A_\Delta(i, t)$.
 
 \begin{gather}
     A_\Delta(i,t) =  C_in^2+Y_in+X_i + t- i\\
-    A_\Delta(i,t) =  \lfloor \frac{\lfloor \frac{i}{K} \rfloor}{K} \rfloor^2+(\lfloor \frac{i}{K} \rfloor ) \bmod K + \underbrace{(i - \lfloor \frac{i}{K} \rfloor K)}_{X'_i} + t - i\\
-    A_\Delta(i,t) =  \lfloor \frac{\lfloor \frac{i}{K} \rfloor}{K} \rfloor^2+(\lfloor \frac{i}{K} \rfloor ) \bmod K + \underbrace{(- \lfloor \frac{i}{K} \rfloor K)}_{X'_i} + t\\
-    % \hat{OFmap}(j) = \displaystyle\sum\limits_{i=0}^{ub(i)} A_\Delta(i, j+i)
+    A_\Delta(i,t) =  C_in^2+Y_in + \underbrace{(i - \lfloor \frac{i}{K} \rfloor K)}_{X_i} + t - i\\
+    A_\Delta(i,t) =  C_in^2+Y_in + \underbrace{(- \lfloor \frac{i}{K} \rfloor K)}_{X'_i} + t
 \end{gather}
 
 \begin{figure}[]
@@ -1243,16 +1243,18 @@ function's initial offset becomes insensitive to changes in the port index $i$
 that are not multiples of $K$. This allows us to remove the lowest layer memory
 along with the systolic array delays in \autoref{fig:reuse_chain} and replace
 both layers with just a series of broadcast buses that span consecutive $K$
-groups of IFmap ports provided that we relax the start time constraints to the
-$\lceil \frac{i}{K} \rceil$ for each group of ports $\lfloor \frac{i}{K}
-\rfloor$. Delays in accessing IFmap data elements across $K$ groups of ports as
-well as across $K^2$ groups of ports accessing different channels still remain.
-This simplification of the IFmap memory hierarchy by removing the systolic
-delays still requires complex delayed reads from the IFmap hierarchy which
-necessitates smart SRAMS whose access times can be programmed. A discussion of
-these smart memories is presented in \autoref{chap:data_orchestration}. The
-final hardware implementation with the added IFmap memory hierarchy optimization
-discussed in this section is given in
+groups of IFmap ports provided that we relax the start time constraints to
+$\Delta_i = \lceil \frac{i}{K} \rceil$. Note that relaxing start time
+constraints will result in computing partial kernels that have invalid positions
+within IFmaps and they must be discarded from the final output of the
+accelerator. Delays in accessing IFmap data elements across $K$ groups of ports
+as well as across $K^2$ groups of ports accessing different channels still
+remain. This simplification of the IFmap memory hierarchy by removing the
+systolic delays still requires complex delayed reads from the IFmap hierarchy
+which necessitates smart SRAMS whose access times can be programmed. A
+discussion of these smart memories is presented in
+\autoref{chap:data_orchestration}. The final hardware implementation with the
+added IFmap memory hierarchy optimization discussed in this section is given in
 \autoref{fig:simplified_systolic_reduction}.
 \autoref{fig:simplified_systolic_reduction} shows the broadcast busses for every
 group of 3 processing engines as well as the (1, 1) vertical broadcast busses
@@ -1287,14 +1289,14 @@ networks.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-t-horizontal.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{HERO template with both Kernel and Channel loops mapped to the horizontal axis}
     \label{fig:hero:horizontal}
 \end{figure}
 
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{fig/hero-t-verticle.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{HERO template with both Kernel and Filter loops mapped to the vertical axis}
     \label{fig:hero:vertical}
 \end{figure}
 
