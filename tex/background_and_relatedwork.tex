@@ -92,6 +92,7 @@ filters in the convolution layer.
         IFmap \in R^{C \times n\times n} \\
         OFmap \in  R^{F \times m\times m} \\
         Weight \in R^{F \times C\times K\times K} \\
+        \text{where }m=\frac{n-k+2P}{s}+1
     \end{split}
     \label{math:default_tensor_def}
 \end{align}
@@ -158,14 +159,14 @@ transformation techniques discussed in \cite{cafe_con_troll}.
 
 \begin{table}[!ht]
     \begin{tabular}{ll|l|l|l|}
-    \cline{3-5}                                                                                                &                     & \begin{tabular}[c]{@{}l@{}}Expensive \\ Lowering/ Lifting\end{tabular}   & \begin{tabular}[c]{@{}l@{}}Balanced \\ Lowering \\ and Lifting\end{tabular} & \begin{tabular}[c]{@{}l@{}}Lowering/ \\ Expensive Lifting\end{tabular} \\ \hline
-\multicolumn{1}{|l|}{\multirow{2}{*}{Lowering}}                                                   & Lowered IFmap Size   & ($k^2$C, $m^2$)                                                              & (kC, mn)                                                                    & (C, $n^2$)                                              \\ \cline{2-5} 
-    \multicolumn{1}{|l|}{}                                                                            & Lowered Kernel Size & (F, $k^2$C)                                                              & (Fk, kC)                                                                    & (F$k^2$, C)                                             \\ \hline
-\multicolumn{1}{|l|}{\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Matrix \\ Multiply\end{tabular}}} & Input Size          & (F, $k^2$C)x($k^2$C, $m^2$) & (Fk, kC)x(kC, mn)                              & (F$k^2$, C)x(C, $n^2$)                   \\ \cline{2-5} 
-    \multicolumn{1}{|l|}{}                                                                            & \# FLOPS            & 2F$k^2$C$m^2$                                                            & 2F$k^2$Cmn                                                   & 2F$k^2$C$n^2$                            \\ \cline{2-5} 
-    \multicolumn{1}{|l|}{}                                                                            & Output Size         & (F, $m^2$)                                                               & (Fk, mn)                                                                    & (F$k^2$, $n^2$)                          \\ \hline
-    \multicolumn{1}{|l|}{\multirow{2}{*}{Lifting}}                                                    & \# FLOPS            & 0                                                                        & $m^2$kF                                                      & $m^2$$k^2$F                              \\ \cline{2-5} 
-    \multicolumn{1}{|l|}{}                                                                            & \# Ram Read         & F$m^2$                                                                   & Fkmn                                                                        & F$k^2$$n^2$                              \\ \hline
+        \cline{3-5}                                                                                       &                     & \begin{tabular}[c]{@{}l@{}}Expensive \\ Lowering/ Lifting\end{tabular}   & \begin{tabular}[c]{@{}l@{}}Balanced \\ Lowering \\ and Lifting\end{tabular} & \begin{tabular}[c]{@{}l@{}}Lowering/ \\ Expensive Lifting\end{tabular} \\ \hline
+        \multicolumn{1}{|l|}{\multirow{2}{*}{Lowering}}                                                   & Lowered IFmap Size  & ($\text{K}^2$C, $\text{m}^2$)                                            & (KC, mn)                                                                    & (C, $\text{n}^2$)                                                      \\ \cline{2-5} 
+        \multicolumn{1}{|l|}{}                                                                            & Lowered Kernel Size & (F, $\text{K}^2$C)                                                       & (FK, KC)                                                                    & (F$\text{K}^2$, C)                                                     \\ \hline
+        \multicolumn{1}{|l|}{\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Matrix \\ Multiply\end{tabular}}} & Input Size          & (F, $\text{K}^2$C)x($\text{K}^2$C, $\text{m}^2$) & (FK, KC)x(KC, mn)     & (F$\text{K}^2$, C)x(C, $\text{n}^2$)                                                                                                                 \\ \cline{2-5} 
+        \multicolumn{1}{|l|}{}                                                                            & \# FLOPS            & 2F$\text{K}^2$C$\text{m}^2$                                              & 2F$\text{K}^2$Cmn                                                           & 2F$\text{K}^2$C$\text{n}^2$                                            \\ \cline{2-5} 
+        \multicolumn{1}{|l|}{}                                                                            & Output Size         & (F, $\text{m}^2$)                                                        & (FK, mn)                                                                    & (F$\text{K}^2$, $\text{n}^2$)                                          \\ \hline
+        \multicolumn{1}{|l|}{\multirow{2}{*}{Lifting}}                                                    & \# FLOPS            & 0                                                                        & $\text{m}^2$KF                                                              & $\text{m}^2$$\text{K}^2$F                                              \\ \cline{2-5} 
+        \multicolumn{1}{|l|}{}                                                                            & \# Ram Read         & F$\text{m}^2$                                                            & FKmn                                                                        & F$\text{K}^2$$\text{n}^2$                                              \\ \hline
     \end{tabular}
 \label{Table:lowering_lifting_breakdown}
     \caption{Breakdown of the dimensionalities and complexity (in FLOPs and DRAM Reads) of the different available lowering and lifting strategies adapted from \cite{cafe_con_troll}}
@@ -228,9 +229,32 @@ Then a matrix multiplication is performed in \eqref{math:balanced_lowering_gemm}
 followed by a lifting operation. Unlike the lifting operation in the expensive
 lowering/ lifting transformation, lifting in the balanced transformation
 involves a series vector operation in addition to a reshape of the output OFmap
-matrix. Balanced lowering has the advantage of reduced data duplication in the
-IFmap and trades that off with increasing the number of FLOPs for lifting the
-OFmap. \autoref{fig:balanced_lowering_lifting} illustrates balanced lowering/
+matrix. From \autoref{fig:expensive_vs_balanced}, Balanced lowering has the
+advantage of reducing the volume of data transferred to and from compute
+elements in an accelerator when the ratio of filters and channels stays below
+the kernel size of a convolution layer. It enables this reduction in data volume
+by increasing the cost in FLOPS of lifting the OFmap matrix into a tensor. 
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[scale=0.8]{Plots/kernel/BalancedVExpensive.pdf}
+    \caption{Plot of ratio of DataVolumes for both Expensive and Balanced lowering and lifting vs filter/channel ratio per layer for different convolution layer kernel sizes. Assumed IFmap channel size (224, 224) with 0 padding and stride size of 1} 
+    \label{fig:expensive_vs_balanced}
+\end{figure}
+
+% \begin{align*}
+%     \frac{\text{DataVolume(ExpensiveLowering/Lifting)}}{\text{DataVolume(BalancedLowering/Lifting)}}=\frac{KCm^2+Fm^2}{KCmn+FKmn}\\
+%     \text{let }z=\frac{F}{C}\\
+%     \frac{\text{DataVolume(ExpensiveLowering/Lifting)}}{\text{DataVolume(BalancedLowering/Lifting)}}=\frac{m(K^2+z)}{Kn(1+z)}\\
+%     \text{let }\frac{m(K^2+z)}{Kn(1+z)}=1\\
+%     z=\frac{k(km-n)}{kn-m}\\
+%     \text{Assuming }P=0, S=1\\
+%     \text{then }m=\frac{n-k+2P}{s}+1=n-k+1\\
+%     \text{since }n>>k\\
+%     m\approx n \\
+%     \text{therefore }z=\frac{F}{C}\approx K\\
+% \end{align*}
+\autoref{fig:balanced_lowering_lifting} illustrates balanced lowering/
 lifting on a 5x5x3 IFmap and a 2x2x3x4 weight tensor. The same stencil based
 intuitive explanation presented for expensive lowering/ lifting applies here
 with a few modification. For IFmap lowering, instead of using a full sized 2x2
