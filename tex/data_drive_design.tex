@@ -801,9 +801,11 @@ template to be further tuned based on a library of target networks in
 \label{chap:dda:hw_dse:temporal_analysis}
 
 Unrolling convolution dataflow loops yield multiple instances of the \ac{MAC}
-statement present in the original convolution nested loops in
+statement across different loops present in the original convolution nested loops in
 \autoref{lst:conv_loop}. These statements represent \ac{PE}s performing MAC
-operations concurrently. 
+operations concurrently. Since there are no data dependencies between the MAC
+statements across different unrolled loop instances all of the MAC statements
+can be fused into one larger loop body as seen in \autoref{lst:conv_loop}.
 \ac{MAC} statement instances can be distinguished from each other based on the memory access offsets that
 exist in them as a result of unrolling filter, channel and kernel loops. For
 unroll factors F\_T for filters, C\_T for channels, KY\_T and KX\_T for kernels
@@ -1243,13 +1245,11 @@ function's initial offset becomes insensitive to changes in the port index $i$
 that are not multiples of $K$. This allows us to remove the lowest layer memory
 along with the systolic array delays in \autoref{fig:reuse_chain} and replace
 both layers with just a series of broadcast buses that span consecutive $K$
-groups of IFmap ports provided that we relax the start time constraints to
-$\Delta_i = \lceil \frac{i}{K} \rceil$. Note that relaxing start time
+groups of IFmap ports provided that we set the start time constraints to
+$\Delta_i = \lfloor \frac{i}{K} \rfloor K$. Note that changing the start time
 constraints will result in computing partial kernels that have invalid positions
 within IFmaps and they must be discarded from the final output of the
-accelerator. Delays in accessing IFmap data elements across $K$ groups of ports
-as well as across $K^2$ groups of ports accessing different channels still
-remain. This simplification of the IFmap memory hierarchy by removing the
+accelerator. This simplification of the IFmap memory hierarchy by removing the
 systolic delays still requires complex delayed reads from the IFmap hierarchy
 which necessitates smart SRAMS whose access times can be programmed. A
 discussion of these smart memories is presented in
