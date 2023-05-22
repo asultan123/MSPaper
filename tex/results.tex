@@ -3,7 +3,7 @@
 
 To assess the performance of the HERO architecture a cycle accurate simulation
 environment was implemented using SystemC and python. The environment was used
-to a single configurations of the HERO architecture on real networks implemented
+to evaluate a single configuration of the HERO architecture on real networks implemented
 in pytorch from the TIMM library. The simulator also enables a study of the HERO
 architecture by allowing different configurations of HERO to be passed in during
 simulation. This study is left as part of future work. The simulator is composed
@@ -27,7 +27,7 @@ for F, C, the list of kernels sizes supported in direct mode, and the on-chip
 storage dedicated for input and output feature map reuse, as well as the maximum
 line size in any IFmap tensor.  The output of the
 frontend is a pandas dataframe containing the results from the backend
-simulation wof the network(s) on the specified hero instance.  
+simulation of the network(s) on the specified hero instance.  
 After the frontend
 receives the list of pytorch models, CIGAR extracts the dimensions of all
 supported layers (Conv2D and Linear). After which two layer transformation
@@ -194,7 +194,7 @@ combined with high MAC OPs and low speedup could be a high layer memory
 footprint. To examine the effect of layer memory footprint as a cause for low
 utilization, a scatter plot of layer feature map size vs utilization is
 presented in \autoref{fig:scatter_plot_util_vs_fmap} for layers where speedup
-was <1 compared to the CPU baseline. 
+was $<1$ compared to the CPU baseline. 
 
 
 \begin{figure}[ht]
@@ -213,7 +213,7 @@ weren't an optimization target the frontend decomposes depthwise layers into
 individual groups of convolutions and since depthwise layers are convolution
 layers where each IFmap channel is convolved with a kernel independently of the
 others, all PEs dedicated to concurrent channel processing are underutilized.
-From \autoref{fig:cause_of_low_util}.a there a few non grouped convolution
+From \autoref{fig:cause_of_low_util}.a there are few non grouped convolution
 layers with low low utilization and low speedup. These layers when examined more
 closely in \autoref{fig:cause_of_low_util}.b and they appear to have lower
 available channel/ filter concurrency as defined by the number of channels/
@@ -321,7 +321,7 @@ a 21.3 GB/s transfer rate.
 \begin{figure}[ht]
     \centering
     \includegraphics[scale=0.58]{Plots/resources/net_bw.pdf}
-    \caption{Hardware Implementation Taxonomy adapted from \cite{maestro}}
+    \caption{Histogram of DRAM bandwidth requirements }
     \label{fig:dram_bw}
 \end{figure}
 
