@@ -142,7 +142,7 @@ The wait descriptor is used to synchronize different descriptor programs across
 SAMs as well as create timed writes and reads to and from SAMs.
 
 
-\begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:wait}]
+\begin{lstlisting}[language=C, caption=WAIT Descriptor, label={lst:descriptor:wait}]
     en = 0;
     for(int x = 0; x < x_count; x++);
 \end{lstlisting}
@@ -154,7 +154,7 @@ inner loop and y\_modify in the outer loop. The "addr" output signal is
 initialized with the contents of the start field and the "en" signal is asserted
 for the duration of the descriptors execution.
 
-\begin{lstlisting}[language=C, caption=Descriptor as a set of loops, label={lst:descriptor:generator}]
+\begin{lstlisting}[language=C, caption=GENERATE Descriptor, label={lst:descriptor:generator}]
 en = 1;
 addr = start;
 for(int y = 0; y < y_count; y++)

@@ -3,8 +3,8 @@
 
 As discussed in \autoref{chap:background:intro}, any convolution accelerator can
 be reduced into it's dataflow and hardware implementation choices. Dataflow in
-this chapter is defined as the order of operations used to perform a
-convolution. Hardware implementation is defined as the on-chip communication
+this chapter is defined as data access and communication patterns within the accelerator. 
+Hardware implementation is defined as the on-chip communication
 infrastructure and memory hierarchy that
 enables the chosen dataflow. Based on the dataflow exploration approach in
 \cite{dnn_df_overrated_v1} dataflows are explorable through the nested loop
@@ -803,9 +803,7 @@ template to be further tuned based on a library of target networks in
 Unrolling convolution dataflow loops yield multiple instances of the \ac{MAC}
 statement across different loops present in the original convolution nested loops in
 \autoref{lst:conv_loop}. These statements represent \ac{PE}s performing MAC
-operations concurrently. Since there are no data dependencies between the MAC
-statements across different unrolled loop instances all of the MAC statements
-can be fused into one larger loop body as seen in \autoref{lst:conv_loop}.
+operations concurrently across different loop boundaries.
 \ac{MAC} statement instances can be distinguished from each other based on the memory access offsets that
 exist in them as a result of unrolling filter, channel and kernel loops. For
 unroll factors F\_T for filters, C\_T for channels, KY\_T and KX\_T for kernels
@@ -1132,7 +1130,8 @@ for(int f = 0; f < F; f+=F_T) // Filter loop
             }
 \end{lstlisting}
 
-Applying the taxonomy in \autoref{fig:hw_taxonomy} to data elements that are
+A summary of the different elements and their associated Reuse and Communication
+Types is presented in \autoref{tab:summary_of_reuse_behavior}. Applying the taxonomy in \autoref{fig:hw_taxonomy} to data elements that are
 spatially reused, IFmap channels that are spatially reused across unrolled
 filter loops can be broadcast with a bus. The reuse chain discussed in
 \autoref{chap:dda:hw_dse:temporal_analysis} can be thought of as a
@@ -1151,6 +1150,20 @@ delays yields a simplification to the L1 memory present in
 \autoref{fig:reuse_chain}. This simplification is discussed in
 \autoref{chap:dda:hw_dse:simplifying_hierarchy}.
 
+\begin{table}[]
+    \center
+    \begin{tabular}{|l|l|l|}
+    \hline
+    Data Element Type   & Reuse Type                    & Communication Type            \\ \hline
+    Weights             & Temporal                      & Multicast w.r.t X \& Y loops  \\ \hline
+    IFmap (Across Fmaps)& Temporal \& Spatial           & Multicast w.r.t F loop        \\ \hline
+    IFmap (Within Fmaps)& Spatial (Due to KY/KX unroll) & Multicast w.r.t KY \& KX loops\\ \hline
+    OFmap (Across Fmaps)& Temporal                      & Reduction w.r.t C loop        \\ \hline
+    OFmap (Within Fmaps)& Spatial                       & Reduction w.r.t KY \& KX loops\\ \hline
+    \end{tabular}
+    \caption{Summary of Reuse and Communication Type for each Data Element in a convolution operation}
+    \label{tab:summary_of_reuse_behavior}
+\end{table}
 
 \begin{figure}
     \centering
